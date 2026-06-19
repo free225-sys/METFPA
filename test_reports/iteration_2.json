@@ -1,0 +1,50 @@
+{
+  "summary": "Iteration 2 full-stack regression: backend pytest 18/18 PASS (auth incl. director, filters, dashboard, actions CRUD with history entries, comment POST, tree, analytics, alerts items+counts contract, ministries 12 rows, notifications). Frontend Playwright validated login, deep-link ?focus=, detail-panel save with auto-history entries attributed to user name, comments add (toast + DB persist), alerts table + filters + view-action deep-link, ministries 12 rows, notifications bell dropdown, actions-table pagination/export, presentation mode toggle, logout.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "DetailPanel comments / save",
+        "issue": "After clicking save-action-button or add-comment-button, the parent re-fetches detail via openAction() which does setDetail(null) then setDetail(data). This unmounts the Tabs component and resets it to its uncontrolled defaultValue='details'. The user is bounced from the Commentaires (or Historique) tab back to Détails after every save/comment, even though the data is correctly persisted. Recommended fix: lift Tabs `value` into controlled state (useState('details')) so it survives re-render, OR merge the refreshed detail into existing state instead of nulling it first.",
+        "affected_selectors": ["tab-comments", "tab-history", "add-comment-button", "save-action-button"]
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "DetailPanel — Détails tab",
+        "issues": ["Date fields (Date début / Fin prévue / Fin réelle) use the browser default <input type='date'> picker which renders mm/dd/yyyy in some locales; product is French-only and would benefit from the shadcn Calendar component for consistent dd/mm/yyyy formatting."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/backend_test.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "Make Tabs in DetailPanel controlled (value/onValueChange) so the active tab persists after save/comment reloads — otherwise users adding a comment lose visual confirmation and have to re-open the Commentaires tab.",
+    "Optional: replace native date inputs with shadcn Calendar component for consistent French date rendering."
+  ],
+  "critical_code_review_comments": [
+    "Backend update_action correctly generates per-field history entries comparing old vs new and stamps the current user's name — verified by automated test (TestActions::test_update_action_creates_history_entry).",
+    "POST /api/actions/{code}/comments persists comment with author=user.name and ISO date — verified.",
+    "GET /api/alerts returns the new flat 'items' list with type/severity/days_late/detail and correct counts (sum of type counts == total items) — verified.",
+    "GET /api/ministries returns 12 entries sorted by total_budget desc with exec_rate, progress (weighted) and alerts count — verified.",
+    "DetailPanel uses `setDetail(null)` before refetch which causes uncontrolled <Tabs> to remount; minor UX regression for iteration 2. Mentioned in action_items.",
+    "Hard-coded TODAY = 2026-06-15 in server.py is intentional for demo, document it so reviewers don't think dates are wrong.",
+    "CORS middleware is added after include_router; works but conventional best practice is to register middleware before routers."
+  ],
+  "updated_files": [
+    "/app/backend/tests/backend_test.py"
+  ],
+  "success_rate": {"backend": "100% (18/18 pytest)", "frontend": "~95% (1 minor tab-reset UX issue; all core flows pass)"},
+  "test_credentials": "Admin ministre@pnd.ci / PND2030!  ; Directors koffi.kouassi@pnd.ci / awa.traore@pnd.ci / yao.brou@pnd.ci with Directeur2030! (all login verified, koffi tested in pytest).",
+  "seed_data_creation": "720 actions auto-seeded; reseed not required because data model fields (description, date_fin_reelle, history[], comments[]) are present. Test added comments are prefixed 'TEST_' for easy identification.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend endpoints used by frontend in iteration 2: PUT /api/actions/{code} returns full updated action including extended history[]; POST /api/actions/{code}/comments returns the inserted comment; GET /api/alerts returns {items, counts:{bloque,retard,budget_nul,critique,majeur,mineur}, total}; GET /api/ministries returns list of 12 sorted by total_budget desc; GET /api/notifications returns top 5 of {items,total}. Deep-link /arborescence?focus=<code> auto-opens action detail. Key data-testids verified: tab-details / tab-history / tab-comments, save-action-button, comment-input, add-comment-button, history-entry-{i}, comment-{i}, filter-type-bloque/retard/budget_nul, filter-sev-critique, view-action-{code}, notifications-trigger, notif-{code}, ministry-row-{owner}, presentation-button, exit-presentation-button, page-input, export-excel-button, export-pdf-button, nav-ministries. ONLY KNOWN ISSUE: Tabs in DetailPanel revert to 'details' after each save/comment because of setDetail(null) refetch pattern; data is persisted correctly.",
+  "rca of the issue": "Tab reset RCA: TreeView.jsx line 153 wires onSaved=() => openAction(selected) and reload=() => openAction(selected). openAction (line 51-53) does setDetail(null) before setDetail(data). The DetailPanel re-renders into its skeleton branch (line 210 `!detail || !form`) which unmounts the <Tabs> subtree. When detail is non-null again, <Tabs defaultValue='details'> remounts and reverts to Détails. Mitigation: control the Tabs value from a useState in DetailPanel, or do `setDetail(prev => ({ ...prev, ...data }))` to avoid the intermediate null."
+}

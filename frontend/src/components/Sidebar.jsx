@@ -1,12 +1,13 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Network, Table2, BarChart3, BellRing, Star } from "lucide-react";
+import { LayoutDashboard, Network, Table2, BarChart3, BellRing, Star, Landmark } from "lucide-react";
 import { CoatOfArms } from "@/components/icons/Ivorian";
 
 const NAV = [
   { to: "/", label: "Tableau de bord", icon: LayoutDashboard, end: true, testid: "nav-dashboard" },
   { to: "/arborescence", label: "Arborescence", icon: Network, testid: "nav-tree" },
   { to: "/actions", label: "Actions", icon: Table2, testid: "nav-actions" },
+  { to: "/ministeres", label: "Vue par ministère", icon: Landmark, testid: "nav-ministries" },
   { to: "/budget", label: "Analyse budgétaire", icon: BarChart3, testid: "nav-analytics" },
   { to: "/alertes", label: "Centre d'alertes", icon: BellRing, testid: "nav-alerts" },
 ];
@@ -14,7 +15,7 @@ const NAV = [
 export function Sidebar() {
   return (
     <aside className="fixed left-0 top-0 h-full w-[280px] bg-[#1A202C] text-white flex flex-col z-30">
-      <div className="px-6 py-6 border-b border-white/8 flex items-center gap-3">
+      <div className="px-6 py-6 border-b border-white/10 flex items-center gap-3">
         <CoatOfArms size={42} stroke="#C5A028" />
         <div className="leading-tight">
           <div className="text-[15px] font-bold tracking-tight">Cockpit PND</div>
@@ -29,12 +30,9 @@ export function Sidebar() {
         {NAV.map(({ to, label, icon: Icon, end, testid }) => (
           <NavLink key={to} to={to} end={end} data-testid={testid}
             className={({ isActive }) =>
-              `group flex items-center gap-3 px-3 py-2.5 rounded-[8px] text-sm font-medium transition-all ${
-                isActive
-                  ? "bg-[#FF8200] text-white shadow-[0_4px_14px_rgba(255,130,0,0.35)]"
-                  : "text-white/65 hover:text-white hover:bg-white/6"
-              }`
-            }>
+              `group flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-sm font-medium transition-all ${
+                isActive ? "bg-[#FF8200] text-white" : "text-white/65 hover:text-white hover:bg-white/8"
+              }`}>
             {({ isActive }) => (
               <>
                 <Icon size={18} strokeWidth={1.6} className={isActive ? "text-white" : "text-white/55 group-hover:text-white"} />
@@ -45,7 +43,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="px-6 py-5 border-t border-white/8">
+      <div className="px-6 py-5 border-t border-white/10">
         <div className="flex items-start gap-2.5">
           <Star size={15} strokeWidth={1.5} className="text-[#C5A028] mt-0.5 shrink-0" />
           <p className="text-[11px] leading-relaxed text-white/45">

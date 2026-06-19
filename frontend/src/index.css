@@ -81,3 +81,32 @@ h1, h2, h3, h4 {
   to { opacity: 1; transform: translateY(0); }
 }
 .animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.form-input {
+  width: 100%;
+  border: 1px solid #E2E8F0;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #1A202C;
+  outline: none;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.form-input:focus {
+  border-color: #FF8200;
+  box-shadow: 0 0 0 2px rgba(255, 130, 0, 0.12);
+}
+.presentation-scope { max-width: 1500px; margin: 0 auto; }
+
+/* Hide third-party preview branding — this is a State tool */
+a[href*="emergent.sh"],
+a[href*="app.emergent"],
+#emergent-badge,
+.emergent-badge,
+[data-emergent-badge],
+[id*="emergent-watermark"] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}

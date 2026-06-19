@@ -9,6 +9,7 @@ import TreeView from "@/pages/TreeView";
 import ActionsTable from "@/pages/ActionsTable";
 import Analytics from "@/pages/Analytics";
 import Alerts from "@/pages/Alerts";
+import Ministries from "@/pages/Ministries";
 import { Loader2 } from "lucide-react";
 
 function ProtectedRoute({ children }) {
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/arborescence" element={<TreeView />} />
         <Route path="/actions" element={<ActionsTable />} />
+        <Route path="/ministeres" element={<Ministries />} />
         <Route path="/budget" element={<Analytics />} />
         <Route path="/alertes" element={<Alerts />} />
       </Route>
