@@ -148,19 +148,25 @@ export default function TreeView() {
       </div>
 
       <AnimatePresence>
-        {selected && detail !== undefined && (
-          <DetailPanel key="panel" code={selected} detail={detail} owners={owners}
-            onClose={() => setSelected(null)} onSaved={() => { openAction(selected); loadTree(); }} reload={() => openAction(selected)} />
+        {selected && (
+          <DetailPanel key="panel" code={selected} detail={detail} setDetail={setDetail} owners={owners}
+            onClose={() => setSelected(null)} loadTree={loadTree} />
         )}
       </AnimatePresence>
     </div>
   );
 }
 
-function DetailPanel({ code, detail, owners, onClose, onSaved, reload }) {
+function DetailPanel({ code, detail, setDetail, owners, onClose, loadTree }) {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [comment, setComment] = useState("");
+  const [tab, setTab] = useState("details");
+
+  const refetch = async () => {
+    const { data } = await api.get(`/actions/${code}`);
+    setDetail(data);
+  };
 
   useEffect(() => {
     if (detail) setForm({
@@ -186,7 +192,8 @@ function DetailPanel({ code, detail, owners, onClose, onSaved, reload }) {
       };
       await api.put(`/actions/${code}`, payload);
       toast.success("Action enregistrée", { description: `Modifications du ${code} sauvegardées.` });
-      onSaved();
+      await refetch();
+      loadTree();
     } catch (e) { toast.error("Échec de l'enregistrement"); }
     setSaving(false);
   };
@@ -196,7 +203,7 @@ function DetailPanel({ code, detail, owners, onClose, onSaved, reload }) {
     await api.post(`/actions/${code}/comments`, { text: comment });
     setComment("");
     toast.success("Commentaire ajouté");
-    reload();
+    await refetch();
   };
 
   const c = pillarColor(code);
@@ -219,7 +226,7 @@ function DetailPanel({ code, detail, owners, onClose, onSaved, reload }) {
               <button onClick={onClose} data-testid="close-panel-button" className="text-[#A0AEC0] hover:text-[#1A202C] transition-colors shrink-0"><X size={20} /></button>
             </div>
 
-            <Tabs defaultValue="details" className="flex-1 flex flex-col min-h-0">
+            <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col min-h-0">
               <TabsList className="mx-6 mt-4 bg-[#F7F7F5] rounded-[6px] p-1 grid grid-cols-3 shrink-0">
                 <TabsTrigger value="details" data-testid="tab-details" className="text-xs data-[state=active]:bg-white rounded-[4px] gap-1.5"><FileText size={13} /> Détails</TabsTrigger>
                 <TabsTrigger value="history" data-testid="tab-history" className="text-xs data-[state=active]:bg-white rounded-[4px] gap-1.5"><History size={13} /> Historique</TabsTrigger>

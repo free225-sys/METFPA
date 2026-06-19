@@ -20,20 +20,26 @@ Strategic, government-grade dashboard for Côte d'Ivoire's National Development 
 5. Alerts Center — blocked / overdue / zero-budget tabs, "Envoyer un rappel" (simulated).
 
 ## Implemented (2026-06-19)
-- ✅ JWT auth (admin ministre@pnd.ci), login screen with coat-of-arms line art.
-- ✅ All 5 screens fully functional and verified (17/17 backend tests, 100% frontend e2e).
-- ✅ Inline editing persists via PUT /api/actions/{code}; toasts; skeleton loaders; status pulse badges.
-- ✅ Line-art Ivorian iconography (coat of arms, elephant), French throughout, FCFA formatting.
+- ✅ JWT auth (admin ministre@pnd.ci) + 3 demo director accounts (Directeur2030!).
+- ✅ All 6 screens functional (Dashboard, Arborescence, Actions, Vue par ministère, Analyse, Alertes).
+
+### Iteration 2 — Redesign institutionnel (2026-06-19)
+- ✅ Palette stricte par pilier (P1 #FF8200 … P6 #A08020) appliquée à tous les graphes/badges.
+- ✅ Cartes KPI « État » (bordure 1px, pas d'ombre, radius 4px) ; badges statut rectangulaires à icône ; pagination numérique ; export Excel orange / PDF gris.
+- ✅ Graphes corrigés : donut couleurs piliers + %, trajectoire (vert plein exécuté / orange pointillé programmé), barres groupées 6 piliers/an, variance 2 barres + écart %, taux d'exécution coloré par pilier + seuil 80%.
+- ✅ Arborescence : couleurs piliers par nœud, sélection active (bordure gauche 3px), deep-link ?focus=.
+- ✅ Panneau de détail ÉDITABLE (onglets Détails / Historique / Commentaires) : formulaire complet (slider, dropdowns, 5 budgets, 3 dates, motif blocage), enregistrement → PUT + historique auto attribué à l'utilisateur, commentaires.
+- ✅ Centre d'alertes : tableau synthétique (sévérité, type, détail, jours de retard) + filtres (type, sévérité, pilier, ministère, période).
+- ✅ Vue par ministère (consolidé), Notifications (cloche header), Mode présentation, badge Emergent masqué.
 
 ## Auth Credentials
-- Admin: ministre@pnd.ci / PND2030! (see /app/memory/test_credentials.md)
+- Admin: ministre@pnd.ci / PND2030!
+- Directeurs (démo): koffi.kouassi@pnd.ci, awa.traore@pnd.ci, yao.brou@pnd.ci / Directeur2030!
 
 ## Backlog (prioritized)
-- **P1**: Real Excel/PDF export (currently simulated toast). Dark mode (deferred phase 2).
-- **P1**: Add/delete actions (currently edit-only CRUD).
-- **P2**: Brute-force lockout on login (5 attempts). Multi-year budget editing UI in table.
-- **P2**: KPI target tracking & historical execution snapshots. Per-ministry consolidated views.
-- **P2**: Bilingual FR/EN toggle.
+- **P1**: Export réel Excel/PDF (actuellement toast simulé). Création/suppression d'actions.
+- **P1**: Calendrier shadcn pour dates FR (au lieu de l'input date natif).
+- **P2**: Mode présentation enrichi (agrandir graphes, masquer filtres). Dark mode (phase 2). Bilingue FR/EN.
 
 ## Next Tasks
 1. Implement real Excel/PDF export when requested.
