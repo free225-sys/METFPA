@@ -1,0 +1,143 @@
+{
+  "theme": "Light",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) + Presidential Authority",
+  "design_philosophy": "Government-grade, authoritative, clean, Élysée meets Abidjan. No startup SaaS fluff, state-level seriousness. Every pixel serves the mission.",
+  "colors": {
+    "primary_orange": "#FF8200",
+    "primary_green": "#009E49",
+    "accent_gold": "#C5A028",
+    "dark_slate": "#1A202C",
+    "soft_gray_bg": "#F7F7F5",
+    "surface_white": "#FFFFFF",
+    "row_hover_orange": "#FFF7ED",
+    "text_primary": "#1A202C",
+    "text_secondary": "#4A5568",
+    "border_subtle": "#E2E8F0"
+  },
+  "typography": {
+    "font_family": "Inter",
+    "rules": "Strict adherence to user constraints: Inter used universally. Banned E1 rules for Serif headings to honor 'typography Inter' constraint.",
+    "headings": "Tight tracking (-0.02em) on all headings to create an authoritative, premium editorial feel.",
+    "h1": "text-4xl font-bold tracking-tight text-[#1A202C]",
+    "h2": "text-2xl font-semibold tracking-tight text-[#1A202C]",
+    "h3": "text-lg font-medium tracking-tight text-[#1A202C]",
+    "body": "text-base font-normal text-[#4A5568]",
+    "data_labels": "text-xs font-semibold tracking-[0.05em] uppercase text-[#718096]"
+  },
+  "spacing_and_layout": {
+    "sidebar": "w-[280px] bg-[#1A202C] text-white fixed h-full left-0 top-0 border-r border-[#1A202C]",
+    "header": "h-[64px] bg-[#FFFFFF] border-b border-[#E2E8F0] fixed top-0 right-0 left-[280px] z-20 px-8 flex items-center justify-between",
+    "main_content": "ml-[280px] mt-[64px] min-h-screen bg-[#F7F7F5] p-8",
+    "grid_system": "Bento-style tight grids for Dashboard (gap-6). grid-cols-12 base. No unnecessary gaps.",
+    "card_padding": "p-6"
+  },
+  "components": {
+    "cards": "bg-[#FFFFFF] rounded-[8px] shadow-[0_2px_10px_rgba(26,32,44,0.04)] border border-[#1A202C]/5",
+    "progress_bars": "h-[8px] rounded-full bg-gradient-to-r from-[#FF8200] to-[#009E49] w-full border border-[#1A202C]/5",
+    "status_badges": {
+      "done": "flex w-fit items-center gap-2 px-2.5 py-1 text-sm font-medium bg-[#009E49]/10 text-[#009E49] rounded-full before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#009E49]",
+      "in_progress": "flex w-fit items-center gap-2 px-2.5 py-1 text-sm font-medium bg-[#FF8200]/10 text-[#FF8200] rounded-full before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full before:bg-[#FF8200] before:animate-[pulse_2s_cubic-bezier(0.4,0,0.6,1)_infinite]",
+      "blocked": "flex w-fit items-center gap-2 px-2.5 py-1 text-sm font-medium bg-red-600/10 text-red-700 rounded-full before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full before:bg-red-600",
+      "not_started": "flex w-fit items-center gap-2 px-2.5 py-1 text-sm font-medium bg-gray-100 text-[#4A5568] rounded-full before:content-[''] before:block before:w-1.5 before:h-1.5 before:rounded-full before:bg-gray-400"
+    },
+    "buttons": {
+      "primary": "bg-[#1A202C] text-white hover:bg-[#1A202C]/90 rounded-[6px] px-4 py-2 font-medium transition-colors shadow-sm",
+      "accent": "bg-[#FF8200] text-white hover:bg-[#FF8200]/90 rounded-[6px] px-4 py-2 font-medium transition-colors shadow-sm",
+      "ghost": "text-[#1A202C] hover:bg-[#F7F7F5] rounded-[6px] px-4 py-2 font-medium transition-colors"
+    },
+    "tables": {
+      "wrapper": "bg-[#FFFFFF] rounded-[8px] shadow-[0_2px_10px_rgba(26,32,44,0.04)] border border-[#1A202C]/5 overflow-hidden",
+      "header": "bg-[#F7F7F5] text-xs font-semibold uppercase tracking-[0.05em] text-[#718096] py-3 px-4 border-b border-[#E2E8F0]",
+      "row": "border-b border-[#E2E8F0]/50 hover:bg-[#FFF7ED] transition-colors group",
+      "cell": "py-4 px-4 text-sm text-[#1A202C] align-middle"
+    }
+  },
+  "icons_and_assets": {
+    "style": "LINE ART ONLY. Single-weight strokes (1.5px), no fill. NO photos. NO 3D. NO gradients on icons.",
+    "library": "lucide-react (preferred for React/JS setup)",
+    "colors": "Icons should use either #C5A028 (Gold) for section/accent icons or #1A202C (Dark Slate) for standard UI icons.",
+    "custom_svgs_required": [
+      "Coat of Arms of Côte d'Ivoire: Use a custom clean SVG path composed of minimal strokes (elephant head, shield, palm trees, sun). If impossible, substitute with a highly stylized, single-stroke Lucide Shield combined with Sun.",
+      "Elephant Silhouettes: Single stroke outline.",
+      "Stars/Palm Trees: Use Lucide 'Star' and 'TreePalm' with strokeWidth={1.5}."
+    ]
+  },
+  "pages": [
+    {
+      "name": "Login",
+      "layout": "Centered clean card (max-w-md) on #F7F7F5 background. Line-art coat of arms at the top. Minimalist inputs.",
+      "features": "Email/password authentication. French UI ('Connexion', 'Mot de passe')."
+    },
+    {
+      "name": "Executive Dashboard",
+      "layout": "Grid-based (Bento style). Top: 4 Hero KPI cards. Middle: Donut Chart (Pillars) + Line Chart (Budget Trajectory 2026-2030). Bottom: Top 10 Priority Actions Table.",
+      "features": "Cards show total budget, spent, global progress %, total actions, late actions with red pulse indicator. Global filter in the header for Pillar/Sector/Year/Owner."
+    },
+    {
+      "name": "Tree View",
+      "layout": "Split view. Left: Collapsible nested tree list. Right: Slide-in detail panel (Framer Motion).",
+      "features": "Hierarchy: PILLAR (6) -> SECTOR (43) -> EFFECT -> PRODUCT -> ACTION. Color-coded progress bars in the panel. Global search with autocomplete."
+    },
+    {
+      "name": "Actions Table",
+      "layout": "Full-width data table filling the main content area.",
+      "features": "Columns: code, title, owner, total budget, progress, status, deadline. Inline CRUD editing (click row to edit fields). Multi-filter, Export button simulating a toast download."
+    },
+    {
+      "name": "Budget Analytics",
+      "layout": "Dense 2-column or 3-column chart grid.",
+      "features": "Stacked bar chart (budget by pillar x year). Waterfall chart (variance planned vs actual). Execution rate bar charts by sector."
+    },
+    {
+      "name": "Alerts Center",
+      "layout": "Action-oriented list or grid of critical warning cards.",
+      "features": "Shows blocked actions with reason, overdue actions, zero budget actions. Each has a 'Send Reminder' ('Envoyer un rappel') ghost button."
+    }
+  ],
+  "data_model": {
+    "action": {
+      "code": "e.g., 4.02.1.1.1",
+      "title": "String",
+      "owner_ministry": "String",
+      "budget_years": "Object/Array mapping 2026-2030 amounts (millions FCFA)",
+      "progress_pct": "Number (0-100)",
+      "status": "Enum ('non commencé', 'en cours', 'terminé', 'bloqué')",
+      "dates": "Start and End dates",
+      "kpis": "Array of strings or objects"
+    }
+  },
+  "interactions_and_motion": {
+    "hover_states": "Rows tint to #FFF7ED. Cards have a very subtle -translate-y-[1px] and shadow increase.",
+    "transitions": "Use Framer Motion for the right-side detail panel slide-in (x: '100%' to x: 0).",
+    "toasts": "Slide-in from bottom-right using Sonner. Dark mode styling for toasts: bg-[#1A202C] text-white border-none.",
+    "loading": "Skeleton screens with slow pulse animation (bg-[#E2E8F0]) for all views. No spinner loaders."
+  },
+  "accessibility_and_testing": {
+    "language": "French (fr-FR). All text MUST be in French.",
+    "data_testids_required": [
+      "login-email-input",
+      "login-password-input",
+      "login-submit-button",
+      "global-search-input",
+      "filter-trigger-[type]",
+      "kpi-card-[metric]",
+      "tree-node-[level]-[id]",
+      "action-row-[id]",
+      "inline-edit-[field]-[id]",
+      "export-button",
+      "toast-notification"
+    ]
+  },
+  "instructions_to_main_agent": {
+    "1": "Use ONLY `.js` and `.jsx` files. DO NOT use TypeScript (`.ts`/`.tsx`) as per environment constraints.",
+    "2": "Language: The entire UI must be in flawless French. Date formats: DD/MM/YYYY. Currency: Millions FCFA.",
+    "3": "Routing: Implement a root layout wrapping authenticated views with the fixed Sidebar (left) and Header (top). Login is a separate unauthenticated route.",
+    "4": "Shadcn UI Customization: Strip away 'Vercel/SaaS' defaults. Enforce 8px border-radius (`rounded-[8px]`). Remove heavy ring shadows; use subtle borders.",
+    "5": "Progress Bars: Do not use native Shadcn progress if it restricts gradients. Build a custom `div` with `h-[8px] rounded-full bg-gradient-to-r from-[#FF8200] to-[#009E49]`.",
+    "6": "Line Art: To get the Coat of Arms and specific Ivorian iconography, build custom SVG components using paths that have `stroke='#C5A028'` or `stroke='#1A202C'`, `strokeWidth={1.5}`, and `fill='none'`. NO FILL.",
+    "7": "Tree View: Use recursive React components with indented left padding. When clicking a node, render a `framer-motion` sliding panel fixed to the right side of the screen.",
+    "8": "Charts: Use `recharts`. Build a custom composed chart for the waterfall if `recharts` native waterfall is too rigid.",
+    "9": "CRUD: Implement inline editing directly in the Actions Table. When a user clicks 'Edit', swap text nodes for simple, unstyled `<input>` fields that save on blur or enter.",
+    "10": "Test IDs: Strictly adhere to adding `data-testid` to all interactive elements for automated testing."
+  }
+}
