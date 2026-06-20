@@ -1,0 +1,2187 @@
+{
+  "_meta": {
+    "title": "Cockpit METFPA intégré — seed de référence",
+    "scope": "PND P4 → Secteur 4.02 EFTP → Politique EFTP 2026-2035 → Stratégie digitale 2026-2031 → Plan d'action",
+    "extracted_from": "Cockpit_METFPA_integre (1).html (objet JS `const D`)",
+    "extracted_at": "2026-06-20",
+    "currency": "FCFA (montants en millions, sauf national PND)",
+    "data_origin_legend": {
+      "official_reference": "Issu des documents officiels (PND 4.02, Politique EFTP, Stratégie digitale) — à VALIDER ligne à ligne contre .docx/.pdf",
+      "html_reference": "Présent dans le cockpit HTML de référence, structure fiable mais valeurs à confirmer",
+      "demo_tracking": "Suivi opérationnel de DÉMONSTRATION — NON officiel (avancement, exécuté, statut, alerte)",
+      "computed": "Calculé à partir d'autres champs",
+      "missing": "Champ requis absent de la source",
+      "to_validate": "Présent mais à faire valider par le METFPA"
+    },
+    "warnings": [
+      "EXTRA.activites = données de SUIVI de démonstration : aucun budget exécuté/avancement/statut ne doit être présenté comme officiel.",
+      "Budgets POL/DIG/PND = html_reference, à valider contre les documents officiels avant pilote.",
+      "Aucune donnée 'budget engagé' ni 'source de financement par activité' n'existe (missing).",
+      "Liste officielle des Directions absente : valeurs direction= dans EXTRA sont indicatives (to_validate)."
+    ]
+  },
+  "pnd": {
+    "national": {
+      "total": 114838520.2
+    },
+    "pilier": {
+      "code": "P4",
+      "nom": "Développement du capital humain, des compétences et création d'emplois décents",
+      "total": 12580839.7
+    },
+    "secteur": {
+      "code": "4.02",
+      "nom": "Enseignement Technique et Formation Professionnelle",
+      "total": 1202137.6,
+      "resultat": "Les apprenant-e-s, les auditeurs et auditrices ainsi que les adolescent-e-s et jeunes hors du système scolaire acquièrent les compétences fondamentales, professionnelles et fonctionnelles attendues pour favoriser leur employabilité, leur insertion socio-économique durable et contribuent à l'industrialisation et au développement inclusif du pays.",
+      "effets": [
+        {
+          "code": "4.02.1",
+          "nom": "Le cadre institutionnel et organisationnel assure un système de gouvernance qui intègre les partenariats, un dispositif de suivi-évaluation et d'audit efficace, une gestion rationnelle des ressources humaines et renforce la confiance des jeunes et de leurs parents en l'EFTP.",
+          "total": 78040.1,
+          "produits": [
+            {
+              "code": "4.02.1.1",
+              "nom": "Les réformes qui assurent la gouvernance et la gestion adéquate du secteur de l'EFTP sont mises en œuvre",
+              "total": 1070.0
+            },
+            {
+              "code": "4.02.1.2",
+              "nom": "L'EFTP dispose d'un système de planification, de suivi-évaluation et de contrôle qui lui assure un pilotage efficace, efficient, compétitif et résilient",
+              "total": 2376.5
+            },
+            {
+              "code": "4.02.1.3",
+              "nom": "Les partenaires techniques et financiers et autres parties prenantes créent un environnement éducatif plus pertinent, innovant, adapté aux exigences du marché du travail",
+              "total": 30035.0
+            },
+            {
+              "code": "4.02.1.4",
+              "nom": "Une politique efficace et rationnelle de gestion des ressources humaines est mise en place",
+              "total": 7527.5
+            },
+            {
+              "code": "4.02.1.5",
+              "nom": "Les mentalités sont transformées pour favoriser un accès équitable et un maintien durable aux opportunités de formation professionnelle",
+              "total": 4119.5
+            },
+            {
+              "code": "4.02.1.6",
+              "nom": "Une stratégie de digitalisation de l'EFTP est mise en œuvre pour favoriser la formation et la gouvernance par le numérique",
+              "total": 32911.6,
+              "ancre_digital": true
+            }
+          ]
+        },
+        {
+          "code": "4.02.2",
+          "nom": "Le dispositif de l'EFTP accueille en formation diplômante 9% (objectif 15% en 2035) des effectifs du secondaire, leur assure une formation de qualité et inclusive en adéquation avec les besoins du marché du travail et facilite leur insertion.",
+          "total": 858982.5,
+          "produits": [
+            {
+              "code": "4.02.2.1",
+              "nom": "Les capacités d'accueil et de traitement du dispositif d'EFTP sont augmentées",
+              "total": 830700.8
+            },
+            {
+              "code": "4.02.2.2",
+              "nom": "Les offres de formation sont adaptées aux besoins en compétences techniques et professionnelles du marché du travail",
+              "total": 14288.6
+            },
+            {
+              "code": "4.02.2.3",
+              "nom": "Les adolescent-e-s et les jeunes fréquentant le dispositif d'EFTP améliorent leurs compétences techniques, professionnelles et fonctionnelles",
+              "total": 6705.0
+            },
+            {
+              "code": "4.02.2.4",
+              "nom": "Le dispositif de formation des formateurs et des autres acteurs de l'EFTP est modernisé",
+              "total": 7288.1
+            }
+          ]
+        },
+        {
+          "code": "4.02.3",
+          "nom": "Les populations de plus de 12 ans, notamment les adolescent-e-s et les jeunes (y compris zones rurales et besoins spécifiques), accèdent à un dispositif de pré-apprentissage, d'apprentissage et de formation qualifiante assurant une insertion professionnelle durable.",
+          "total": 265115.0,
+          "produits": [
+            {
+              "code": "4.02.3.1",
+              "nom": "L'EFTP dispose d'infrastructures d'apprentissage et de formation qualifiante de qualité, diversifiées et inclusives",
+              "total": 119300.0
+            },
+            {
+              "code": "4.02.3.2",
+              "nom": "Les adolescent-e-s et jeunes bénéficient d'opportunités de pré-apprentissage, d'apprentissage et de formation qualifiante",
+              "total": 62792.5
+            },
+            {
+              "code": "4.02.3.3",
+              "nom": "Un dispositif d'appui à la professionnalisation des métiers est mis en place",
+              "total": 34642.5
+            },
+            {
+              "code": "4.02.3.4",
+              "nom": "Les populations vulnérables et groupes spécifiques bénéficient d'appuis pour la formation et l'insertion",
+              "total": 43850.0
+            },
+            {
+              "code": "4.02.3.5",
+              "nom": "Les jeunes formés bénéficient d'appuis pour leur insertion socioprofessionnelle",
+              "total": 4530.0
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "politique": {
+    "vision": "« Repenser et revaloriser l'enseignement technique, la formation professionnelle et l'apprentissage pour soutenir le développement socio-économique et contribuer à l'émergence rapide de la Côte d'Ivoire » (horizon 2035).",
+    "total": 2937726.0,
+    "axes": [
+      {
+        "code": "AX1",
+        "nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "effet": "Effet 1 : La gouvernance de l'EFTP est proactive et assure un financement à la hauteur des besoins, une implication effective des secteurs productifs, une bonne gestion des flux d'apprenants et un pilotage efficace de la performance.",
+        "total": 96891.0,
+        "pnd_effet": "4.02.1",
+        "produits": [
+          {
+            "code": "1.1",
+            "nom": "Les réformes du cadre juridique de l'EFTP sont finalisées et les textes vulgarisés",
+            "total": 3035.0,
+            "actions": [
+              {
+                "code": "1.1.1",
+                "nom": "Prendre tous les textes d'application de la loi d'orientation de l'EFTP"
+              },
+              {
+                "code": "1.1.2",
+                "nom": "Prendre les textes d'application du décret sur l'approche par compétences"
+              },
+              {
+                "code": "1.1.3",
+                "nom": "Prendre les textes sur la formation par alternance (statut scolaire)"
+              },
+              {
+                "code": "1.1.4",
+                "nom": "Prendre une loi spécifique à l'apprentissage"
+              },
+              {
+                "code": "1.1.5",
+                "nom": "Prendre les décrets et arrêtés d'application de la loi sur l'apprentissage"
+              },
+              {
+                "code": "1.1.6",
+                "nom": "Prendre les textes sur la réforme du statut et de la gouvernance des établissements"
+              },
+              {
+                "code": "1.1.7",
+                "nom": "Prendre les textes sur la réforme des structures sous tutelle (FDFP, AGEFOP, IPNETP, CIDFOR, CPNTIC, EIBMA)"
+              },
+              {
+                "code": "1.1.8",
+                "nom": "Créer une Taxe d'Apprentissage Contributive (TAC) et ses arrêtés d'application"
+              },
+              {
+                "code": "1.1.9",
+                "nom": "Doter les sites de l'EFTP de titres fonciers définitifs"
+              },
+              {
+                "code": "1.1.10",
+                "nom": "Sensibiliser et former les acteurs sur les textes et réformes juridiques"
+              }
+            ]
+          },
+          {
+            "code": "1.2",
+            "nom": "Le cadre institutionnel de l'EFTP est renforcé",
+            "total": 625.0,
+            "actions": [
+              {
+                "code": "1.2.1",
+                "nom": "Mettre en œuvre la réforme des structures sous tutelle"
+              },
+              {
+                "code": "1.2.2",
+                "nom": "Rendre opérationnel le nouveau cadre de gouvernance des établissements publics"
+              },
+              {
+                "code": "1.2.3",
+                "nom": "Rendre opérationnels les instruments d'implication des secteurs productifs (CPP, CNBP, C-PDC)"
+              },
+              {
+                "code": "1.2.4",
+                "nom": "Mettre en œuvre un dispositif d'appui aux apprenants dans chaque établissement"
+              }
+            ]
+          },
+          {
+            "code": "1.3",
+            "nom": "Les capacités opérationnelles et de pilotage de l'EFTP sont renforcées",
+            "total": 40362.0,
+            "actions": [
+              {
+                "code": "1.3.1",
+                "nom": "Opérationnaliser la chaîne Prospective-Planification-Programmation-Budgétisation-S&E"
+              },
+              {
+                "code": "1.3.2",
+                "nom": "Mettre en œuvre un dispositif de gestion des flux d'apprenants"
+              },
+              {
+                "code": "1.3.3",
+                "nom": "Mettre en œuvre un dispositif de suivi de l'insertion des diplômés"
+              },
+              {
+                "code": "1.3.4",
+                "nom": "Mettre en œuvre un système de management de la qualité"
+              },
+              {
+                "code": "1.3.5",
+                "nom": "Mettre en œuvre un système HSSE"
+              },
+              {
+                "code": "1.3.6",
+                "nom": "Réhabiliter et équiper directions centrales, structures sous tutelle et directions régionales"
+              },
+              {
+                "code": "1.3.7",
+                "nom": "Renforcer les capacités de mobilité des entités du METFPA"
+              },
+              {
+                "code": "1.3.8",
+                "nom": "Mettre en œuvre les dispositifs sur les passerelles"
+              }
+            ]
+          },
+          {
+            "code": "1.4",
+            "nom": "La digitalisation de l'EFTP est réalisée",
+            "total": 13355.0,
+            "ancre_digital": true,
+            "actions": [
+              {
+                "code": "1.4.1",
+                "nom": "Mettre en œuvre la stratégie de digitalisation de l'EFTP"
+              },
+              {
+                "code": "1.4.2",
+                "nom": "Développer les infrastructures numériques au niveau administratif"
+              },
+              {
+                "code": "1.4.3",
+                "nom": "Développer les TICE adaptées à l'EFTP"
+              },
+              {
+                "code": "1.4.4",
+                "nom": "Doter le METFPA et les structures sous tutelle d'équipements numériques"
+              },
+              {
+                "code": "1.4.5",
+                "nom": "Renforcer les compétences numériques des personnels et enseignants"
+              },
+              {
+                "code": "1.4.6",
+                "nom": "Opérationnaliser le cadre de gouvernance numérique de l'EFTP"
+              }
+            ]
+          },
+          {
+            "code": "1.5",
+            "nom": "Une politique de gestion efficace des ressources humaines est mise en œuvre",
+            "total": 17013.0,
+            "actions": [
+              {
+                "code": "1.5.1",
+                "nom": "Mettre en place une gestion prévisionnelle des emplois et des compétences"
+              },
+              {
+                "code": "1.5.2",
+                "nom": "Aligner les RH (qualité/quantité) sur les besoins en personnel"
+              },
+              {
+                "code": "1.5.3",
+                "nom": "Assurer la formation continue du personnel (public et privé)"
+              },
+              {
+                "code": "1.5.4",
+                "nom": "Mettre en place un Système Intégré de Gestion des RH"
+              }
+            ]
+          },
+          {
+            "code": "1.6",
+            "nom": "Des mécanismes innovants de financement de l'EFTP sont mis en œuvre",
+            "total": 1982.0,
+            "actions": [
+              {
+                "code": "1.6.1",
+                "nom": "Renforcer les capacités des DG et Directeurs en mobilisation de ressources"
+              },
+              {
+                "code": "1.6.2",
+                "nom": "Mettre en place une cellule de mobilisation de fonds d'investissement"
+              },
+              {
+                "code": "1.6.4",
+                "nom": "Développer un mécanisme incitatif pour les contributions des entreprises"
+              },
+              {
+                "code": "1.6.5",
+                "nom": "Exploiter les modèles de financement innovants des partenaires"
+              }
+            ]
+          },
+          {
+            "code": "1.7",
+            "nom": "La communication interne et externe du METFPA est renforcée",
+            "total": 2470.0,
+            "actions": [
+              {
+                "code": "1.7.1",
+                "nom": "Réviser la stratégie de communication du METFPA"
+              },
+              {
+                "code": "1.7.2",
+                "nom": "Mettre en œuvre la stratégie de communication du METFPA"
+              }
+            ]
+          },
+          {
+            "code": "1.8",
+            "nom": "La politique d'exploitation et de maintenance des équipements et infrastructures est mise en œuvre",
+            "total": 16780.0,
+            "actions": [
+              {
+                "code": "1.8.1",
+                "nom": "Mettre en place des cellules d'entretien et de maintenance dans les établissements"
+              },
+              {
+                "code": "1.8.2",
+                "nom": "Élaborer et mettre en œuvre un programme de maintenance corrective et préventive"
+              }
+            ]
+          },
+          {
+            "code": "1.9",
+            "nom": "La politique santé sexuelle/reproductive, genre et inclusion sociale est mise en œuvre",
+            "total": 1270.0,
+            "actions": [
+              {
+                "code": "1.9.1",
+                "nom": "Élaborer la politique genre et inclusion sociale de l'EFTP"
+              },
+              {
+                "code": "1.9.2",
+                "nom": "Opérationnaliser les programmes genre, inclusion et santé dans les établissements"
+              }
+            ]
+          },
+          {
+            "code": "1.10",
+            "nom": "La décentralisation du service public d'EFTP est effective",
+            "total": null,
+            "actions": [
+              {
+                "code": "1.10.1",
+                "nom": "Renforcer les capacités des directions régionales d'EFTP"
+              },
+              {
+                "code": "1.10.2",
+                "nom": "Assurer la territorialisation de la politique d'EFTP"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "AX2",
+        "nom": "Augmentation et amélioration de l'accès",
+        "effet": "Effet 2 : Les populations de la Côte d'Ivoire bénéficient d'un accès étendu et équitable à l'EFTP.",
+        "total": 2634266.0,
+        "pnd_effet": "4.02.2",
+        "produits": [
+          {
+            "code": "2.1",
+            "nom": "Un programme de construction de nouvelles infrastructures publiques est réalisé",
+            "total": 1024220.0,
+            "actions": [
+              {
+                "code": "2.1.1",
+                "nom": "Achever les projets de construction en cours"
+              },
+              {
+                "code": "2.1.2",
+                "nom": "Élaborer un programme de construction de nouvelles infrastructures publiques"
+              },
+              {
+                "code": "2.1.3",
+                "nom": "Mettre en œuvre le programme de construction de nouvelles infrastructures publiques"
+              }
+            ]
+          },
+          {
+            "code": "2.2",
+            "nom": "Un programme de réhabilitation et d'extension des infrastructures existantes est réalisé",
+            "total": 412178.0,
+            "actions": [
+              {
+                "code": "2.2.1",
+                "nom": "Achever les projets de réhabilitation en cours"
+              },
+              {
+                "code": "2.2.2",
+                "nom": "Élaborer un programme de réhabilitation et d'extension"
+              },
+              {
+                "code": "2.2.3",
+                "nom": "Mettre en œuvre le programme de réhabilitation et d'extension"
+              }
+            ]
+          },
+          {
+            "code": "2.3",
+            "nom": "Les conditions d'entrée et de parcours sont améliorées",
+            "total": 430022.0,
+            "actions": [
+              {
+                "code": "2.3.1",
+                "nom": "Renforcer le dispositif d'information et d'orientation des apprenants"
+              },
+              {
+                "code": "2.3.2",
+                "nom": "Opérationnaliser un dispositif d'accompagnement le long du cursus"
+              },
+              {
+                "code": "2.3.3",
+                "nom": "Construire des internats inclusifs (filles et handicapés)"
+              },
+              {
+                "code": "2.3.4",
+                "nom": "Mettre en œuvre la réforme des bourses favorisant l'accès des filles aux filières industrielles"
+              }
+            ]
+          },
+          {
+            "code": "2.4",
+            "nom": "L'offre d'EFTP est étendue et diversifiée",
+            "total": 6000.0,
+            "actions": [
+              {
+                "code": "2.4.1",
+                "nom": "Créer de nouvelles filières post-baccalauréat"
+              },
+              {
+                "code": "2.4.2",
+                "nom": "Créer de nouvelles filières dans les secteurs porteurs (agro-industrie, énergies renouvelables, TIC)"
+              },
+              {
+                "code": "2.4.3",
+                "nom": "Développer l'offre de formation en ligne"
+              }
+            ]
+          },
+          {
+            "code": "2.5",
+            "nom": "Un dispositif d'appui au développement et à la maîtrise de l'offre privée est mis en œuvre",
+            "total": 85050.0,
+            "actions": [
+              {
+                "code": "2.5.1",
+                "nom": "Mettre en adéquation le cadre légal et institutionnel"
+              },
+              {
+                "code": "2.5.2",
+                "nom": "Mettre en place un fonds de garantie pour les initiatives privées"
+              },
+              {
+                "code": "2.5.3",
+                "nom": "Construire des centres de mutualisation de ressources techniques"
+              }
+            ]
+          },
+          {
+            "code": "2.6",
+            "nom": "Le dispositif d'apprentissage et de formation qualifiante est renforcé à l'échelle nationale",
+            "total": 517568.0,
+            "actions": [
+              {
+                "code": "2.6.1",
+                "nom": "Achever la construction des infrastructures d'apprentissage en cours"
+              },
+              {
+                "code": "2.6.2",
+                "nom": "Élaborer un programme de développement des infrastructures d'apprentissage"
+              },
+              {
+                "code": "2.6.3",
+                "nom": "Mettre en œuvre le programme de développement des infrastructures d'apprentissage"
+              },
+              {
+                "code": "2.6.4",
+                "nom": "Déployer l'École de la 2ème Chance sur tout le territoire"
+              },
+              {
+                "code": "2.6.5",
+                "nom": "Développer l'ingénierie de la formation par apprentissage"
+              },
+              {
+                "code": "2.6.6",
+                "nom": "Développer la formation par apprentissage"
+              },
+              {
+                "code": "2.6.7",
+                "nom": "Développer les partenariats avec les opérateurs privés de formation"
+              }
+            ]
+          },
+          {
+            "code": "2.7",
+            "nom": "Le dispositif d'appui à la professionnalisation des métiers est opérationnel",
+            "total": 69628.0,
+            "actions": [
+              {
+                "code": "2.7.1",
+                "nom": "Mettre en œuvre le dispositif d'encadrement de l'apprentissage traditionnel (CQM)"
+              },
+              {
+                "code": "2.7.2",
+                "nom": "Mettre en œuvre le dispositif de Validation des Acquis de l'Expérience (VAE)"
+              }
+            ]
+          },
+          {
+            "code": "2.8",
+            "nom": "Une offre adaptée est développée pour les groupes vulnérables et spécifiques",
+            "total": 89600.0,
+            "actions": [
+              {
+                "code": "2.8.1",
+                "nom": "Développer des formations adaptées aux groupes spécifiques ou vulnérables"
+              },
+              {
+                "code": "2.8.2",
+                "nom": "Développer des formations adaptées aux populations des zones à risque"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "code": "AX3",
+        "nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "effet": "Effet 3 : Les populations de la Côte d'Ivoire bénéficient d'une offre d'EFTP pertinente, qualitative et attractive favorisant une insertion professionnelle durable.",
+        "total": 206569.0,
+        "pnd_effet": "4.02.3",
+        "produits": [
+          {
+            "code": "3.1",
+            "nom": "Des méthodes pédagogiques développant compétences techniques et comportementales sont mises en œuvre",
+            "total": 18740.0,
+            "actions": [
+              {
+                "code": "3.1.1",
+                "nom": "Déployer l'Approche par Compétences au niveau national"
+              },
+              {
+                "code": "3.1.2",
+                "nom": "Renforcer la pratique dans les apprentissages"
+              },
+              {
+                "code": "3.1.3",
+                "nom": "Intégrer les compétences comportementales (soft skills)"
+              },
+              {
+                "code": "3.1.4",
+                "nom": "Assurer la formation continue des enseignants (pédagogie moderne, technologies, entrepreneuriat)"
+              },
+              {
+                "code": "3.1.5",
+                "nom": "Produire des guides pédagogiques intégrant compétences techniques et comportementales"
+              },
+              {
+                "code": "3.1.6",
+                "nom": "Développer des ressources pédagogiques adaptées et uniformisées"
+              }
+            ]
+          },
+          {
+            "code": "3.2",
+            "nom": "Les curricula sont révisés/créés intégrant les compétences numériques, technologiques émergentes et l'entrepreneuriat",
+            "total": 18559.0,
+            "actions": [
+              {
+                "code": "3.2.1",
+                "nom": "Rénover les curricula existants (entrepreneuriat, numérique, innovation)"
+              },
+              {
+                "code": "3.2.2",
+                "nom": "Élaborer des curricula des nouveaux métiers en partenariat avec le secteur productif"
+              }
+            ]
+          },
+          {
+            "code": "3.3",
+            "nom": "Un système d'assurance qualité de l'EFTP est mis en œuvre",
+            "total": 750.0,
+            "actions": [
+              {
+                "code": "3.3.1",
+                "nom": "Mettre en place une structure d'assurance qualité de l'EFTP"
+              },
+              {
+                "code": "3.3.2",
+                "nom": "Mettre en œuvre le système d'assurance qualité (public et privé)"
+              }
+            ]
+          },
+          {
+            "code": "3.4",
+            "nom": "Les mécanismes d'adéquation besoins de compétences / offre de formation sont opérationnels",
+            "total": 700.0,
+            "actions": [
+              {
+                "code": "3.4.1",
+                "nom": "Opérationnaliser le cadre de partenariat État-Secteur privé"
+              },
+              {
+                "code": "3.4.2",
+                "nom": "Opérationnaliser la participation du secteur privé à la formation et la gouvernance"
+              }
+            ]
+          },
+          {
+            "code": "3.5",
+            "nom": "Des partenariats internationaux d'accréditation et de certification sont mis en place",
+            "total": 3750.0,
+            "actions": [
+              {
+                "code": "3.5.1",
+                "nom": "Partenariats avec des pays performants (Allemagne, Suisse, Corée du Sud, Canada)"
+              },
+              {
+                "code": "3.5.2",
+                "nom": "Partenariats avec des établissements reconnus à l'international"
+              },
+              {
+                "code": "3.5.3",
+                "nom": "Partenariats avec des entités d'accréditation et de certification"
+              }
+            ]
+          },
+          {
+            "code": "3.6",
+            "nom": "Le dispositif de formation des formateurs est développé, modernisé et effectif",
+            "total": 15711.0,
+            "actions": [
+              {
+                "code": "3.6.1",
+                "nom": "Instaurer un nouveau modèle de formation initiale des formateurs et acteurs"
+              },
+              {
+                "code": "3.6.2",
+                "nom": "Assurer la formation continue des formateurs en service"
+              },
+              {
+                "code": "3.6.3",
+                "nom": "Renforcer les capacités des formateurs en recherche et innovation"
+              },
+              {
+                "code": "3.6.4",
+                "nom": "Développer les partenariats académiques et scientifiques"
+              },
+              {
+                "code": "3.6.5",
+                "nom": "Déployer les antennes d'encadrement pédagogique au plan national"
+              },
+              {
+                "code": "3.6.6",
+                "nom": "Mettre en place la formation continue et certification des enseignants du privé"
+              }
+            ]
+          },
+          {
+            "code": "3.7",
+            "nom": "Les plateaux techniques des établissements sont mis à niveau selon les évolutions technologiques",
+            "total": 143000.0,
+            "actions": [
+              {
+                "code": "3.7.1",
+                "nom": "Achever les projets de mise à niveau des plateaux techniques en cours"
+              },
+              {
+                "code": "3.7.2",
+                "nom": "Élaborer des modèles types de plateaux techniques par filière"
+              },
+              {
+                "code": "3.7.3",
+                "nom": "Mettre à niveau les plateaux techniques existants"
+              },
+              {
+                "code": "3.7.4",
+                "nom": "Équiper les nouveaux établissements selon les modèles identifiés"
+              }
+            ]
+          },
+          {
+            "code": "3.8",
+            "nom": "Le dispositif de formation par alternance est mis à l'échelle",
+            "total": null,
+            "actions": [
+              {
+                "code": "3.8.1",
+                "nom": "Élaborer une stratégie de mise à l'échelle de la formation par alternance"
+              },
+              {
+                "code": "3.8.2",
+                "nom": "Mettre en œuvre la stratégie de mise à l'échelle de l'alternance"
+              }
+            ]
+          },
+          {
+            "code": "3.9",
+            "nom": "Le développement des activités extra-scolaires est assuré",
+            "total": null,
+            "actions": [
+              {
+                "code": "3.9.1",
+                "nom": "Mettre en place des mécanismes de prise en charge psychologique des apprenants"
+              },
+              {
+                "code": "3.9.3",
+                "nom": "Développer des activités sportives, culturelles et d'innovation technologique"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "digital": {
+    "vision": "En 2030, la Côte d'Ivoire dispose d'un système d'ETFP digitalisé, inclusif et accessible à tous, en adéquation avec le marché de l'emploi.",
+    "total": 33562.0,
+    "annuel": {
+      "2026": 865,
+      "2027": 15196,
+      "2028": 5531,
+      "2029": 4515,
+      "2030": 3805,
+      "2031": 3649
+    },
+    "financement": {
+      "etat_pct": 15,
+      "bailleur_pct": 85,
+      "etat": 5034,
+      "bailleur": 28528
+    },
+    "pnd_ancre": "4.02.1.6",
+    "pol_ancre": "1.4",
+    "priorites": [
+      {
+        "code": "P1",
+        "nom": "Priorité 1",
+        "actions": 22,
+        "total": 8656,
+        "etat": 1298,
+        "bailleur": 7358
+      },
+      {
+        "code": "P2",
+        "nom": "Priorité 2",
+        "actions": 21,
+        "total": 6060,
+        "etat": 909,
+        "bailleur": 5151
+      },
+      {
+        "code": "P3",
+        "nom": "Priorité 3",
+        "actions": 16,
+        "total": 12701,
+        "etat": 1905,
+        "bailleur": 10796
+      },
+      {
+        "code": "P4",
+        "nom": "Priorité 4",
+        "actions": 16,
+        "total": 6145,
+        "etat": 922,
+        "bailleur": 5223
+      }
+    ],
+    "axes": [
+      {
+        "code": "D1",
+        "nom": "Développement des infrastructures numériques",
+        "total": 15791,
+        "pct": 47,
+        "etat": 2369,
+        "bailleur": 13422,
+        "objectifs": [
+          {
+            "code": "OS1",
+            "nom": "Équiper en matériel TIC les établissements et les structures sous tutelle du METFPA",
+            "orientations": [
+              "OS1.1 — Fournir des équipements et infrastructures de base dans les structures du METFPA",
+              "OS1.2 — Équiper les structures d'encadrement de l'ETFPA (hors établissements)",
+              "OS1.3 — Doter l'ETFPA de salles spécialisées et d'outils pour la formation à distance"
+            ]
+          },
+          {
+            "code": "OS2",
+            "nom": "Assurer la maintenance des équipements TIC",
+            "orientations": [
+              "OS2.1 — Assurer la pérennité des infrastructures numériques existantes"
+            ]
+          }
+        ]
+      },
+      {
+        "code": "D2",
+        "nom": "Amélioration de la qualité de la formation par le numérique",
+        "total": 12756,
+        "pct": 38,
+        "etat": 1913,
+        "bailleur": 10843,
+        "objectifs": [
+          {
+            "code": "OS1",
+            "nom": "Intégrer un dispositif de formation à distance à l'ETFP",
+            "orientations": [
+              "OS1.1 — Mettre en place le dispositif de formation à distance des acteurs de l'ETFPA"
+            ]
+          },
+          {
+            "code": "OS2",
+            "nom": "Développer les compétences numériques des enseignants, formateurs et apprenants",
+            "orientations": [
+              "OS2.1 — Formation continue des formateurs et administratifs",
+              "OS2.2 — Éducation numérique des apprenants",
+              "OS2.3 — Inclusion de l'éducation environnementale dans les programmes",
+              "OS2.4 — Appui à la faisabilité d'un établissement de formation dédié aux TIC",
+              "OS2.5 — Consultation avec le secteur privé pour l'adaptation des programmes"
+            ]
+          },
+          {
+            "code": "OS3",
+            "nom": "Accompagner la modification/actualisation des programmes",
+            "orientations": [
+              "OS3.1 — Définir et standardiser les pratiques pédagogiques numériques",
+              "OS3.2 — Promotion de l'utilisation responsable des technologies"
+            ]
+          },
+          {
+            "code": "OS4",
+            "nom": "Développer des mécanismes de changement de comportement",
+            "orientations": [
+              "OS4.1 — Assurer une migration inclusive et responsable vers le numérique",
+              "OS4.2 — Sécurisation des infrastructures éducatives et formation à la cybersécurité",
+              "OS4.3 — Suivre et évaluer l'impact des projets"
+            ]
+          }
+        ]
+      },
+      {
+        "code": "D3",
+        "nom": "Amélioration de la gouvernance du système par le numérique",
+        "total": 5015,
+        "pct": 15,
+        "etat": 752,
+        "bailleur": 4263,
+        "objectifs": [
+          {
+            "code": "OS1",
+            "nom": "Améliorer la gouvernance de l'ETFP",
+            "orientations": [
+              "OS1.1 — Améliorer la gouvernance générale de l'ETFP grâce au numérique"
+            ]
+          },
+          {
+            "code": "OS2",
+            "nom": "Encadrer la digitalisation et garantir la qualité et la sécurité des processus",
+            "orientations": [
+              "OS2.1 — Développement de normes et prévention des risques numériques",
+              "OS2.2 — Réglementation des certifications",
+              "OS2.3 — Encadrement légal",
+              "OS2.4 — Évaluations régulières"
+            ]
+          },
+          {
+            "code": "OS3",
+            "nom": "Mobiliser les ressources financières et les structures de gouvernance de la Stratégie",
+            "orientations": [
+              "OS3.1 — Financement des infrastructures et des projets innovants",
+              "OS3.2 — Soutien à l'entrepreneuriat numérique et à l'employabilité",
+              "OS3.3 — Mobilisation des ressources technologiques",
+              "OS3.4 — Mettre en place les structures de gouvernance de la Stratégie"
+            ]
+          }
+        ]
+      }
+    ],
+    "kpi": [
+      {
+        "n": "Établissements connectés au haut débit (>=20 Mbps)",
+        "base": "n.d.",
+        "cible": "100%",
+        "axe": "D1"
+      },
+      {
+        "n": "Taux de disponibilité des connexions haut débit",
+        "base": "n.d.",
+        "cible": "99,5%",
+        "axe": "D1"
+      },
+      {
+        "n": "Établissements équipés de ressources et matériels informatiques",
+        "base": "n.d.",
+        "cible": "100%",
+        "axe": "D1"
+      },
+      {
+        "n": "Établissements équipés de solutions audio/visioconférence",
+        "base": "n.d.",
+        "cible": "100%",
+        "axe": "D1"
+      },
+      {
+        "n": "Établissements dotés de solutions d'apprentissage en ligne",
+        "base": "n.d.",
+        "cible": "100%",
+        "axe": "D1"
+      },
+      {
+        "n": "Enseignants formés en techno-pédagogie",
+        "base": "n.d.",
+        "cible": "100%",
+        "axe": "D2"
+      },
+      {
+        "n": "Personnel administratif local formé en TIC",
+        "base": "n.d.",
+        "cible": "100%",
+        "axe": "D2"
+      },
+      {
+        "n": "Personnel administratif régional formé en TIC",
+        "base": "n.d.",
+        "cible": "100%",
+        "axe": "D2"
+      },
+      {
+        "n": "Taux de réalisation des réformes nécessaires à la digitalisation",
+        "base": "n.d.",
+        "cible": "100%",
+        "axe": "D3"
+      },
+      {
+        "n": "Effectif ETFPA en % des élèves du secondaire",
+        "base": "6%",
+        "cible": "15%",
+        "axe": "D3"
+      },
+      {
+        "n": "Filles/jeunes femmes dans les filières industrielles",
+        "base": "18%",
+        "cible": "50%",
+        "axe": "D3"
+      },
+      {
+        "n": "Taux d'insertion des diplômés",
+        "base": "34%",
+        "cible": "70%",
+        "axe": "D3"
+      }
+    ]
+  },
+  "kpi_cascade": [
+    {
+      "niveau": "PND (national)",
+      "libelle": "Taux d'insertion des diplômés de l'EFTP",
+      "base": "34%",
+      "cible": "70%",
+      "src": "PND 4.02 / Politique / Stratégie"
+    },
+    {
+      "niveau": "PND (national)",
+      "libelle": "Effectif EFTP en % des effectifs du secondaire",
+      "base": "9% (6% digital)",
+      "cible": "15%",
+      "src": "PND Effet 4.02.2"
+    },
+    {
+      "niveau": "Politique EFTP",
+      "libelle": "Part des filles dans les filières industrielles",
+      "base": "18%",
+      "cible": "50%",
+      "src": "Politique Axe 2 / Stratégie"
+    },
+    {
+      "niveau": "Politique EFTP",
+      "libelle": "Taux de réalisation des réformes juridiques EFTP",
+      "base": "n.d.",
+      "cible": "100%",
+      "src": "Politique Produit 1.1"
+    },
+    {
+      "niveau": "Stratégie digitale",
+      "libelle": "Établissements connectés au haut débit (>=20 Mbps)",
+      "base": "n.d.",
+      "cible": "100%",
+      "src": "Stratégie Axe 1"
+    },
+    {
+      "niveau": "Stratégie digitale",
+      "libelle": "Enseignants formés en techno-pédagogie",
+      "base": "n.d.",
+      "cible": "100%",
+      "src": "Stratégie Axe 2"
+    },
+    {
+      "niveau": "Stratégie digitale",
+      "libelle": "Taux de réalisation des réformes de digitalisation",
+      "base": "n.d.",
+      "cible": "100%",
+      "src": "Stratégie Axe 3"
+    }
+  ],
+  "operational_demo": {
+    "activites": [
+      {
+        "id": "ACT001",
+        "intitule": "Prendre tous les textes d'application de la loi d'orientation de l'EFTP",
+        "code_action": "1.1.1",
+        "direction": "CPNTIC",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.1",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 304.0,
+        "budget_execute": 32.0,
+        "avancement": 15,
+        "statut": "En retard",
+        "echeance": "2026-T3",
+        "alerte": "Marché non attribué"
+      },
+      {
+        "id": "ACT002",
+        "intitule": "Prendre les textes d'application du décret sur l'approche par compétences",
+        "code_action": "1.1.2",
+        "direction": "DAF",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.1",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 304.0,
+        "budget_execute": 43.0,
+        "avancement": 15,
+        "statut": "En cours",
+        "echeance": "2027-T1",
+        "alerte": ""
+      },
+      {
+        "id": "ACT003",
+        "intitule": "Mettre en œuvre la réforme des structures sous tutelle",
+        "code_action": "1.2.1",
+        "direction": "CPNTIC",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.2",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 156.0,
+        "budget_execute": 6.0,
+        "avancement": 5,
+        "statut": "À l'heure",
+        "echeance": "2027-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT004",
+        "intitule": "Rendre opérationnel le nouveau cadre de gouvernance des établissements publics",
+        "code_action": "1.2.2",
+        "direction": "CPNTIC",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.2",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 156.0,
+        "budget_execute": 0.0,
+        "avancement": 0,
+        "statut": "Non démarré",
+        "echeance": "2027-T1",
+        "alerte": ""
+      },
+      {
+        "id": "ACT005",
+        "intitule": "Opérationnaliser la chaîne Prospective-Planification-Programmation-Budgétisation-S&E",
+        "code_action": "1.3.1",
+        "direction": "Dir. Communication",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.3",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 5045.0,
+        "budget_execute": 1984.0,
+        "avancement": 40,
+        "statut": "En cours",
+        "echeance": "2028-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT006",
+        "intitule": "Mettre en œuvre un dispositif de gestion des flux d'apprenants",
+        "code_action": "1.3.2",
+        "direction": "DEXC",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.3",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 5045.0,
+        "budget_execute": 1191.0,
+        "avancement": 25,
+        "statut": "Bloqué",
+        "echeance": "2026-T3",
+        "alerte": "Texte non signé"
+      },
+      {
+        "id": "ACT007",
+        "intitule": "Mettre en œuvre la stratégie de digitalisation de l'EFTP",
+        "code_action": "1.4.1",
+        "direction": "DAIP",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 2226.0,
+        "budget_execute": 901.0,
+        "avancement": 55,
+        "statut": "Achevé",
+        "echeance": "2026-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT008",
+        "intitule": "Développer les infrastructures numériques au niveau administratif",
+        "code_action": "1.4.2",
+        "direction": "Dir. Infrastructures",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 2226.0,
+        "budget_execute": 1217.0,
+        "avancement": 60,
+        "statut": "En cours",
+        "echeance": "2027-T1",
+        "alerte": ""
+      },
+      {
+        "id": "ACT009",
+        "intitule": "Mettre en place une gestion prévisionnelle des emplois et des compétences",
+        "code_action": "1.5.1",
+        "direction": "DAIP",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.5",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 4253.0,
+        "budget_execute": 664.0,
+        "avancement": 15,
+        "statut": "Achevé",
+        "echeance": "2027-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT010",
+        "intitule": "Aligner les RH (qualité/quantité) sur les besoins en personnel",
+        "code_action": "1.5.2",
+        "direction": "CPNTIC",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.5",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 4253.0,
+        "budget_execute": 1895.0,
+        "avancement": 45,
+        "statut": "Bloqué",
+        "echeance": "2027-T4",
+        "alerte": "Dépendance inter-direction"
+      },
+      {
+        "id": "ACT011",
+        "intitule": "Renforcer les capacités des DG et Directeurs en mobilisation de ressources",
+        "code_action": "1.6.1",
+        "direction": "Dir. Communication",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.6",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 496.0,
+        "budget_execute": 36.0,
+        "avancement": 10,
+        "statut": "À l'heure",
+        "echeance": "2026-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT012",
+        "intitule": "Mettre en place une cellule de mobilisation de fonds d'investissement",
+        "code_action": "1.6.2",
+        "direction": "FDFP",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.6",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 496.0,
+        "budget_execute": 50.0,
+        "avancement": 10,
+        "statut": "En cours",
+        "echeance": "2026-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT013",
+        "intitule": "Réviser la stratégie de communication du METFPA",
+        "code_action": "1.7.1",
+        "direction": "AGEFOP",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.7",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 1235.0,
+        "budget_execute": 1025.0,
+        "avancement": 90,
+        "statut": "Bloqué",
+        "echeance": "2026-T4",
+        "alerte": "Marché non attribué"
+      },
+      {
+        "id": "ACT014",
+        "intitule": "Mettre en œuvre la stratégie de communication du METFPA",
+        "code_action": "1.7.2",
+        "direction": "DAF",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.7",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 1235.0,
+        "budget_execute": 346.0,
+        "avancement": 30,
+        "statut": "En cours",
+        "echeance": "2027-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT015",
+        "intitule": "Mettre en place des cellules d'entretien et de maintenance dans les établissements",
+        "code_action": "1.8.1",
+        "direction": "DEXC",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.8",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 8390.0,
+        "budget_execute": 1860.0,
+        "avancement": 25,
+        "statut": "À l'heure",
+        "echeance": "2027-T1",
+        "alerte": ""
+      },
+      {
+        "id": "ACT016",
+        "intitule": "Élaborer et mettre en œuvre un programme de maintenance corrective et préventive",
+        "code_action": "1.8.2",
+        "direction": "Dir. Pédagogie",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.8",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 8390.0,
+        "budget_execute": 4666.0,
+        "avancement": 70,
+        "statut": "À l'heure",
+        "echeance": "2026-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT017",
+        "intitule": "Élaborer la politique genre et inclusion sociale de l'EFTP",
+        "code_action": "1.9.1",
+        "direction": "Dir. Communication",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.9",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 635.0,
+        "budget_execute": 25.0,
+        "avancement": 5,
+        "statut": "En cours",
+        "echeance": "2026-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT018",
+        "intitule": "Opérationnaliser les programmes genre, inclusion et santé dans les établissements",
+        "code_action": "1.9.2",
+        "direction": "Cabinet",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.9",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 635.0,
+        "budget_execute": 353.0,
+        "avancement": 70,
+        "statut": "À l'heure",
+        "echeance": "2027-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT019",
+        "intitule": "Renforcer les capacités des directions régionales d'EFTP",
+        "code_action": "1.10.1",
+        "direction": "FDFP",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.10",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 2222.0,
+        "budget_execute": 946.0,
+        "avancement": 55,
+        "statut": "Non démarré",
+        "echeance": "2027-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT020",
+        "intitule": "Assurer la territorialisation de la politique d'EFTP",
+        "code_action": "1.10.2",
+        "direction": "FDFP",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.10",
+        "pnd_effet": "4.02.1",
+        "strategie": "",
+        "budget_prevu": 1282.0,
+        "budget_execute": 384.0,
+        "avancement": 40,
+        "statut": "En retard",
+        "echeance": "2027-T2",
+        "alerte": "Dépendance inter-direction"
+      },
+      {
+        "id": "ACT021",
+        "intitule": "Achever les projets de construction en cours",
+        "code_action": "2.1.1",
+        "direction": "DRH",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.1",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 341407.0,
+        "budget_execute": 197569.0,
+        "avancement": 70,
+        "statut": "En cours",
+        "echeance": "2027-T1",
+        "alerte": ""
+      },
+      {
+        "id": "ACT022",
+        "intitule": "Élaborer un programme de construction de nouvelles infrastructures publiques",
+        "code_action": "2.1.2",
+        "direction": "DEXC",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.1",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 341407.0,
+        "budget_execute": 32930.0,
+        "avancement": 10,
+        "statut": "En cours",
+        "echeance": "2027-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT023",
+        "intitule": "Achever les projets de réhabilitation en cours",
+        "code_action": "2.2.1",
+        "direction": "DAF",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.2",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 137393.0,
+        "budget_execute": 33566.0,
+        "avancement": 25,
+        "statut": "Achevé",
+        "echeance": "2026-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT024",
+        "intitule": "Élaborer un programme de réhabilitation et d'extension",
+        "code_action": "2.2.2",
+        "direction": "DRH",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.2",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 137393.0,
+        "budget_execute": 80168.0,
+        "avancement": 70,
+        "statut": "Non démarré",
+        "echeance": "2026-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT025",
+        "intitule": "Renforcer le dispositif d'information et d'orientation des apprenants",
+        "code_action": "2.3.1",
+        "direction": "Dir. Pédagogie",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.3",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 107506.0,
+        "budget_execute": 0.0,
+        "avancement": 0,
+        "statut": "Non démarré",
+        "echeance": "2027-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT026",
+        "intitule": "Opérationnaliser un dispositif d'accompagnement le long du cursus",
+        "code_action": "2.3.2",
+        "direction": "IPNETP",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.3",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 107506.0,
+        "budget_execute": 41670.0,
+        "avancement": 40,
+        "statut": "Bloqué",
+        "echeance": "2027-T1",
+        "alerte": "Retard de décaissement"
+      },
+      {
+        "id": "ACT027",
+        "intitule": "Créer de nouvelles filières post-baccalauréat",
+        "code_action": "2.4.1",
+        "direction": "Dir. Communication",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.4",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 2000.0,
+        "budget_execute": 429.0,
+        "avancement": 25,
+        "statut": "En retard",
+        "echeance": "2026-T3",
+        "alerte": "Dépendance inter-direction"
+      },
+      {
+        "id": "ACT028",
+        "intitule": "Créer de nouvelles filières dans les secteurs porteurs (agro-industrie, énergies renouvelables, TIC)",
+        "code_action": "2.4.2",
+        "direction": "DAF",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.4",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 2000.0,
+        "budget_execute": 301.0,
+        "avancement": 15,
+        "statut": "En retard",
+        "echeance": "2026-T3",
+        "alerte": "Dépendance inter-direction"
+      },
+      {
+        "id": "ACT029",
+        "intitule": "Mettre en adéquation le cadre légal et institutionnel",
+        "code_action": "2.5.1",
+        "direction": "DRH",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.5",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 28350.0,
+        "budget_execute": 4711.0,
+        "avancement": 20,
+        "statut": "En cours",
+        "echeance": "2028-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT030",
+        "intitule": "Mettre en place un fonds de garantie pour les initiatives privées",
+        "code_action": "2.5.2",
+        "direction": "DPSI",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.5",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 28350.0,
+        "budget_execute": 0.0,
+        "avancement": 0,
+        "statut": "Non démarré",
+        "echeance": "2026-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT031",
+        "intitule": "Achever la construction des infrastructures d'apprentissage en cours",
+        "code_action": "2.6.1",
+        "direction": "DPSI",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.6",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 73938.0,
+        "budget_execute": 44698.0,
+        "avancement": 60,
+        "statut": "En retard",
+        "echeance": "2026-T3",
+        "alerte": "Marché non attribué"
+      },
+      {
+        "id": "ACT032",
+        "intitule": "Élaborer un programme de développement des infrastructures d'apprentissage",
+        "code_action": "2.6.2",
+        "direction": "Dir. Apprentissage",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.6",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 73938.0,
+        "budget_execute": 5397.0,
+        "avancement": 10,
+        "statut": "Non démarré",
+        "echeance": "2026-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT033",
+        "intitule": "Mettre en œuvre le dispositif d'encadrement de l'apprentissage traditionnel (CQM)",
+        "code_action": "2.7.1",
+        "direction": "DRH",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.7",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 34814.0,
+        "budget_execute": 5187.0,
+        "avancement": 20,
+        "statut": "Non démarré",
+        "echeance": "2026-T3",
+        "alerte": ""
+      },
+      {
+        "id": "ACT034",
+        "intitule": "Mettre en œuvre le dispositif de Validation des Acquis de l'Expérience (VAE)",
+        "code_action": "2.7.2",
+        "direction": "CPNTIC",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.7",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 34814.0,
+        "budget_execute": 12320.0,
+        "avancement": 40,
+        "statut": "Achevé",
+        "echeance": "2027-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT035",
+        "intitule": "Développer des formations adaptées aux groupes spécifiques ou vulnérables",
+        "code_action": "2.8.1",
+        "direction": "Dir. Pédagogie",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.8",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 44800.0,
+        "budget_execute": 12762.0,
+        "avancement": 30,
+        "statut": "Achevé",
+        "echeance": "2027-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT036",
+        "intitule": "Développer des formations adaptées aux populations des zones à risque",
+        "code_action": "2.8.2",
+        "direction": "DAIP",
+        "axe_pol": "AX2",
+        "axe_pol_nom": "Augmentation et amélioration de l'accès",
+        "produit_pol": "2.8",
+        "pnd_effet": "4.02.2",
+        "strategie": "",
+        "budget_prevu": 44800.0,
+        "budget_execute": 22938.0,
+        "avancement": 60,
+        "statut": "Non démarré",
+        "echeance": "2026-T3",
+        "alerte": ""
+      },
+      {
+        "id": "ACT037",
+        "intitule": "Déployer l'Approche par Compétences au niveau national",
+        "code_action": "3.1.1",
+        "direction": "DAF",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.1",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 3123.0,
+        "budget_execute": 790.0,
+        "avancement": 35,
+        "statut": "En cours",
+        "echeance": "2027-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT038",
+        "intitule": "Renforcer la pratique dans les apprentissages",
+        "code_action": "3.1.2",
+        "direction": "DAIP",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.1",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 3123.0,
+        "budget_execute": 990.0,
+        "avancement": 35,
+        "statut": "En cours",
+        "echeance": "2027-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT039",
+        "intitule": "Rénover les curricula existants (entrepreneuriat, numérique, innovation)",
+        "code_action": "3.2.1",
+        "direction": "Dir. Apprentissage",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.2",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 9280.0,
+        "budget_execute": 362.0,
+        "avancement": 5,
+        "statut": "En cours",
+        "echeance": "2026-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT040",
+        "intitule": "Élaborer des curricula des nouveaux métiers en partenariat avec le secteur productif",
+        "code_action": "3.2.2",
+        "direction": "CPNTIC",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.2",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 9280.0,
+        "budget_execute": 817.0,
+        "avancement": 10,
+        "statut": "En retard",
+        "echeance": "2027-T2",
+        "alerte": "Capacités insuffisantes"
+      },
+      {
+        "id": "ACT041",
+        "intitule": "Mettre en place une structure d'assurance qualité de l'EFTP",
+        "code_action": "3.3.1",
+        "direction": "CPNTIC",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.3",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 375.0,
+        "budget_execute": 71.0,
+        "avancement": 20,
+        "statut": "Non démarré",
+        "echeance": "2028-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT042",
+        "intitule": "Mettre en œuvre le système d'assurance qualité (public et privé)",
+        "code_action": "3.3.2",
+        "direction": "DAIP",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.3",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 375.0,
+        "budget_execute": 368.0,
+        "avancement": 100,
+        "statut": "Achevé",
+        "echeance": "2026-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT043",
+        "intitule": "Opérationnaliser le cadre de partenariat État-Secteur privé",
+        "code_action": "3.4.1",
+        "direction": "CIDFOR",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.4",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 350.0,
+        "budget_execute": 231.0,
+        "avancement": 80,
+        "statut": "Achevé",
+        "echeance": "2028-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT044",
+        "intitule": "Opérationnaliser la participation du secteur privé à la formation et la gouvernance",
+        "code_action": "3.4.2",
+        "direction": "DPSI",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.4",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 350.0,
+        "budget_execute": 16.0,
+        "avancement": 5,
+        "statut": "En cours",
+        "echeance": "2027-T1",
+        "alerte": ""
+      },
+      {
+        "id": "ACT045",
+        "intitule": "Partenariats avec des pays performants (Allemagne, Suisse, Corée du Sud, Canada)",
+        "code_action": "3.5.1",
+        "direction": "CPNTIC",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.5",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 1250.0,
+        "budget_execute": 674.0,
+        "avancement": 55,
+        "statut": "En cours",
+        "echeance": "2026-T3",
+        "alerte": ""
+      },
+      {
+        "id": "ACT046",
+        "intitule": "Partenariats avec des établissements reconnus à l'international",
+        "code_action": "3.5.2",
+        "direction": "FDFP",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.5",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 1250.0,
+        "budget_execute": 333.0,
+        "avancement": 30,
+        "statut": "En cours",
+        "echeance": "2026-T3",
+        "alerte": ""
+      },
+      {
+        "id": "ACT047",
+        "intitule": "Instaurer un nouveau modèle de formation initiale des formateurs et acteurs",
+        "code_action": "3.6.1",
+        "direction": "CIDFOR",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.6",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 2618.0,
+        "budget_execute": 903.0,
+        "avancement": 40,
+        "statut": "En cours",
+        "echeance": "2028-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT048",
+        "intitule": "Assurer la formation continue des formateurs en service",
+        "code_action": "3.6.2",
+        "direction": "DAIP",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.6",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 2618.0,
+        "budget_execute": 282.0,
+        "avancement": 15,
+        "statut": "En cours",
+        "echeance": "2028-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT049",
+        "intitule": "Achever les projets de mise à niveau des plateaux techniques en cours",
+        "code_action": "3.7.1",
+        "direction": "CIDFOR",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.7",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 35750.0,
+        "budget_execute": 9487.0,
+        "avancement": 35,
+        "statut": "Non démarré",
+        "echeance": "2026-T3",
+        "alerte": ""
+      },
+      {
+        "id": "ACT050",
+        "intitule": "Élaborer des modèles types de plateaux techniques par filière",
+        "code_action": "3.7.2",
+        "direction": "FDFP",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.7",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 35750.0,
+        "budget_execute": 25422.0,
+        "avancement": 70,
+        "statut": "En cours",
+        "echeance": "2026-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT051",
+        "intitule": "Élaborer une stratégie de mise à l'échelle de la formation par alternance",
+        "code_action": "3.8.1",
+        "direction": "IPNETP",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.8",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 2467.0,
+        "budget_execute": 1011.0,
+        "avancement": 40,
+        "statut": "Non démarré",
+        "echeance": "2027-T1",
+        "alerte": ""
+      },
+      {
+        "id": "ACT052",
+        "intitule": "Mettre en œuvre la stratégie de mise à l'échelle de l'alternance",
+        "code_action": "3.8.2",
+        "direction": "CPNTIC",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.8",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 1818.0,
+        "budget_execute": 1371.0,
+        "avancement": 100,
+        "statut": "Achevé",
+        "echeance": "2026-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT053",
+        "intitule": "Mettre en place des mécanismes de prise en charge psychologique des apprenants",
+        "code_action": "3.9.1",
+        "direction": "DPSI",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.9",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 1553.0,
+        "budget_execute": 75.0,
+        "avancement": 5,
+        "statut": "En cours",
+        "echeance": "2027-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT054",
+        "intitule": "Développer des activités sportives, culturelles et d'innovation technologique",
+        "code_action": "3.9.3",
+        "direction": "Dir. Apprentissage",
+        "axe_pol": "AX3",
+        "axe_pol_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "produit_pol": "3.9",
+        "pnd_effet": "4.02.3",
+        "strategie": "",
+        "budget_prevu": 1323.0,
+        "budget_execute": 238.0,
+        "avancement": 25,
+        "statut": "En cours",
+        "echeance": "2026-T3",
+        "alerte": ""
+      },
+      {
+        "id": "ACT055",
+        "intitule": "Réaliser l'étude d'évaluation des besoins en équipement TIC",
+        "code_action": "D1.OS1",
+        "direction": "DPSI",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1.6",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 80,
+        "budget_execute": 12,
+        "avancement": 100,
+        "statut": "Achevé",
+        "echeance": "2026-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT056",
+        "intitule": "Équiper 72 établissements publics en salles informatiques spécialisées",
+        "code_action": "D1.OS1",
+        "direction": "Dir. Infrastructures",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1.6",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 8640,
+        "budget_execute": 1500,
+        "avancement": 17,
+        "statut": "En cours",
+        "echeance": "2027-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT057",
+        "intitule": "Doter 72 établissements de connexion haut débit (>=20 Mbps)",
+        "code_action": "D1.OS1",
+        "direction": "DPSI",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1.6",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 471,
+        "budget_execute": 40,
+        "avancement": 8,
+        "statut": "En cours",
+        "echeance": "2027-T3",
+        "alerte": ""
+      },
+      {
+        "id": "ACT058",
+        "intitule": "Mettre en place le dispositif de formation à distance des acteurs",
+        "code_action": "D2.OS1",
+        "direction": "CPNTIC",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1.6",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 1085,
+        "budget_execute": 120,
+        "avancement": 11,
+        "statut": "En cours",
+        "echeance": "2027-T1",
+        "alerte": ""
+      },
+      {
+        "id": "ACT059",
+        "intitule": "Former les enseignants en techno-pédagogie",
+        "code_action": "D2.OS2",
+        "direction": "IPNETP",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1.6",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 2062,
+        "budget_execute": 0,
+        "avancement": 0,
+        "statut": "Non démarré",
+        "echeance": "2027-T4",
+        "alerte": ""
+      },
+      {
+        "id": "ACT060",
+        "intitule": "Déployer la plateforme numérique de gestion intégrée (ersys)",
+        "code_action": "D3.OS1",
+        "direction": "DPSI",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1.6",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 1180,
+        "budget_execute": 300,
+        "avancement": 25,
+        "statut": "En retard",
+        "echeance": "2027-T2",
+        "alerte": "Retard de décaissement"
+      },
+      {
+        "id": "ACT061",
+        "intitule": "Mettre en place le cadre de cybersécurité des établissements",
+        "code_action": "D2.OS4",
+        "direction": "CPNTIC",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1.6",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 505,
+        "budget_execute": 0,
+        "avancement": 0,
+        "statut": "Non démarré",
+        "echeance": "2028-T2",
+        "alerte": ""
+      },
+      {
+        "id": "ACT062",
+        "intitule": "Installer les structures de gouvernance de la Stratégie (Comité national de pilotage)",
+        "code_action": "D3.OS3",
+        "direction": "Cabinet",
+        "axe_pol": "AX1",
+        "axe_pol_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "produit_pol": "1.4",
+        "pnd_effet": "4.02.1.6",
+        "strategie": "Stratégie digitalisation 2026-2031",
+        "budget_prevu": 670,
+        "budget_execute": 200,
+        "avancement": 30,
+        "statut": "En cours",
+        "echeance": "2026-T3",
+        "alerte": ""
+      }
+    ],
+    "reunions": [
+      {
+        "date": "2026-01-22",
+        "objet": "Comité de pilotage — lancement de la Politique EFTP 2026-2035",
+        "statut": "Tenue"
+      },
+      {
+        "date": "2026-03-12",
+        "objet": "Revue trimestrielle T1 — exécution budgétaire & alertes",
+        "statut": "Tenue"
+      },
+      {
+        "date": "2026-06-25",
+        "objet": "Comité technique — arbitrage infrastructures vs digitalisation",
+        "statut": "Planifiée"
+      },
+      {
+        "date": "2026-09-30",
+        "objet": "Revue à mi-année — cadre de résultats & KPI cascade",
+        "statut": "Planifiée"
+      }
+    ],
+    "arbitrages": [
+      {
+        "sujet": "Priorisation du décaissement T2 entre construction (Axe 2) et plateaux techniques (Axe 3)",
+        "decision": "Arbitrage en attente — Comité du 25/06",
+        "impact": "Élevé"
+      },
+      {
+        "sujet": "Hébergement des plateformes : datacenter mutualisé DPSI vs cloud externe",
+        "decision": "Validé — mutualisation DPSI",
+        "impact": "Moyen"
+      },
+      {
+        "sujet": "Calendrier de signature des textes d'application (loi d'orientation EFTP)",
+        "decision": "Relance Cabinet — échéance T3",
+        "impact": "Élevé"
+      }
+    ],
+    "align": [
+      {
+        "pol_axe": "AX1",
+        "pol_axe_nom": "Réforme de la gouvernance et du pilotage de l'EFTP",
+        "pol_effet": "Effet 1 : La gouvernance de l'EFTP est proactive et assure un financement à la hauteur des besoins, une implication effective des secteurs productifs, une bonne gestion des flux d'apprenants et un pilotage efficace de la performance.",
+        "pol_total": 96891.0,
+        "pnd_effet": "4.02.1",
+        "pnd_effet_nom": "Le cadre institutionnel et organisationnel assure un système de gouvernance qui intègre les partenariats, un dispositif de suivi-évaluation et d'audit efficace, une gestion rationnelle des ressources humaines et renforce la confiance des jeunes et de leurs parents en l'EFTP.",
+        "pnd_total": 78040.1,
+        "nb_produits": 10
+      },
+      {
+        "pol_axe": "AX2",
+        "pol_axe_nom": "Augmentation et amélioration de l'accès",
+        "pol_effet": "Effet 2 : Les populations de la Côte d'Ivoire bénéficient d'un accès étendu et équitable à l'EFTP.",
+        "pol_total": 2634266.0,
+        "pnd_effet": "4.02.2",
+        "pnd_effet_nom": "Le dispositif de l'EFTP accueille en formation diplômante 9% (objectif 15% en 2035) des effectifs du secondaire, leur assure une formation de qualité et inclusive en adéquation avec les besoins du marché du travail et facilite leur insertion.",
+        "pnd_total": 858982.5,
+        "nb_produits": 8
+      },
+      {
+        "pol_axe": "AX3",
+        "pol_axe_nom": "Amélioration de la qualité de l'offre de l'EFTP",
+        "pol_effet": "Effet 3 : Les populations de la Côte d'Ivoire bénéficient d'une offre d'EFTP pertinente, qualitative et attractive favorisant une insertion professionnelle durable.",
+        "pol_total": 206569.0,
+        "pnd_effet": "4.02.3",
+        "pnd_effet_nom": "Les populations de plus de 12 ans, notamment les adolescent-e-s et les jeunes (y compris zones rurales et besoins spécifiques), accèdent à un dispositif de pré-apprentissage, d'apprentissage et de formation qualifiante assurant une insertion professionnelle durable.",
+        "pnd_total": 265115.0,
+        "nb_produits": 9
+      }
+    ],
+    "synthese": {
+      "tot_prev": 1716746.0,
+      "tot_exe": 557883.0,
+      "nb_alertes": 11,
+      "av_moyen": 33,
+      "nb_act": 62,
+      "nb_dir": 15
+    }
+  }
+}
