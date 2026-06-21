@@ -67,10 +67,10 @@ Cockpit institutionnel du Ministère de l'Enseignement Technique, de la Formatio
 - ✅ **Sprint S1** (2026-06) — backend `metfpa_dev`, endpoints lecture, seed idempotent, audit_log, promotion seed `/api/metfpa/admin/validate`. Tests `tests/metfpa_s1_test.py` (8/8).
 - ✅ **Sprint S2** (2026-06-21) — refactor frontend : Accueil intégré, OriginBadge, DemoBanner, Sidebar/Header METFPA, route `/` = Accueil ; legacy → `/legacy-pnd`.
 - ✅ **Sprint S3A** (2026-06-21) — 6 vues détaillées : `/pnd-402`, `/politique-eftp`, `/strategie-digitale`, `/plan-action` (édition auditée), `/alignement`, `/kpi-cascade`. Nav déverrouillée. **testing_agent : 14/14 PASS (iteration_3.json)**. Rapport : `SPRINT_S3A_COMPLETION_REPORT.md`.
+- ✅ **Sprint S3B** (2026-06-21) — couche décisionnelle : `/pilotage-directeur` (Cabinet View, ordre ①Décisions→②Alertes→③Échéances→④Risques→⑤Budget→⑥Avancement→⑦Note), `/decisions` (CRUD), `/risks` (CRUD + score P×I & sévérité auto), `/budget-consolide` (4 modes), historique d'activité lecture seule. `metfpa/registers.py` + endpoints cabinet/budget/history. **pytest 13/13 + testing_agent 100% (iteration_4.json)**. Rapport : `SPRINT_S3B_COMPLETION_REPORT.md`.
 
 ## Backlog METFPA (prioritized)
-- **P0 · Sprint S3B (décisionnel)** : Cabinet View MVP (ordre Décisions→Alertes→Échéances→graphes→risques→note), registres **Risques** & **Décisions** (CRUD), budget consolidé normalisé (4 modes : total/moyenne annuelle/recouvrement 2026-2030/par cadre source).
-- **P1 · Sprint S4/S5** : RBAC complet (Lecteur Cabinet/Saisie Direction/Validateur M&E/Admin), alertes exécutives, durcissement auth.
+- **P0 · Sprint S4 (qualité & gouvernance)** : application **RBAC** (rôles Lecteur Cabinet/Saisie Direction/Validateur M&E/Admin déjà structurés), durcissement auth, alertes exécutives.
 - **P2 · Phase 2+** : import Excel officiel (`IMPORT_METFPA.xlsx`), workflow M&E (baselines/cibles), upload de preuves, exports réels PDF/Excel/PPTX, déploiement production.
 
 ## Contraintes fermes (METFPA)
