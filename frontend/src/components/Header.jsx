@@ -10,12 +10,18 @@ import {
 
 const TITLES = {
   "/": "Accueil intégré METFPA",
+  "/pnd-402": "Vue PND 4.02",
+  "/politique-eftp": "Politique EFTP 2026-2035",
+  "/strategie-digitale": "Stratégie digitale 2026-2031",
+  "/plan-action": "Plan d'action ministériel",
+  "/alignement": "Alignement stratégique",
+  "/kpi-cascade": "KPI en cascade",
+  "/pilotage-directeur": "Pilotage Directeur",
+  "/decisions": "Registre des décisions",
+  "/risks": "Registre des risques",
+  "/budget-consolide": "Budget consolidé",
+  "/admin-users": "Administration · Utilisateurs",
   "/legacy-pnd": "Tableau de bord exécutif (PND générique)",
-  "/arborescence": "Arborescence du Plan",
-  "/actions": "Registre des actions",
-  "/ministeres": "Vue par ministère",
-  "/budget": "Analyse budgétaire",
-  "/alertes": "Centre d'alertes",
 };
 
 export function Header({ onSearch, onPresentation }) {
@@ -23,7 +29,7 @@ export function Header({ onSearch, onPresentation }) {
   const loc = useLocation();
   const navigate = useNavigate();
   const [notifs, setNotifs] = useState({ items: [], total: 0 });
-  const title = TITLES[loc.pathname] || "Cockpit PND 2026-2030";
+  const title = TITLES[loc.pathname] || "Cockpit METFPA";
   const initials = (user?.name || "PM").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
   useEffect(() => { api.get("/notifications").then((r) => setNotifs(r.data)).catch(() => {}); }, [loc.pathname]);

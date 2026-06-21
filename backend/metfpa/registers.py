@@ -4,10 +4,11 @@ demo_tracking / to_validate. No invented official data."""
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field, field_validator
 
 from .db import mdb, audit
+from .auth import get_identity, require_role, assert_direction_scope, EDIT_ROLES
 
 registers_router = APIRouter(prefix="/api/metfpa")
 
@@ -91,8 +92,10 @@ async def get_decision(did: str):
 
 
 @registers_router.post("/decisions")
-async def create_decision(payload: DecisionIn, x_user: str = Header(default="dev")):
-    doc = {"id": uuid.uuid4().hex, **payload.model_dump(), **DEFAULT_ORIGIN,
+async def create_decision(payload: DecisionIn, identity: dict = Depends(require_role(*EDIT_ROLES))):
+    x_user = identity["email"]
+    direction = identity.get("direction")
+    doc = {"id": uuid.uuid4().hex, **payload.model_dump(), "direction": direction, **DEFAULT_ORIGIN,
            "created_at": _now(), "updated_at": _now(), "created_by": x_user, "updated_by": x_user}
     await mdb.decisions.insert_one(dict(doc))
     doc.pop("_id", None)
@@ -101,10 +104,12 @@ async def create_decision(payload: DecisionIn, x_user: str = Header(default="dev
 
 
 @registers_router.put("/decisions/{did}")
-async def update_decision(did: str, payload: DecisionIn, x_user: str = Header(default="dev")):
+async def update_decision(did: str, payload: DecisionIn, identity: dict = Depends(require_role(*EDIT_ROLES))):
     cur = await mdb.decisions.find_one({"id": did}, {"_id": 0})
     if not cur:
         raise HTTPException(404, "Décision introuvable")
+    assert_direction_scope(identity, cur.get("direction"))
+    x_user = identity["email"]
     data = {**payload.model_dump(), "updated_at": _now(), "updated_by": x_user}
     await mdb.decisions.update_one({"id": did}, {"$set": data})
     await audit("update_decision", "decision", did,
@@ -113,12 +118,13 @@ async def update_decision(did: str, payload: DecisionIn, x_user: str = Header(de
 
 
 @registers_router.delete("/decisions/{did}")
-async def delete_decision(did: str, x_user: str = Header(default="dev")):
+async def delete_decision(did: str, identity: dict = Depends(require_role(*EDIT_ROLES))):
     cur = await mdb.decisions.find_one({"id": did}, {"_id": 0})
     if not cur:
         raise HTTPException(404, "Décision introuvable")
+    assert_direction_scope(identity, cur.get("direction"))
     await mdb.decisions.delete_one({"id": did})
-    await audit("delete_decision", "decision", did, avant=cur, apres=None, user=x_user)
+    await audit("delete_decision", "decision", did, avant=cur, apres=None, user=identity["email"])
     return {"deleted": did}
 
 
@@ -182,9 +188,10 @@ async def get_risk(rid: str):
 
 
 @registers_router.post("/risks")
-async def create_risk(payload: RiskIn, x_user: str = Header(default="dev")):
+async def create_risk(payload: RiskIn, identity: dict = Depends(require_role(*EDIT_ROLES))):
+    x_user = identity["email"]
     comp = _risk_computed(payload.probability, payload.impact, payload.residual_probability, payload.residual_impact)
-    doc = {"id": uuid.uuid4().hex, **payload.model_dump(), **comp, **DEFAULT_ORIGIN,
+    doc = {"id": uuid.uuid4().hex, **payload.model_dump(), **comp, "direction": identity.get("direction"), **DEFAULT_ORIGIN,
            "created_at": _now(), "updated_at": _now(), "created_by": x_user, "updated_by": x_user}
     await mdb.risks.insert_one(dict(doc))
     doc.pop("_id", None)
@@ -193,10 +200,12 @@ async def create_risk(payload: RiskIn, x_user: str = Header(default="dev")):
 
 
 @registers_router.put("/risks/{rid}")
-async def update_risk(rid: str, payload: RiskIn, x_user: str = Header(default="dev")):
+async def update_risk(rid: str, payload: RiskIn, identity: dict = Depends(require_role(*EDIT_ROLES))):
     cur = await mdb.risks.find_one({"id": rid}, {"_id": 0})
     if not cur:
         raise HTTPException(404, "Risque introuvable")
+    assert_direction_scope(identity, cur.get("direction"))
+    x_user = identity["email"]
     comp = _risk_computed(payload.probability, payload.impact, payload.residual_probability, payload.residual_impact)
     data = {**payload.model_dump(), **comp, "updated_at": _now(), "updated_by": x_user}
     await mdb.risks.update_one({"id": rid}, {"$set": data})
@@ -206,10 +215,11 @@ async def update_risk(rid: str, payload: RiskIn, x_user: str = Header(default="d
 
 
 @registers_router.delete("/risks/{rid}")
-async def delete_risk(rid: str, x_user: str = Header(default="dev")):
+async def delete_risk(rid: str, identity: dict = Depends(require_role(*EDIT_ROLES))):
     cur = await mdb.risks.find_one({"id": rid}, {"_id": 0})
     if not cur:
         raise HTTPException(404, "Risque introuvable")
+    assert_direction_scope(identity, cur.get("direction"))
     await mdb.risks.delete_one({"id": rid})
-    await audit("delete_risk", "risk", rid, avant=cur, apres=None, user=x_user)
+    await audit("delete_risk", "risk", rid, avant=cur, apres=None, user=identity["email"])
     return {"deleted": rid}

@@ -1,7 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Layers, Target, Activity, ListChecks, GitMerge, Gauge, Gavel, ShieldAlert, Wallet, Crown } from "lucide-react";
+import { LayoutDashboard, Layers, Target, Activity, ListChecks, GitMerge, Gauge, Gavel, ShieldAlert, Wallet, Crown, ShieldCheck } from "lucide-react";
 import { CoatOfArms } from "@/components/icons/Ivorian";
+import { useAuth, ROLE_LABELS, isAdmin } from "@/context/AuthContext";
 
 // S3A + S3B delivered views
 const NAV = [
@@ -22,6 +23,8 @@ const DECISIONNEL = [
 ];
 
 export function Sidebar() {
+  const { user } = useAuth();
+  const admin = isAdmin(user?.role);
   return (
     <aside className="fixed left-0 top-0 h-full w-[280px] bg-[#1A202C] text-white flex flex-col z-30">
       <div className="px-6 py-6 border-b border-white/10 flex items-center gap-3">
@@ -58,7 +61,29 @@ export function Sidebar() {
             <Icon size={18} strokeWidth={1.6} /> {label}
           </NavLink>
         ))}
+
+        {admin && (
+          <>
+            <div className="px-3 pt-5 pb-2">
+              <p className="text-[10px] font-semibold tracking-[0.12em] text-white/35 uppercase">Administration</p>
+            </div>
+            <NavLink to="/admin-users" data-testid="nav-admin-users"
+              className={({ isActive }) =>
+                `group flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-sm font-medium transition-all ${
+                  isActive ? "bg-[#FF8200] text-white" : "text-white/65 hover:text-white hover:bg-white/8"
+                }`}>
+              <ShieldCheck size={18} strokeWidth={1.6} /> Utilisateurs & rôles
+            </NavLink>
+          </>
+        )}
       </nav>
+
+      {user && (
+        <div className="px-6 py-3 border-t border-white/10" data-testid="sidebar-user">
+          <div className="text-[12px] font-semibold text-white/85 truncate">{user.name || user.email}</div>
+          <div className="text-[10px] text-[#C5A028] font-medium uppercase tracking-wide">{ROLE_LABELS[user.role] || user.role}{user.direction ? ` · ${user.direction}` : ""}</div>
+        </div>
+      )}
 
       <div className="px-6 py-5 border-t border-white/10">
         <p className="text-[11px] leading-relaxed text-white/45">

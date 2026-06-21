@@ -5,6 +5,7 @@ import { OriginBadge, MissingValue } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { useAuth, canEdit } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { ListChecks, Pencil, Filter, X, AlertTriangle, History } from "lucide-react";
 
@@ -21,6 +22,8 @@ export default function PlanAction() {
   const [f, setF] = useState({ axe: "", produit: "", direction: "", statut: "", echeance: "", alerte: "" });
   const [editing, setEditing] = useState(null);
   const [history, setHistory] = useState(null);
+  const { user } = useAuth();
+  const editable = (a) => canEdit(user?.role) && (user?.role !== "direction_editor" || a.direction === user?.direction);
 
   const load = () => metfpaApi.get("/activities").then((r) => setActs(r.data));
   useEffect(() => { load(); }, []);
@@ -121,7 +124,9 @@ export default function PlanAction() {
                     </td>
                     <td className="px-3 py-2.5 text-xs whitespace-nowrap">{a.echeance}</td>
                     <td className="px-3 py-2.5 text-center whitespace-nowrap">
-                      <button data-testid={`edit-activity-${a.id}`} onClick={() => setEditing(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#FF8200]/10 hover:text-[#FF8200] transition-colors"><Pencil size={14} /></button>
+                      {editable(a)
+                        ? <button data-testid={`edit-activity-${a.id}`} onClick={() => setEditing(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#FF8200]/10 hover:text-[#FF8200] transition-colors"><Pencil size={14} /></button>
+                        : <span className="inline-flex items-center justify-center w-7 h-7 text-[#CBD5E0]" title="Lecture seule"><Pencil size={14} /></span>}
                       <button data-testid={`history-activity-${a.id}`} onClick={() => setHistory(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#1F6FEB]/10 hover:text-[#1F6FEB] transition-colors"><History size={14} /></button>
                     </td>
                   </tr>

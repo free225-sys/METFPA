@@ -1,0 +1,56 @@
+{
+  "summary": "S4 end-to-end testing PASSED. Backend: 28/28 pytest cases green (auth hardening, RBAC, admin user mgmt, alerts, PDF, regression). Frontend: All RBAC role flows verified across 4 accounts.",
+  "backend_results": {
+    "auth_hardening": "8/8 — login returns access_token+user{role,direction}; wrong password 401; missing/malformed/tampered/expired/wrong-type JWT all 401; /me returns identity from DB",
+    "rbac": "8/8 — cabinet_reader 403 on POST /decisions, POST /risks, PUT /activities, POST /admin/validate; direction_editor 403 on /admin/validate; me_validator+admin pass RBAC (hit 400 invalid framework); direction_editor (DAF) PUT DAF activity 200, PUT non-DAF activity 403",
+    "admin_users": "4/4 — GET /admin/users admin-only (others 403); PUT patches direction; last-admin demotion 409; last-admin deactivation 409",
+    "alerts": "2/2 — /cabinet/alerts requires auth (401), returns alerts with all required fields (alert_id/rule_id/category/severity/title/description/related_resource_type/related_resource_id/evidence/generated_at/data_origin/validation_status), sorted critical-first, counts by severity present",
+    "pdf": "3/3 — /cabinet/export/pdf 401 without auth; returns application/pdf with attachment filename METFPA_Cabinet_Brief_YYYY-MM-DD.pdf; %PDF magic bytes valid; audit_log contains export_cabinet_pdf entries",
+    "regression": "3/3 — /health, /pnd, /politique, /digital, /cabinet still return data; financial reliability still reports budget_engage_missing>0 (not 0)"
+  },
+  "frontend_results": {
+    "login": "Login page branded 'Cockpit METFPA' ✓; default email input value = admin@metfpa.ci ✓",
+    "admin_role": "Sidebar shows 'Administration · Utilisateurs & rôles' (nav-admin-users) ✓; sidebar-user shows 'Administrateur METFPA / Administrateur' ✓; /admin-users page loads with 6 table rows for 4+ seeded users ✓; CabinetView shows cabinet-exec-alerts panel ✓ (6 critiques · 12 élevées · 27 au total) and export-pdf-btn ✓",
+    "cabinet_reader": "No nav-admin-users in sidebar ✓; /admin-users renders access-denied screen ✓; /decisions add-decision button is DISABLED ✓; /risks add-risk button is DISABLED ✓; /plan-action no edit-activity-* buttons rendered (effectively read-only)",
+    "direction_editor_DAF": "All edit-activity-* buttons rendered (5 visible: ACT002 1.1.2, ACT014 1.7.2, ACT023 2.2.1, ACT028 2.4.2, ACT037 3.1.1) — every one belongs to direction=DAF ✓; non-DAF rows (CPNTIC, FDFP) have NO edit button rendered (scope enforced by hiding rather than disabling)",
+    "validator": "No nav-admin-users in sidebar ✓",
+    "legacy_pnd": "/legacy-pnd route mounts without crash (no error elements) ✓"
+  },
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "PlanAction.jsx (cabinet_reader & direction_editor non-scope rows)",
+        "issues": [
+          "Spec wording: 'edit buttons hidden (show \"Lecture\")' and 'others show disabled pencil'. Implementation simply omits the edit-activity-* button for unauthorized rows instead of rendering a disabled pencil + 'Lecture' badge. Functionally equivalent (read-only is enforced), but the explicit 'Lecture' affordance / disabled pencil shown in the spec is absent. Recommend optionally adding a non-interactive pencil + 'Lecture' tooltip for visual cue."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/metfpa_s4_test.py",
+    "/app/test_reports/pytest/s4_results.xml"
+  ],
+  "action_items": [
+    "(Optional polish) Show disabled pencil + 'Lecture' badge for read-only activity rows in PlanAction to match the spec wording, instead of hiding the icon entirely. Not blocking — current behavior is correctly read-only."
+  ],
+  "critical_code_review_comments": [
+    "auth.py: JWT uses HS256 + custom 'type': metfpa_access; expiry+signature+type all enforced in get_identity; role/direction re-fetched from DB (no client trust). Bcrypt hashing with gensalt() is correct. Good.",
+    "auth.py last-admin safeguard: checks role==admin AND active before counting; deactivation OR demotion both trigger 409 when only 1 active admin remains. Correct.",
+    "alerts.py: fully deterministic, rule-based, no LLM. Severities ranked, sorted critical-first. Each alert has alert_id, rule_id, evidence dict, data_origin (demo_tracking/html_reference). Good governance shape.",
+    "pdf.py: real reportlab PDF with watermark when provisional. Audited via audit() with export_cabinet_pdf entries. Note: ⚠ unicode arrow used in watermark — fine with default Helvetica because reportlab tolerates basic latin1 fallback. PDF integrity verified by %PDF magic bytes.",
+    "router.py PUT /activities + admin/validate both guarded by require_role; direction scope asserted by assert_direction_scope read from DB identity. registers.py decisions/risks: same guard. No client-side role leak.",
+    "Frontend metfpaApi attaches Bearer metfpa_token + redirects on 401; AuthContext drives RoleRoute and AccessDenied. Sidebar conditionally renders admin link by role.",
+    "Minor: 'Failed to load resource: 401' console noise appears around login transitions — expected because pages probe /api/metfpa/auth/me before token is in storage. Non-blocking."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "100% (28/28)", "frontend": "100% (all S4 RBAC flows for admin/validator/editor/reader, plus regression on legacy-pnd)" },
+  "test_credentials": "Verified: admin@metfpa.ci, validateur@metfpa.ci, direction.daf@metfpa.ci, cabinet@metfpa.ci — all with Metfpa@2026Demo (DB seed via METFPA_SEED_PASSWORD).",
+  "seed_data_creation": "Backend pytest: temporarily patched cabinet_reader user's direction to 'TEST_SCOPE' then reverted (audited). No decisions/risks/activities mutated by S4 tests beyond reversible DAF activity avancement re-set to its current value. PDF export triggered twice (admin, reader) — produces audit_log entries by design.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "S4 RBAC is solid. Test creds in /app/memory/test_credentials.md. Token key in localStorage = 'metfpa_token'. Confirmed testids: login-submit, nav-admin-users, sidebar-user, page-admin-users (header text contains 'Administration · Utilisateurs'), cabinet-exec-alerts, export-pdf-btn, access-denied, add-decision (disabled for reader), add-risk (disabled for reader), edit-activity-<id> (rendered ONLY for scoped activities). Direction enforcement on PlanAction is by conditional render, not disabled-state — spec says 'disabled pencil' but impl hides; functionally equivalent. Backend test file: /app/backend/tests/metfpa_s4_test.py (REACT_APP_BACKEND_URL + JWT_SECRET from env). Last-admin safeguard returns 409. Do NOT actually promote frameworks — tests use INVALID framework to verify RBAC pass without mutating data.",
+  "rca of the issue": "n/a — no failures in this iteration."
+}

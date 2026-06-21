@@ -15,13 +15,14 @@ import CabinetView from "@/pages/CabinetView";
 import DecisionRegister from "@/pages/DecisionRegister";
 import RiskRegister from "@/pages/RiskRegister";
 import BudgetConsolide from "@/pages/BudgetConsolide";
+import AdminUsers from "@/pages/AdminUsers";
 import Dashboard from "@/pages/Dashboard";
 import TreeView from "@/pages/TreeView";
 import ActionsTable from "@/pages/ActionsTable";
 import Analytics from "@/pages/Analytics";
 import Alerts from "@/pages/Alerts";
 import Ministries from "@/pages/Ministries";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShieldX } from "lucide-react";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -34,6 +35,24 @@ function ProtectedRoute({ children }) {
   }
   if (!user) return <Navigate to="/login" replace />;
   return children;
+}
+
+export function AccessDenied() {
+  return (
+    <div data-testid="access-denied" className="flex flex-col items-center justify-center py-24 text-center">
+      <div className="w-16 h-16 rounded-full bg-[#C53030]/10 flex items-center justify-center mb-4">
+        <ShieldX className="text-[#C53030]" size={30} />
+      </div>
+      <h1 className="text-xl font-bold text-[#1A202C]">Accès refusé</h1>
+      <p className="text-sm text-[#718096] mt-2 max-w-md">Votre rôle ne vous autorise pas à accéder à cette section. Contactez un administrateur si vous pensez qu'il s'agit d'une erreur.</p>
+    </div>
+  );
+}
+
+function RoleRoute({ roles, children }) {
+  const { user } = useAuth();
+  if (user && roles.includes(user.role)) return children;
+  return <AccessDenied />;
 }
 
 function AppRoutes() {
@@ -52,6 +71,7 @@ function AppRoutes() {
         <Route path="/decisions" element={<DecisionRegister />} />
         <Route path="/risks" element={<RiskRegister />} />
         <Route path="/budget-consolide" element={<BudgetConsolide />} />
+        <Route path="/admin-users" element={<RoleRoute roles={["admin"]}><AdminUsers /></RoleRoute>} />
         <Route path="/legacy-pnd" element={<Dashboard />} />
         <Route path="/arborescence" element={<TreeView />} />
         <Route path="/actions" element={<ActionsTable />} />

@@ -1,9 +1,10 @@
 from datetime import datetime, timezone, timedelta
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from .db import mdb, audit, FRAMEWORK_META, OVERLAP
+from .auth import get_identity, require_role, assert_direction_scope, EDIT_ROLES, VALIDATE_ROLES
 
 metfpa_router = APIRouter(prefix="/api/metfpa")
 
@@ -198,10 +199,12 @@ class ActivityUpdate(BaseModel):
 
 
 @metfpa_router.put("/activities/{aid}")
-async def update_activity(aid: str, payload: ActivityUpdate, x_user: str = Header(default="dev")):
+async def update_activity(aid: str, payload: ActivityUpdate, identity: dict = Depends(require_role(*EDIT_ROLES))):
     a = await mdb.activities.find_one({"id": aid}, {"_id": 0})
     if not a:
         raise HTTPException(status_code=404, detail="Activité introuvable")
+    assert_direction_scope(identity, a.get("direction"))
+    x_user = identity["email"]
     data = {k: v for k, v in payload.model_dump().items() if v is not None}
     if not data:
         return a
@@ -219,9 +222,9 @@ class PromoteInput(BaseModel):
 
 
 @metfpa_router.post("/admin/validate")
-async def promote_framework(payload: PromoteInput, x_user: str = Header(default="dev")):
-    """Promotion workflow. Promotes ONLY when explicitly invoked with framework +
-    validated_by. Never promotes automatically."""
+async def promote_framework(payload: PromoteInput, identity: dict = Depends(require_role(*VALIDATE_ROLES))):
+    """Promotion workflow (Validateur M&E / Admin only). Promotes ONLY when
+    explicitly invoked with framework + validated_by. Never promotes automatically."""
     if payload.framework not in FRAMEWORK_META:
         raise HTTPException(status_code=400, detail="framework invalide (PND|POL|DIG)")
     if not payload.validated_by.strip():
@@ -233,7 +236,7 @@ async def promote_framework(payload: PromoteInput, x_user: str = Header(default=
     r1 = await mdb.frameworks.update_one({"key": payload.framework}, {"$set": promo})
     r2 = await mdb[coll].update_many({}, {"$set": promo})
     await audit("promote_framework", "framework", payload.framework,
-                avant={"validation_status": "pending_metfpa_validation"}, apres=promo, user=x_user)
+                avant={"validation_status": "pending_metfpa_validation"}, apres=promo, user=identity["email"])
     return {"framework": payload.framework, "frameworks_updated": r1.modified_count,
             "nodes_updated": r2.modified_count, "validation_status": "validated"}
 

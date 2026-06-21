@@ -7,7 +7,7 @@ import { Loader2, Lock } from "lucide-react";
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("ministre@pnd.ci");
+  const [email, setEmail] = useState("admin@metfpa.ci");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,9 +34,9 @@ export default function Login() {
       <div className="w-full max-w-md animate-slide-up">
         <div className="flex flex-col items-center mb-8">
           <CoatOfArms size={68} stroke="#C5A028" />
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-[#1A202C]">Cockpit PND 2026-2030</h1>
-          <p className="text-sm text-[#718096] mt-1 font-medium tracking-wide">RÉPUBLIQUE DE CÔTE D'IVOIRE</p>
-          <p className="text-xs text-[#A0AEC0] mt-2 text-center">Plan National de Développement · Pilotage stratégique</p>
+          <h1 className="mt-4 text-2xl font-bold tracking-tight text-[#1A202C]">Cockpit METFPA</h1>
+          <p className="text-sm text-[#718096] mt-1 font-medium tracking-wide">SECTEUR 4.02 · EFTP</p>
+          <p className="text-xs text-[#A0AEC0] mt-2 text-center">Enseignement Technique, Formation Professionnelle & Apprentissage</p>
         </div>
 
         <div className="bg-white rounded-[8px] shadow-[0_4px_24px_rgba(26,32,44,0.06)] border border-[#1A202C]/5 p-8">
@@ -47,7 +47,7 @@ export default function Login() {
                 data-testid="login-email-input"
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
                 className="w-full h-11 px-3.5 rounded-[8px] border border-[#E2E8F0] focus:border-[#FF8200] focus:ring-2 focus:ring-[#FF8200]/15 outline-none text-sm transition-all"
-                placeholder="ministre@pnd.ci"
+                placeholder="admin@metfpa.ci"
               />
             </div>
             <div>

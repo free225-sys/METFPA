@@ -4,6 +4,7 @@ import { OriginBadge } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { useAuth, canEdit } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { ShieldAlert, Plus, Pencil, Trash2 } from "lucide-react";
 
@@ -19,6 +20,8 @@ export default function RiskRegister() {
   const [meta, setMeta] = useState(null);
   const [edit, setEdit] = useState(null);
   const [del, setDel] = useState(null);
+  const { user } = useAuth();
+  const editor = canEdit(user?.role);
 
   const load = () => metfpaApi.get("/risks").then((r) => setRows(r.data));
   useEffect(() => { load(); metfpaApi.get("/risks/meta").then((r) => setMeta(r.data)); }, []);
@@ -33,7 +36,7 @@ export default function RiskRegister() {
           <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Registre des risques</h1>
           <p className="text-sm text-[#4A5568] mt-2">Score = Probabilité × Impact (échelle 1–5). Sévérité : critique ≥15 · élevé ≥10 · modéré ≥5 · faible &lt;5. Données <strong>démo · à valider</strong>.</p>
         </div>
-        <button data-testid="add-risk" onClick={() => setEdit({ ...EMPTY })} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#C53030] text-white px-3.5 py-2 text-sm font-medium hover:bg-[#a82626]"><Plus size={15} /> Nouveau risque</button>
+        <button data-testid="add-risk" disabled={!editor} onClick={() => setEdit({ ...EMPTY })} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#C53030] text-white px-3.5 py-2 text-sm font-medium hover:bg-[#a82626] disabled:opacity-40 disabled:cursor-not-allowed" title={editor ? "" : "Lecture seule"}><Plus size={15} /> Nouveau risque</button>
       </div>
 
       <div className="bg-white rounded-[4px] border border-[#E2E8F0] overflow-hidden">
@@ -56,8 +59,10 @@ export default function RiskRegister() {
                     <td className="px-4 py-2.5 text-xs">{r.owner || "—"}</td>
                     <td className="px-4 py-2.5"><OriginBadge origin={r.data_origin} status={r.validation_status} /></td>
                     <td className="px-4 py-2.5 text-center whitespace-nowrap">
-                      <button data-testid={`edit-risk-${r.id}`} onClick={() => setEdit({ ...EMPTY, ...r, residual_probability: r.residual_probability ?? "", residual_impact: r.residual_impact ?? "", mitigation_deadline: (r.mitigation_deadline || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#1F6FEB]/10 hover:text-[#1F6FEB] inline-flex items-center justify-center"><Pencil size={14} /></button>
-                      <button data-testid={`delete-risk-${r.id}`} onClick={() => setDel(r)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>
+                      {editor ? <>
+                        <button data-testid={`edit-risk-${r.id}`} onClick={() => setEdit({ ...EMPTY, ...r, residual_probability: r.residual_probability ?? "", residual_impact: r.residual_impact ?? "", mitigation_deadline: (r.mitigation_deadline || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#1F6FEB]/10 hover:text-[#1F6FEB] inline-flex items-center justify-center"><Pencil size={14} /></button>
+                        <button data-testid={`delete-risk-${r.id}`} onClick={() => setDel(r)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>
+                      </> : <span className="text-[11px] text-[#A0AEC0]">Lecture</span>}
                     </td>
                   </tr>
                 ))}

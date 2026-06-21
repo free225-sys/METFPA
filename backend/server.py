@@ -613,13 +613,20 @@ async def root():
 
 app.include_router(api_router)
 
-# --- METFPA module (Phase 1 / Sprint S1) — additive, isolated DB ---
+# --- METFPA module (Phase 1 / Sprint S1-S4) — additive, isolated DB ---
 from metfpa.router import metfpa_router
 from metfpa.registers import registers_router
+from metfpa.auth import auth_router as metfpa_auth_router, admin_router as metfpa_admin_router, seed_users
+from metfpa.alerts import alerts_router
+from metfpa.pdf import pdf_router
 from metfpa.seed_loader import import_seed
 from metfpa.db import mdb as metfpa_mdb
+app.include_router(metfpa_auth_router)
+app.include_router(metfpa_admin_router)
 app.include_router(metfpa_router)
 app.include_router(registers_router)
+app.include_router(alerts_router)
+app.include_router(pdf_router)
 
 
 @app.on_event("startup")
@@ -627,6 +634,8 @@ async def metfpa_startup():
     try:
         s = await import_seed()
         logger.info(f"METFPA seed imported: {s}")
+        u = await seed_users()
+        logger.info(f"METFPA users seeded: {u}")
         # S3B register indexes (idempotent)
         await metfpa_mdb.decisions.create_index("id", unique=True)
         await metfpa_mdb.decisions.create_index("status")

@@ -5,7 +5,8 @@ import { fmtMillions } from "@/lib/format";
 import { OriginBadge, MissingValue } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { Gavel, AlertTriangle, CalendarClock, ShieldAlert, Wallet, BarChart3, StickyNote, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Gavel, AlertTriangle, CalendarClock, ShieldAlert, Wallet, BarChart3, StickyNote, ArrowRight, CheckCircle2, Siren, FileDown } from "lucide-react";
+import { toast } from "sonner";
 
 function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
 const SEV_COLOR = { critique: "#C53030", eleve: "#FF8200", modere: "#C5A028", faible: "#718096" };
@@ -14,15 +15,34 @@ const STATUT_COLOR = { "Non démarré": "#718096", "À l'heure": "#1F6FEB", "En 
 export default function CabinetView() {
   const [c, setC] = useState(null);
   const [budget, setBudget] = useState(null);
+  const [alerts, setAlerts] = useState(null);
+  const [exporting, setExporting] = useState(false);
   const [note, setNote] = useState(() => localStorage.getItem("metfpa_director_note") || "");
   const nav = useNavigate();
 
   useEffect(() => {
     metfpaApi.get("/cabinet").then((r) => setC(r.data));
     metfpaApi.get("/budget/consolidated").then((r) => setBudget(r.data));
+    metfpaApi.get("/cabinet/alerts").then((r) => setAlerts(r.data));
   }, []);
 
   const saveNote = (v) => { setNote(v); localStorage.setItem("metfpa_director_note", v); };
+
+  const exportPdf = async () => {
+    setExporting(true);
+    try {
+      const r = await metfpaApi.get(`/cabinet/export/pdf?note=${encodeURIComponent(note)}`, { responseType: "blob" });
+      const url = URL.createObjectURL(new Blob([r.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `METFPA_Cabinet_Brief_${new Date().toISOString().slice(0, 10)}.pdf`;
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+      toast.success("Note de Cabinet exportée (PDF)");
+    } catch (e) {
+      toast.error("Échec de l'export PDF", { description: e?.response?.status === 403 ? "Accès refusé" : "Erreur" });
+    } finally { setExporting(false); }
+  };
 
   return (
     <div className="space-y-6 animate-slide-up" data-testid="page-cabinet">
@@ -30,9 +50,17 @@ export default function CabinetView() {
       <DemoBanner />
 
       <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6">
-        <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#FF8200]">Cockpit décisionnel · Cabinet</div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Pilotage Directeur — Secteur 4.02</h1>
-        <p className="text-sm text-[#4A5568] mt-2 max-w-3xl">Synthèse décisionnelle en moins de deux minutes : décisions, alertes, échéances, risques, budget, avancement.</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#FF8200]">Cockpit décisionnel · Cabinet</div>
+            <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Pilotage Directeur — Secteur 4.02</h1>
+            <p className="text-sm text-[#4A5568] mt-2 max-w-3xl">Synthèse décisionnelle en moins de deux minutes : décisions, alertes, échéances, risques, budget, avancement.</p>
+          </div>
+          <button data-testid="export-pdf-btn" onClick={exportPdf} disabled={exporting}
+            className="shrink-0 inline-flex items-center gap-2 rounded-[6px] bg-[#1A202C] text-white px-4 py-2.5 text-sm font-medium hover:bg-black transition-colors disabled:opacity-60">
+            <FileDown size={16} /> {exporting ? "Génération…" : "Exporter la note (PDF)"}
+          </button>
+        </div>
         {/* KPI strip */}
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mt-4">
           {!c ? [...Array(6)].map((_, i) => <Skeleton key={i} className="h-16" />) : <>
@@ -65,6 +93,28 @@ export default function CabinetView() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </Section>
+
+      {/* Executive alerts (deterministic, rule-based) */}
+      <Section icon={Siren} color="#C53030" title="Alertes exécutives (règles déterministes)" testid="cabinet-exec-alerts"
+        action={alerts && <span className="text-xs text-[#718096]">{alerts.counts.critique} critiques · {alerts.counts.eleve} élevées · {alerts.total} au total</span>}>
+        {!alerts ? <Skeleton className="h-16" /> : alerts.alerts.length === 0 ? <Empty label="Aucune alerte déclenchée." /> : (
+          <div className="space-y-2">
+            {alerts.alerts.slice(0, 12).map((a) => (
+              <div key={a.alert_id} data-testid={`exec-alert-${a.rule_id}`} className="flex items-start justify-between gap-3 rounded-[6px] border border-[#E2E8F0] px-3 py-2.5">
+                <div className="min-w-0 flex items-start gap-2">
+                  <SevPill sev={a.severity} />
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-[#1A202C]">{a.title} <span className="text-[10px] text-[#A0AEC0] font-normal">· {a.category}</span></div>
+                    <div className="text-[11px] text-[#718096]">{a.description}</div>
+                  </div>
+                </div>
+                <OriginBadge origin={a.data_origin} status={a.validation_status} />
+              </div>
+            ))}
+            <p className="text-[11px] text-[#A0AEC0] mt-1">{alerts.rules_note}</p>
           </div>
         )}
       </Section>
