@@ -1,0 +1,49 @@
+{
+  "summary": "S3A frontend regression — 14/14 critical flows PASS. Login (ministre@pnd.ci/PND2030!) -> integrated home rendering framework cards + result chain + ops counts (62 activités, 12 alertes, 4 bloqués, 6 en retard). Sidebar shows exactly the 7 active links and 3 locked 'Décisionnel · à venir (S3B+)' entries (Pilotage Directeur / Registre risques / Registre décisions) with cursor-not-allowed. All 6 detailed views (page-pnd, page-politique, page-digital, page-plan-action, page-alignement, page-kpi-cascade) load with the expected anchors/counts; tree toggles work on PND view; Politique header carries 3/27/100 and axe->PND linkage; Stratégie shows 15/85 financing split + 2026-2031 + anchors 4.02.1.6 & 1.4; Plan d'action lists 62 rows with filters narrowing to 24 for 'En cours' and filter-count updating, reset-filters restores 62; KPI cascade renders exactly 19 indicators; Alignement shows AX1/AX2/AX3 cards + legend + digital anchor 4.02.1.6 / 1.4; Legacy /legacy-pnd still renders the full legacy dashboard. EDIT flow validated end-to-end: opening edit-dialog on ACT001, setting avancement=77, statut='En cours', alerte='TEST_ALERT_REGRESSION', clicking save-activity → success toast, dialog closes, row updates immediately, and after full page reload values persist (PUT /api/metfpa/activities/{id} confirmed persisted). Activity was reset to alerte='' after test.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Plan d'action — edit-dialog",
+        "issues": [
+          "Radix DialogContent warning in console: 'Missing Description or aria-describedby={undefined} for {DialogContent}'. Add a <DialogDescription> (or aria-describedby) inside DialogHeader for a11y compliance.",
+          "edit-avancement is a native HTML <input type='number'> with min=0/max=100 but no client guard against negative or >100 typed values before save() clamps. The clamp in save() works, but UX would improve with onChange clamping or a slider."
+        ]
+      },
+      {
+        "screen": "Plan d'action table",
+        "issues": [
+          "All 62 activities currently have budget_prevu/budget_execute populated in seed, so the MissingValue chip (data-testid=missing-value) was not observable in this run. Cannot positively verify the 'manquante' rendering branch from the UI; recommend leaving at least one seed activity with null budget_prevu to keep this guarantee testable."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/test_reports/iteration_3.json"
+  ],
+  "action_items": [
+    "Add DialogDescription (or aria-describedby) inside the Plan d'action edit dialog to silence Radix a11y warning.",
+    "Optionally seed at least one activity with null budget_prevu so MissingValue chip rendering is observable on /plan-action (currently no manquante chips visible).",
+    "Optional UX: clamp edit-avancement onChange to 0-100 rather than relying on save-time clamp."
+  ],
+  "critical_code_review_comments": [
+    "Sidebar.jsx correctly limits NAV to the 7 S3A routes and renders the 3 S3B+ items as non-clickable divs with cursor-not-allowed — no dead links, conforms to spec.",
+    "PlanAction.jsx EditDialog PUTs only {avancement, statut, alerte} (read-only fields preserved server-side); response replaces row in state, then full reload re-fetches from /api/metfpa/activities → persistence confirmed.",
+    "metfpaApi.js correctly uses process.env.REACT_APP_BACKEND_URL + /api/metfpa and attaches Bearer pnd_token from localStorage on every request. No hardcoded URLs.",
+    "App.js still keeps legacy routes /arborescence /actions /ministeres /budget /alertes — they are reachable by URL but not listed in the new Sidebar, which is acceptable since /legacy-pnd is the documented legacy entrypoint. Consider removing or gating them if they shouldn't be discoverable.",
+    "DialogContent in PlanAction.jsx triggers a Radix a11y warning (no DialogDescription / aria-describedby). Minor but worth fixing globally where Dialog is used."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "100% (14/14 critical S3A flows)"},
+  "test_credentials": "ministre@pnd.ci / PND2030! (admin) — verified working.",
+  "seed_data_creation": "Test temporarily set ACT001.alerte='TEST_ALERT_REGRESSION', avancement=77, statut='En cours' to verify edit + persistence; alerte was reset to '' afterwards. avancement/statut were left as updated (data is demo_tracking).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "S3A frontend is fully wired to /api/metfpa. Data-testids confirmed live and stable: nav-accueil/nav-pnd/nav-politique/nav-digital/nav-plan-action/nav-alignement/nav-kpi; nav-upcoming-{Pilotage Directeur|Registre risques|Registre décisions}; page-pnd/page-politique/page-digital/page-plan-action/page-alignement/page-kpi-cascade; tree-toggle-<code> (5+ present on PND); activity-row-<id> (62 rows, ids ACT001..ACT062), edit-activity-<id>, edit-dialog, edit-avancement, edit-statut, edit-alerte, save-activity, filter-axe/produit/direction/statut/echeance/alerte, filter-count, reset-filters; alignment-AX1/AX2/AX3, alignment-legend; kpi-row (19 rows). missing-value chip not observed (no null budgets in current seed). Edit PUT is persisted (verified via reload). No backend issues encountered.",
+  "rca of the issue": "n/a — no failures. Only observed warnings are non-blocking Radix a11y DialogDescription warnings."
+}

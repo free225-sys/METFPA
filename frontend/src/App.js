@@ -5,6 +5,12 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/Layout";
 import Login from "@/pages/Login";
 import AccueilIntegre from "@/pages/AccueilIntegre";
+import VuePND from "@/pages/VuePND";
+import PolitiqueEFTP from "@/pages/PolitiqueEFTP";
+import StrategieDigitale from "@/pages/StrategieDigitale";
+import PlanAction from "@/pages/PlanAction";
+import Alignement from "@/pages/Alignement";
+import KpiCascade from "@/pages/KpiCascade";
 import Dashboard from "@/pages/Dashboard";
 import TreeView from "@/pages/TreeView";
 import ActionsTable from "@/pages/ActionsTable";
@@ -32,6 +38,12 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route path="/" element={<AccueilIntegre />} />
+        <Route path="/pnd-402" element={<VuePND />} />
+        <Route path="/politique-eftp" element={<PolitiqueEFTP />} />
+        <Route path="/strategie-digitale" element={<StrategieDigitale />} />
+        <Route path="/plan-action" element={<PlanAction />} />
+        <Route path="/alignement" element={<Alignement />} />
+        <Route path="/kpi-cascade" element={<KpiCascade />} />
         <Route path="/legacy-pnd" element={<Dashboard />} />
         <Route path="/arborescence" element={<TreeView />} />
         <Route path="/actions" element={<ActionsTable />} />
