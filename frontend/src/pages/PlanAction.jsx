@@ -6,7 +6,7 @@ import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ListChecks, Pencil, Filter, X, AlertTriangle } from "lucide-react";
+import { ListChecks, Pencil, Filter, X, AlertTriangle, History } from "lucide-react";
 
 const STATUTS = ["Non démarré", "À l'heure", "En cours", "En retard", "Bloqué", "Achevé"];
 const STATUT_COLOR = {
@@ -20,6 +20,7 @@ export default function PlanAction() {
   const [acts, setActs] = useState(null);
   const [f, setF] = useState({ axe: "", produit: "", direction: "", statut: "", echeance: "", alerte: "" });
   const [editing, setEditing] = useState(null);
+  const [history, setHistory] = useState(null);
 
   const load = () => metfpaApi.get("/activities").then((r) => setActs(r.data));
   useEffect(() => { load(); }, []);
@@ -92,7 +93,7 @@ export default function PlanAction() {
                 <th className="text-left px-3 py-2.5 font-semibold">Avancement</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Statut</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Échéance</th>
-                <th className="text-center px-3 py-2.5 font-semibold">Éditer</th>
+                <th className="text-center px-3 py-2.5 font-semibold">Éditer · Historique</th>
               </tr>
             </thead>
             <tbody>
@@ -119,8 +120,9 @@ export default function PlanAction() {
                       {a.alerte && <div className="flex items-center gap-1 text-[10px] text-[#C53030] mt-1"><AlertTriangle size={10} />{a.alerte}</div>}
                     </td>
                     <td className="px-3 py-2.5 text-xs whitespace-nowrap">{a.echeance}</td>
-                    <td className="px-3 py-2.5 text-center">
+                    <td className="px-3 py-2.5 text-center whitespace-nowrap">
                       <button data-testid={`edit-activity-${a.id}`} onClick={() => setEditing(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#FF8200]/10 hover:text-[#FF8200] transition-colors"><Pencil size={14} /></button>
+                      <button data-testid={`history-activity-${a.id}`} onClick={() => setHistory(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#1F6FEB]/10 hover:text-[#1F6FEB] transition-colors"><History size={14} /></button>
                     </td>
                   </tr>
                 ))}
@@ -130,7 +132,52 @@ export default function PlanAction() {
       </div>
 
       <EditDialog activity={editing} onClose={() => setEditing(null)} onSaved={(updated) => { setActs((p) => p.map((x) => x.id === updated.id ? updated : x)); }} />
+      <HistoryDialog activity={history} onClose={() => setHistory(null)} />
     </div>
+  );
+}
+
+const FIELD_LABEL = { avancement: "Avancement", statut: "Statut", alerte: "Alerte", derniere_maj: "Dernière maj" };
+function HistoryDialog({ activity, onClose }) {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    if (activity) { setData(null); metfpaApi.get(`/activities/${activity.id}/history`).then((r) => setData(r.data)); }
+  }, [activity]);
+  return (
+    <Dialog open={!!activity} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent data-testid="history-dialog" className="max-w-lg max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">Historique des modifications <OriginBadge origin="demo_tracking" /></DialogTitle>
+          <DialogDescription className="text-xs text-[#718096]">{activity?.code_action} · {activity?.intitule} — lecture seule (journal d'audit).</DialogDescription>
+        </DialogHeader>
+        {!data ? <div className="animate-pulse h-24 bg-[#E2E8F0] rounded-[4px]" /> :
+          data.entries.length === 0 ? <div data-testid="history-empty" className="text-sm text-[#A0AEC0] italic py-6 text-center rounded-[6px] border border-dashed border-[#E2E8F0]">Aucune modification enregistrée pour cette activité.</div> : (
+            <div className="space-y-3" data-testid="history-entries">
+              {data.entries.map((e, i) => (
+                <div key={i} className="rounded-[6px] border border-[#E2E8F0] p-3">
+                  <div className="flex items-center justify-between text-[11px] text-[#718096]">
+                    <span>{fmtDateTime(e.horodatage)}</span>
+                    <span className="font-medium text-[#4A5568]">{e.action} · {e.user}</span>
+                  </div>
+                  <div className="mt-2 space-y-1">
+                    {Object.keys(e.apres || {}).filter((k) => k !== "derniere_maj").map((k) => (
+                      <div key={k} className="flex items-center gap-2 text-xs">
+                        <span className="w-24 text-[#718096]">{FIELD_LABEL[k] || k}</span>
+                        <span className="text-[#C53030] line-through">{String(e.avant?.[k] ?? "—") || "∅"}</span>
+                        <span className="text-[#CBD5E0]">→</span>
+                        <span className="font-semibold text-[#009E49]">{String(e.apres?.[k] ?? "—") || "∅"}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        <DialogFooter>
+          <button onClick={onClose} className="px-4 py-2 text-sm rounded-[6px] border border-[#E2E8F0] text-[#4A5568] hover:bg-[#F7F7F5]">Fermer</button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

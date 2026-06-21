@@ -1,0 +1,41 @@
+{
+  "summary": "S3B end-to-end testing PASSED. Backend: 13/13 pytest cases green covering cabinet aggregation (kpis, decisions_required, alerts, deadlines_upcoming/overdue, risks_critical_high, top_costly, progress_summary, financial_reliability — budget_engage_missing=62, source_financement_missing=62), budget/consolidated (4 comparison_modes; PND/POL/DIG overlap_years=5; requires_client_validation=true; annotation+overlap_note present), Decisions CRUD (POST creates with data_origin=demo_tracking + validation_status=to_validate; invalid status -> 422; PUT updates; GET/{id} 404 honest; audit_log contains create_decision + update_decision for created id), Risks CRUD (probability/impact out of 1-5 -> 422; POST p=5/i=4 -> risk_score=20 + severity='critique'; PUT recomputes to risk_score=2 + severity='faible'; list sorted by risk_score desc; DELETE -> 404 on subsequent GET; audit_log has create_risk + update_risk), and activity history (unknown id -> 404; after PUT /activities/ACT001 history returns >=1 entries sorted desc with horodatage). Frontend (logged in ministre@pnd.ci): Sidebar exposes the 4 new DECISIONNEL links (nav-cabinet, nav-decisions, nav-risks, nav-budget). Cabinet view section order verified DOM-by-position = ['cabinet-decisions','cabinet-alerts','cabinet-deadlines','cabinet-risks','cabinet-budget','cabinet-progress','director-note'] — executive order respected, charts do NOT appear before decisions/alerts/deadlines. director-note persists in localStorage across reload (TEST_NOTE_S3B_PERSIST recovered). Decision Register: add-decision -> decision-dialog -> filling title/type=arbitrage/priority=haute/status=pending -> save-decision created a new row showing 'Démonstration' origin badge; delete-decision-<id> + confirm-delete-decision removed it. Risk Register: add-risk -> risk-dialog -> probability=5 + impact=4 made risk-computed-score render '20' live (critique severity); save-risk created row; delete flow works. Budget Consolidé: all 4 mode buttons (budget-mode-total/annual_average/overlap_period/source_framework) toggle; horizon-warning remains visible in every mode; cards budget-card-PND/POL/DIG render with period/total/annual avg/overlap. Plan d'action history: history-activity-ACT001 opens history-dialog (read-only) showing the 4+ audit entries with previous->new values and timestamps (visible TEST_S3B_HISTORY entry from backend test plus prior TEST_ALERT_REGRESSION run). No console errors blocking flows.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "BudgetConsolide.jsx",
+        "issues": [
+          "Root testid is 'page-budget-consolide' while the review_request spec implies 'page-budget'. Minor inconsistency — recommend aligning either the spec or adding a duplicate data-testid='page-budget' for E2E discoverability. Content is correct; this is naming only."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/metfpa_s3b_test.py",
+    "/app/test_reports/pytest/s3b_results.xml"
+  ],
+  "action_items": [
+    "Optional: align Budget Consolidé root testid (page-budget vs page-budget-consolide) with the S3B spec to avoid downstream selector confusion.",
+    "Carry over from iteration_3: add DialogDescription to history/decision/risk dialogs to silence Radix a11y warnings (non-blocking)."
+  ],
+  "critical_code_review_comments": [
+    "registers.py: severity_from_score is deterministic (>=15 critique / >=10 eleve / >=5 modere / <5 faible). Both create_risk and update_risk recompute via _risk_computed — no drift between client and server. Good.",
+    "router.py /cabinet: section ordering computed server-side and CabinetView.jsx renders sections in matching executive order. financial_reliability counts budget_engage_missing and source_financement_missing — confirmed 62/62, no fabrication of official financials.",
+    "POST /decisions and /risks both inject DEFAULT_ORIGIN={data_origin:'demo_tracking', validation_status:'to_validate'} and audit() is called for every mutation; audit-log queryable by entite='decision'/'risk'/'activity' + entite_id — clean lineage for governance.",
+    "Pydantic Field(ge=1, le=5) on probability/impact reliably yields 422 for out-of-range. Status/category/type/priority enforced via field_validator with explicit French-friendly error list.",
+    "Frontend metfpaApi attaches Bearer pnd_token from localStorage; all four new pages (CabinetView, DecisionRegister, RiskRegister, BudgetConsolide) use it; no hardcoded URLs.",
+    "BudgetConsolide always renders horizon-warning regardless of mode (confirmed); financing note (15/85) is scoped to Digital only as required.",
+    "Minor: route-level testid drift (page-budget-consolide vs page-budget). Non-functional but worth normalising."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "100% (13/13)", "frontend": "100% (all S3B critical flows incl. nav, cabinet order, director-note persistence, decisions+risks CRUD with badges, budget 4 modes, history dialog)" },
+  "test_credentials": "ministre@pnd.ci / PND2030! — verified.",
+  "seed_data_creation": "Backend pytest created/cleaned: TEST_S3B decision (created+updated+deleted via class fixture teardown), TEST_S3B critique/faible risk (created+updated+deleted in test), ACT001 history entries (alerte set then reset to ''). Frontend playwright created+deleted 1 demo decision ('TEST_S3B Decision UI') and 1 demo risk ('TEST_S3B Risk UI') via the UI. The pre-existing curl smoke decision ('Arbitrage budgétaire AX2') and risk ('Retard infrastructures D1') were left intact as documented by main agent.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "S3B is fully wired and stable. Confirmed testids: nav-cabinet, nav-decisions, nav-risks, nav-budget, page-cabinet, cabinet-decisions, cabinet-alerts, cabinet-deadlines, cabinet-risks, cabinet-budget, cabinet-progress, director-note, page-decisions, add-decision, decision-dialog, decision-title, decision-type, decision-priority, decision-status, save-decision, decision-row-<id>, edit-decision-<id>, delete-decision-<id>, confirm-delete-decision, page-risks, add-risk, risk-dialog, risk-title, risk-probability, risk-impact, risk-computed-score, save-risk, risk-row-<id>, delete-risk-<id>, confirm-delete-risk, page-budget-consolide (NOT page-budget), budget-mode-{total|annual_average|overlap_period|source_framework}, horizon-warning, budget-card-{PND|POL|DIG}, financing-note, history-activity-<id>, history-dialog. Decisions show 'Démonstration' origin badge. Live risk score computes client-side and matches server. Audit log entries are visible in history dialog with horodatage + user. Backend pytest file is /app/backend/tests/metfpa_s3b_test.py and accepts REACT_APP_BACKEND_URL via env.",
+  "rca of the issue": "n/a — no failures in this iteration."
+}

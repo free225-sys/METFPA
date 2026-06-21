@@ -615,8 +615,11 @@ app.include_router(api_router)
 
 # --- METFPA module (Phase 1 / Sprint S1) — additive, isolated DB ---
 from metfpa.router import metfpa_router
+from metfpa.registers import registers_router
 from metfpa.seed_loader import import_seed
+from metfpa.db import mdb as metfpa_mdb
 app.include_router(metfpa_router)
+app.include_router(registers_router)
 
 
 @app.on_event("startup")
@@ -624,6 +627,12 @@ async def metfpa_startup():
     try:
         s = await import_seed()
         logger.info(f"METFPA seed imported: {s}")
+        # S3B register indexes (idempotent)
+        await metfpa_mdb.decisions.create_index("id", unique=True)
+        await metfpa_mdb.decisions.create_index("status")
+        await metfpa_mdb.risks.create_index("id", unique=True)
+        await metfpa_mdb.risks.create_index("severity")
+        await metfpa_mdb.audit_log.create_index([("entite", 1), ("entite_id", 1)])
     except Exception as e:
         logger.error(f"METFPA seed import failed: {e}")
 

@@ -11,6 +11,10 @@ import StrategieDigitale from "@/pages/StrategieDigitale";
 import PlanAction from "@/pages/PlanAction";
 import Alignement from "@/pages/Alignement";
 import KpiCascade from "@/pages/KpiCascade";
+import CabinetView from "@/pages/CabinetView";
+import DecisionRegister from "@/pages/DecisionRegister";
+import RiskRegister from "@/pages/RiskRegister";
+import BudgetConsolide from "@/pages/BudgetConsolide";
 import Dashboard from "@/pages/Dashboard";
 import TreeView from "@/pages/TreeView";
 import ActionsTable from "@/pages/ActionsTable";
@@ -44,6 +48,10 @@ function AppRoutes() {
         <Route path="/plan-action" element={<PlanAction />} />
         <Route path="/alignement" element={<Alignement />} />
         <Route path="/kpi-cascade" element={<KpiCascade />} />
+        <Route path="/pilotage-directeur" element={<CabinetView />} />
+        <Route path="/decisions" element={<DecisionRegister />} />
+        <Route path="/risks" element={<RiskRegister />} />
+        <Route path="/budget-consolide" element={<BudgetConsolide />} />
         <Route path="/legacy-pnd" element={<Dashboard />} />
         <Route path="/arborescence" element={<TreeView />} />
         <Route path="/actions" element={<ActionsTable />} />

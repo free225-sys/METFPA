@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
@@ -72,33 +72,122 @@ async def activities():
 @metfpa_router.get("/budget/consolidated")
 async def budget_consolidated():
     fr = await _list("frameworks")
-    items = [{"framework": f["key"], "label": f["label"], "period": f"{f['period_start']}-{f['period_end']}",
-              "period_start": f["period_start"], "period_end": f["period_end"], "period_years": f["period_years"],
-              "total": f["total"], "annual_average": f["annual_average"], "budget_scope": f["budget_scope"],
-              "source": f["source_document"], "data_origin": f["data_origin"],
-              "validation_status": f["validation_status"]} for f in fr]
+    items = []
+    for f in fr:
+        ov_years = max(0, min(f["period_end"], OVERLAP["end"]) - max(f["period_start"], OVERLAP["start"]) + 1)
+        ov_value = round(f["annual_average"] * ov_years, 1)
+        items.append({
+            "framework": f["key"], "label": f["label"], "period": f"{f['period_start']}-{f['period_end']}",
+            "period_start": f["period_start"], "period_end": f["period_end"], "period_years": f["period_years"],
+            "total": f["total"], "annual_average": f["annual_average"],
+            "overlap_years": ov_years, "overlap_value": ov_value,
+            "budget_scope": f["budget_scope"], "source": f["source_document"],
+            "data_origin": f["data_origin"], "validation_status": f["validation_status"]})
     return {"items": items, "overlap_period": OVERLAP, "annotation": NORM_NOTE,
+            "overlap_note": ("Recouvrement 2026-2030 estimé = moyenne annuelle × années communes "
+                             "(approximation, requiert validation client)."),
             "comparison_modes": ["total", "annual_average", "overlap_period", "source_framework"],
             "requires_client_validation": True}
+
+
+def _quarter_end(echeance):
+    """'YYYY-TQ' -> ISO date of quarter end. Returns None if unparsable."""
+    try:
+        y, q = echeance.split("-T")
+        m, d = {"1": (3, 31), "2": (6, 30), "3": (9, 30), "4": (12, 31)}[q]
+        return datetime(int(y), m, d, tzinfo=timezone.utc)
+    except Exception:
+        return None
 
 
 @metfpa_router.get("/cabinet")
 async def cabinet():
     acts = await _list("activities")
-    alerts = [a for a in acts if a.get("statut") in DEMO_STATUSES or (a.get("alerte") or "")]
-    echeances = sorted([a for a in acts if a.get("statut") != "Achevé"], key=lambda a: a.get("echeance") or "")[:8]
+    decisions = await _list("decisions")
+    risks = await _list("risks")
+    now = datetime.now(timezone.utc)
+    horizon = now + timedelta(days=30)
+
+    # ① Decisions requiring action (pending/draft, or overdue)
+    def _dec_overdue(d):
+        due = d.get("due_date")
+        try:
+            return bool(due) and datetime.fromisoformat(due.replace("Z", "+00:00")) < now and d.get("status") not in ("closed", "implemented", "rejected")
+        except Exception:
+            return False
+    decisions_required = [d for d in decisions if d.get("status") in ("draft", "pending") or _dec_overdue(d)]
+
+    # ② Alerts & blockers
+    blocked = [a for a in acts if a.get("statut") in DEMO_STATUSES or (a.get("alerte") or "")]
+
+    # ③ Deadlines: upcoming (<=30d) and overdue
+    upcoming, overdue = [], []
+    for a in acts:
+        if a.get("statut") == "Achevé":
+            continue
+        qe = _quarter_end(a.get("echeance") or "")
+        if not qe:
+            continue
+        if now <= qe <= horizon:
+            upcoming.append(a)
+        elif qe < now:
+            overdue.append(a)
+    upcoming.sort(key=lambda a: a.get("echeance") or "")
+    overdue.sort(key=lambda a: a.get("echeance") or "")
+
+    # ④ Risk exposure (critical/high first)
+    SEV_RANK = {"critique": 0, "eleve": 1, "modere": 2, "faible": 3}
+    open_risks = [r for r in risks if r.get("status") != "closed"]
+    open_risks.sort(key=lambda r: (SEV_RANK.get(r.get("severity"), 9), -(r.get("risk_score") or 0)))
+    critical_high = [r for r in open_risks if r.get("severity") in ("critique", "eleve")]
+
+    # ⑤ Top planned-cost activities
     top_costly = sorted(acts, key=lambda a: a.get("budget_prevu") or 0, reverse=True)[:5]
+
+    # Physical progress summary
+    statut_counts = {}
+    for a in acts:
+        statut_counts[a.get("statut", "?")] = statut_counts.get(a.get("statut", "?"), 0) + 1
+    avg_av = round(sum(a.get("avancement") or 0 for a in acts) / len(acts), 1) if acts else 0
+
+    # Financial-data reliability summary
+    fin_reliability = {
+        "budget_prevu_present": sum(1 for a in acts if a.get("budget_prevu") is not None),
+        "budget_execute_demo": sum(1 for a in acts if a.get("budget_execute") is not None),
+        "budget_engage_missing": sum(1 for a in acts if a.get("budget_engage") is None),
+        "source_financement_missing": sum(1 for a in acts if a.get("source_financement") is None),
+        "directions_to_validate": sum(1 for a in acts if a.get("direction_status") == "to_validate"),
+    }
+
     return {
         "kpis": {"activites": len(acts),
-                 "alertes": len(alerts),
+                 "alertes": len(blocked),
                  "bloques": sum(1 for a in acts if a.get("statut") == "Bloqué"),
-                 "en_retard": sum(1 for a in acts if a.get("statut") == "En retard")},
-        "decisions_required": await _list("decisions"),  # placeholder collection (empty in S1)
-        "alerts": alerts[:20],
-        "echeances": echeances,
+                 "en_retard": sum(1 for a in acts if a.get("statut") == "En retard"),
+                 "decisions_en_attente": len(decisions_required),
+                 "risques_critiques": len(critical_high),
+                 "avancement_moyen": avg_av},
+        "decisions_required": decisions_required,
+        "alerts": blocked[:20],
+        "deadlines_upcoming": upcoming[:10],
+        "deadlines_overdue": overdue[:10],
+        "risks_critical_high": critical_high[:10],
         "top_costly": top_costly,
+        "progress_summary": {"by_statut": statut_counts, "avancement_moyen": avg_av, "total": len(acts)},
+        "financial_reliability": fin_reliability,
         "data_notice": "Indicateurs opérationnels (avancement/exécuté/statut/alerte) = demo_tracking, non officiels.",
     }
+
+
+@metfpa_router.get("/activities/{aid}/history")
+async def activity_history(aid: str):
+    a = await mdb.activities.find_one({"id": aid}, {"_id": 0, "id": 1})
+    if not a:
+        raise HTTPException(status_code=404, detail="Activité introuvable")
+    entries = await mdb.audit_log.find(
+        {"entite": "activity", "entite_id": aid}, {"_id": 0}
+    ).sort("horodatage", -1).to_list(500)
+    return {"activity_id": aid, "count": len(entries), "entries": entries}
 
 
 # ---------- Mutations (audited) ----------

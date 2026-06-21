@@ -1,9 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Lock, Layers, Target, Activity, ListChecks, GitMerge, Gauge } from "lucide-react";
+import { LayoutDashboard, Layers, Target, Activity, ListChecks, GitMerge, Gauge, Gavel, ShieldAlert, Wallet, Crown } from "lucide-react";
 import { CoatOfArms } from "@/components/icons/Ivorian";
 
-// S3A delivered views
+// S3A + S3B delivered views
 const NAV = [
   { to: "/", label: "Accueil intégré", icon: LayoutDashboard, end: true, testid: "nav-accueil" },
   { to: "/pnd-402", label: "Vue PND 4.02", icon: Layers, testid: "nav-pnd" },
@@ -14,8 +14,12 @@ const NAV = [
   { to: "/kpi-cascade", label: "KPI en cascade", icon: Gauge, testid: "nav-kpi" },
 ];
 
-// S3B/S4 — not yet built
-const UPCOMING = ["Pilotage Directeur", "Registre risques", "Registre décisions"];
+const DECISIONNEL = [
+  { to: "/pilotage-directeur", label: "Pilotage Directeur", icon: Crown, testid: "nav-cabinet" },
+  { to: "/decisions", label: "Décisions", icon: Gavel, testid: "nav-decisions" },
+  { to: "/risks", label: "Risques", icon: ShieldAlert, testid: "nav-risks" },
+  { to: "/budget-consolide", label: "Budget consolidé", icon: Wallet, testid: "nav-budget" },
+];
 
 export function Sidebar() {
   return (
@@ -43,13 +47,16 @@ export function Sidebar() {
         ))}
 
         <div className="px-3 pt-5 pb-2">
-          <p className="text-[10px] font-semibold tracking-[0.12em] text-white/35 uppercase">Décisionnel · à venir (S3B+)</p>
+          <p className="text-[10px] font-semibold tracking-[0.12em] text-white/35 uppercase">Décisionnel · Cabinet</p>
         </div>
-        {UPCOMING.map((label) => (
-          <div key={label} data-testid={`nav-upcoming-${label}`}
-            className="flex items-center gap-3 px-3 py-2 rounded-[6px] text-sm text-white/30 cursor-not-allowed select-none">
-            <Lock size={15} strokeWidth={1.6} /> {label}
-          </div>
+        {DECISIONNEL.map(({ to, label, icon: Icon, testid }) => (
+          <NavLink key={to} to={to} data-testid={testid}
+            className={({ isActive }) =>
+              `group flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-sm font-medium transition-all ${
+                isActive ? "bg-[#FF8200] text-white" : "text-white/65 hover:text-white hover:bg-white/8"
+              }`}>
+            <Icon size={18} strokeWidth={1.6} /> {label}
+          </NavLink>
         ))}
       </nav>
 
