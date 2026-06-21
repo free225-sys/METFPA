@@ -126,7 +126,7 @@ export default function PlanAction() {
                     <td className="px-3 py-2.5 text-center whitespace-nowrap">
                       {editable(a)
                         ? <button data-testid={`edit-activity-${a.id}`} onClick={() => setEditing(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#FF8200]/10 hover:text-[#FF8200] transition-colors"><Pencil size={14} /></button>
-                        : <span className="inline-flex items-center justify-center w-7 h-7 text-[#CBD5E0]" title="Lecture seule"><Pencil size={14} /></span>}
+                        : <span className="inline-flex items-center gap-1 text-[#CBD5E0]" title="Lecture seule"><Pencil size={14} /><span className="text-[10px] text-[#A0AEC0]">Lecture</span></span>}
                       <button data-testid={`history-activity-${a.id}`} onClick={() => setHistory(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#1F6FEB]/10 hover:text-[#1F6FEB] transition-colors"><History size={14} /></button>
                     </td>
                   </tr>
