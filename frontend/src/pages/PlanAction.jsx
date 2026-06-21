@@ -4,7 +4,7 @@ import { fmtMillions, fmtDateTime } from "@/lib/format";
 import { OriginBadge, MissingValue } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { ListChecks, Pencil, Filter, X, AlertTriangle } from "lucide-react";
 
@@ -88,7 +88,7 @@ export default function PlanAction() {
                 <th className="text-left px-3 py-2.5 font-semibold">Intitulé</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Direction</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Axe</th>
-                <th className="text-right px-3 py-2.5 font-semibold">Prévu / Exécuté</th>
+                <th className="text-right px-3 py-2.5 font-semibold">Prévu / Exécuté · Engagé</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Avancement</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Statut</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Échéance</th>
@@ -106,6 +106,7 @@ export default function PlanAction() {
                     <td className="px-3 py-2.5 text-right text-xs tabular-nums whitespace-nowrap">
                       <div>{a.budget_prevu != null ? fmtMillions(a.budget_prevu) : <MissingValue label="manquant" />}</div>
                       <div className="text-[#718096]">{a.budget_execute != null ? fmtMillions(a.budget_execute) : "—"} <span className="text-[9px]">(démo)</span></div>
+                      <div className="mt-0.5">{a.budget_engage != null ? fmtMillions(a.budget_engage) : <MissingValue label="engagé manquant" />}</div>
                     </td>
                     <td className="px-3 py-2.5 min-w-[120px]">
                       <div className="flex items-center gap-2">
@@ -163,6 +164,7 @@ function EditDialog({ activity, onClose, onSaved }) {
       <DialogContent data-testid="edit-dialog" className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">Éditer l'activité <OriginBadge origin="demo_tracking" /></DialogTitle>
+          <DialogDescription className="text-xs text-[#718096]">Suivi de démonstration · seuls l'avancement, le statut et l'alerte sont modifiables.</DialogDescription>
         </DialogHeader>
         {activity && (
           <div className="space-y-4">

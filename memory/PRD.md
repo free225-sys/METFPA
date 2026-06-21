@@ -45,3 +45,36 @@ Strategic, government-grade dashboard for Côte d'Ivoire's National Development 
 1. Implement real Excel/PDF export when requested.
 2. Add create/delete action flows.
 3. Dark mode (phase 2).
+
+
+
+---
+
+# PIVOT — Cockpit METFPA (Secteur 4.02 · EFTP)
+> Le projet a pivoté du cockpit PND générique vers un **cockpit institutionnel METFPA** centré exclusivement sur le **Secteur 4.02**. L'app PND générique est conservée comme référence sur `/legacy-pnd`.
+
+## Problem Statement (METFPA)
+Cockpit institutionnel du Ministère de l'Enseignement Technique, de la Formation Professionnelle et de l'Apprentissage. Périmètre = **Secteur 4.02 uniquement**. Intègre 3 référentiels : **PND 4.02 (2026-2030)**, **Politique EFTP (2026-2035)**, **Stratégie de digitalisation (2026-2031)**. Gouvernance des données stricte : distinguer **officiel / référence à valider / démo / manquant** via badges d'origine partout. UI **français**.
+
+## Architecture METFPA (isolée)
+- **Backend** : module `backend/metfpa/` (router/db/seed_loader) ; DB MongoDB **isolée `metfpa_dev`** (legacy `test_database` non touché). Endpoints sous `/api/metfpa`.
+- **Frontend** : pages dédiées + `metfpaApi.js`, `metfpaTheme.js` (langage par axes, `ORIGIN_META`), composants `OriginBadge`/`MissingValue`, `DemoBanner`, `Breadcrumb`, `HierTree` (arbre itératif).
+- **Collections** : frameworks, pnd_nodes, pol_nodes, dig_nodes, dig_profile, indicators, alignments, activities, audit_log.
+- **Source Phase 1** : `memory/seed_metfpa.json` (`data_origin=html_reference`, `validation_status=pending_metfpa_validation`). Activités (62) = `demo_tracking` ; directions `to_validate` ; engagé/source financement = `missing`.
+
+## Avancement METFPA
+- ✅ **Phase 0** (audit + plan + seed) — voir `AUDIT_METFPA_Cockpit.md`, `PHASE1_LAUNCH_PLAN_METFPA.md`.
+- ✅ **Sprint S1** (2026-06) — backend `metfpa_dev`, endpoints lecture, seed idempotent, audit_log, promotion seed `/api/metfpa/admin/validate`. Tests `tests/metfpa_s1_test.py` (8/8).
+- ✅ **Sprint S2** (2026-06-21) — refactor frontend : Accueil intégré, OriginBadge, DemoBanner, Sidebar/Header METFPA, route `/` = Accueil ; legacy → `/legacy-pnd`.
+- ✅ **Sprint S3A** (2026-06-21) — 6 vues détaillées : `/pnd-402`, `/politique-eftp`, `/strategie-digitale`, `/plan-action` (édition auditée), `/alignement`, `/kpi-cascade`. Nav déverrouillée. **testing_agent : 14/14 PASS (iteration_3.json)**. Rapport : `SPRINT_S3A_COMPLETION_REPORT.md`.
+
+## Backlog METFPA (prioritized)
+- **P0 · Sprint S3B (décisionnel)** : Cabinet View MVP (ordre Décisions→Alertes→Échéances→graphes→risques→note), registres **Risques** & **Décisions** (CRUD), budget consolidé normalisé (4 modes : total/moyenne annuelle/recouvrement 2026-2030/par cadre source).
+- **P1 · Sprint S4/S5** : RBAC complet (Lecteur Cabinet/Saisie Direction/Validateur M&E/Admin), alertes exécutives, durcissement auth.
+- **P2 · Phase 2+** : import Excel officiel (`IMPORT_METFPA.xlsx`), workflow M&E (baselines/cibles), upload de preuves, exports réels PDF/Excel/PPTX, déploiement production.
+
+## Contraintes fermes (METFPA)
+- **NO-GO production** jusqu'aux validations METFPA (V1-V11). Ne pas déployer.
+- Ne jamais modifier `test_database` legacy ; toute écriture reste dans `metfpa_dev`.
+- Ne pas inventer de données officielles (directions, budgets engagés, sources). Manquant affiché « manquant », jamais 0.
+- Tout bloc majeur affiche origine + statut de validation.
