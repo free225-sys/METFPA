@@ -71,7 +71,10 @@ Cockpit institutionnel du Ministère de l'Enseignement Technique, de la Formatio
 - ✅ **Sprint S4** (2026-06-21) — gouvernance : **RBAC complet** (4 rôles, application serveur, scope direction, 401/403), **auth durcie** (JWT HS256 + bcrypt, exp/signature/type, suppression bypass dev), **alertes exécutives déterministes** (`/cabinet/alerts`), **export PDF réel** de la Note de Cabinet (`/cabinet/export/pdf`, reportlab, filigrane provisoire), **admin utilisateurs/rôles** (`/admin-users`, garde-fou dernier admin). `metfpa/auth.py`, `alerts.py`, `pdf.py`. **pytest 28/28 + testing_agent 100% (iteration_5.json)**. Rapport : `SPRINT_S4_COMPLETION_REPORT.md`. Comptes : voir `test_credentials.md`.
 
 ## Backlog METFPA (prioritized)
-- **P0 · Phase 2 (préparation import & M&E)** : import Excel officiel (`IMPORT_METFPA.xlsx`), workflow M&E (baselines/cibles), upload de preuves — sous réserve levée progressive du NO-GO.
+- ✅ **Phase 2A-0** (2026-06-21) — clôture sécurité : tous les GET `/api/metfpa/*` gatés (sauf `/health`,`/auth/login`), audit-log restreint validateur/admin, historique d'activité scopé par direction, effacement explicite de direction (422 pour direction_editor), ordre Cabinet « Décisions d'abord » (web+PDF), test workflow validation (snapshot/restore DIG).
+- ✅ **Phase 2A-1** (2026-06-21) — import Excel **dry-run uniquement** (`/imports/excel/dry-run`, validateur/admin) : validation fichier/schéma/intégrité/budget, classification insert/update/unchanged/conflict/reject, verdicts READY_FOR_REVIEW/READY_WITH_WARNINGS/BLOCKED_BY_ERRORS, **aucune mutation métier**, list/get/delete + cleanup, page `/imports` sans bouton Appliquer. **pytest 53/53 + testing_agent 100% (iteration_6.json)**. Rapport : `PHASE2A_COMPLETION_REPORT.md`.
+- **P0 · Phase 2B (sur GO)** : application contrôlée des imports validés (diff → application transactionnelle + rollback → re-promotion M&E).
+- **P2 · ultérieur** : workflow M&E baselines/cibles, upload de preuves, exports génériques, déploiement (conditionnés aux validations METFPA).
 - **P2 · Phase 2+** : import Excel officiel (`IMPORT_METFPA.xlsx`), workflow M&E (baselines/cibles), upload de preuves, exports réels PDF/Excel/PPTX, déploiement production.
 
 ## Contraintes fermes (METFPA)
