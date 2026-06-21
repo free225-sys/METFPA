@@ -613,6 +613,20 @@ async def root():
 
 app.include_router(api_router)
 
+# --- METFPA module (Phase 1 / Sprint S1) — additive, isolated DB ---
+from metfpa.router import metfpa_router
+from metfpa.seed_loader import import_seed
+app.include_router(metfpa_router)
+
+
+@app.on_event("startup")
+async def metfpa_startup():
+    try:
+        s = await import_seed()
+        logger.info(f"METFPA seed imported: {s}")
+    except Exception as e:
+        logger.error(f"METFPA seed import failed: {e}")
+
 app.add_middleware(CORSMiddleware, allow_credentials=True,
                    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
                    allow_methods=["*"], allow_headers=["*"])
