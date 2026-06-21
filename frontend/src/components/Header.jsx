@@ -9,7 +9,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const TITLES = {
-  "/": "Tableau de bord exécutif",
+  "/": "Accueil intégré METFPA",
+  "/legacy-pnd": "Tableau de bord exécutif (PND générique)",
   "/arborescence": "Arborescence du Plan",
   "/actions": "Registre des actions",
   "/ministeres": "Vue par ministère",

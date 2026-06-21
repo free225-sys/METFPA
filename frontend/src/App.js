@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/Layout";
 import Login from "@/pages/Login";
+import AccueilIntegre from "@/pages/AccueilIntegre";
 import Dashboard from "@/pages/Dashboard";
 import TreeView from "@/pages/TreeView";
 import ActionsTable from "@/pages/ActionsTable";
@@ -30,7 +31,8 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<AccueilIntegre />} />
+        <Route path="/legacy-pnd" element={<Dashboard />} />
         <Route path="/arborescence" element={<TreeView />} />
         <Route path="/actions" element={<ActionsTable />} />
         <Route path="/ministeres" element={<Ministries />} />

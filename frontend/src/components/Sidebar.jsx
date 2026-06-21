@@ -1,15 +1,12 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Network, Table2, BarChart3, BellRing, Star, Landmark } from "lucide-react";
+import { LayoutDashboard, Lock } from "lucide-react";
 import { CoatOfArms } from "@/components/icons/Ivorian";
 
-const NAV = [
-  { to: "/", label: "Tableau de bord", icon: LayoutDashboard, end: true, testid: "nav-dashboard" },
-  { to: "/arborescence", label: "Arborescence", icon: Network, testid: "nav-tree" },
-  { to: "/actions", label: "Actions", icon: Table2, testid: "nav-actions" },
-  { to: "/ministeres", label: "Vue par ministère", icon: Landmark, testid: "nav-ministries" },
-  { to: "/budget", label: "Analyse budgétaire", icon: BarChart3, testid: "nav-analytics" },
-  { to: "/alertes", label: "Centre d'alertes", icon: BellRing, testid: "nav-alerts" },
+// Phase S3 modules — listed but not yet built (no S3 work started in S2)
+const UPCOMING = [
+  "Vue PND 4.02", "Politique EFTP", "Stratégie digitale", "Plan d'action",
+  "Alignement", "KPI en cascade", "Pilotage Directeur",
 ];
 
 export function Sidebar() {
@@ -18,39 +15,40 @@ export function Sidebar() {
       <div className="px-6 py-6 border-b border-white/10 flex items-center gap-3">
         <CoatOfArms size={42} stroke="#C5A028" />
         <div className="leading-tight">
-          <div className="text-[15px] font-bold tracking-tight">Cockpit PND</div>
-          <div className="text-[11px] text-white/45 font-medium tracking-wide">RÉPUBLIQUE DE CÔTE D'IVOIRE</div>
+          <div className="text-[15px] font-bold tracking-tight">Cockpit METFPA</div>
+          <div className="text-[11px] text-white/45 font-medium tracking-wide">SECTEUR 4.02 · EFTP</div>
         </div>
       </div>
 
       <div className="px-6 pt-6 pb-3">
         <p className="text-[10px] font-semibold tracking-[0.12em] text-white/35 uppercase">Navigation</p>
       </div>
-      <nav className="flex-1 px-3 space-y-1">
-        {NAV.map(({ to, label, icon: Icon, end, testid }) => (
-          <NavLink key={to} to={to} end={end} data-testid={testid}
-            className={({ isActive }) =>
-              `group flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-sm font-medium transition-all ${
-                isActive ? "bg-[#FF8200] text-white" : "text-white/65 hover:text-white hover:bg-white/8"
-              }`}>
-            {({ isActive }) => (
-              <>
-                <Icon size={18} strokeWidth={1.6} className={isActive ? "text-white" : "text-white/55 group-hover:text-white"} />
-                {label}
-              </>
-            )}
-          </NavLink>
+      <nav className="px-3 space-y-1">
+        <NavLink to="/" end data-testid="nav-accueil"
+          className={({ isActive }) =>
+            `group flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-sm font-medium transition-all ${
+              isActive ? "bg-[#FF8200] text-white" : "text-white/65 hover:text-white hover:bg-white/8"
+            }`}>
+          <LayoutDashboard size={18} strokeWidth={1.6} /> Accueil intégré
+        </NavLink>
+      </nav>
+
+      <div className="px-6 pt-6 pb-3">
+        <p className="text-[10px] font-semibold tracking-[0.12em] text-white/35 uppercase">Modules · à venir (S3+)</p>
+      </div>
+      <nav className="px-3 space-y-1 flex-1">
+        {UPCOMING.map((label) => (
+          <div key={label} data-testid={`nav-upcoming-${label}`}
+            className="flex items-center gap-3 px-3 py-2 rounded-[6px] text-sm text-white/30 cursor-not-allowed select-none">
+            <Lock size={15} strokeWidth={1.6} /> {label}
+          </div>
         ))}
       </nav>
 
       <div className="px-6 py-5 border-t border-white/10">
-        <div className="flex items-start gap-2.5">
-          <Star size={15} strokeWidth={1.5} className="text-[#C5A028] mt-0.5 shrink-0" />
-          <p className="text-[11px] leading-relaxed text-white/45">
-            Plan National de Développement<br />
-            <span className="text-white/70 font-semibold">2026 — 2030</span>
-          </p>
-        </div>
+        <p className="text-[11px] leading-relaxed text-white/45">
+          PND 4.02 · Politique EFTP 2026-2035 · Stratégie digitale 2026-2031
+        </p>
       </div>
     </aside>
   );
