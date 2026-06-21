@@ -18,6 +18,64 @@
       "Budgets POL/DIG/PND = html_reference, à valider contre les documents officiels avant pilote.",
       "Aucune donnée 'budget engagé' ni 'source de financement par activité' n'existe (missing).",
       "Liste officielle des Directions absente : valeurs direction= dans EXTRA sont indicatives (to_validate)."
+    ],
+    "validation_status": "pending_metfpa_validation",
+    "promotion_workflow": {
+      "current": {
+        "data_origin": "html_reference",
+        "validation_status": "pending_metfpa_validation",
+        "source_document": "HTML reference + cross-check Politique EFTP (.docx) & Stratégie digitale (.pdf)"
+      },
+      "on_validation": {
+        "data_origin": "official_reference",
+        "validation_status": "validated",
+        "adds": [
+          "validated_by",
+          "validated_at",
+          "validation_note"
+        ]
+      }
+    },
+    "frameworks_meta": {
+      "PND_4.02": {
+        "period_start": 2026,
+        "period_end": 2030,
+        "period_years": 5,
+        "budget_scope": "Cadre sectoriel national à moyen terme",
+        "total": 1202137.6,
+        "annual_average": 240427.5,
+        "requires_client_validation": true
+      },
+      "POLITIQUE_EFTP": {
+        "period_start": 2026,
+        "period_end": 2035,
+        "period_years": 10,
+        "budget_scope": "Politique sectorielle décennale",
+        "total": 2937726.0,
+        "annual_average": 293772.6,
+        "requires_client_validation": true
+      },
+      "STRATEGIE_DIGITALE": {
+        "period_start": 2026,
+        "period_end": 2031,
+        "period_years": 6,
+        "budget_scope": "Sous-programme de transformation numérique",
+        "total": 33562.0,
+        "annual_average": 5593.7,
+        "requires_client_validation": true
+      },
+      "overlap_period": {
+        "start": 2026,
+        "end": 2030,
+        "note": "Période commune aux trois cadres pour comparaison normalisée"
+      },
+      "comparison_rule": "NE PAS comparer les totaux directement ; comparer via moyenne annuelle et/ou période de recouvrement. Marqué requires_client_validation."
+    },
+    "directions_status": "to_validate",
+    "missing_official": [
+      "budget_engage par activité",
+      "source_financement par activité",
+      "liste officielle des Directions"
     ]
   },
   "pnd": {
