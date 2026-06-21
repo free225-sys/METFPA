@@ -155,9 +155,18 @@ async def patch_user(uid: str, payload: UserPatch, identity: dict = Depends(requ
     user = await mdb.users.find_one({"id": uid}, {"_id": 0, "password_hash": 0})
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
-    data = {k: v for k, v in payload.model_dump().items() if v is not None}
+    # Explicit field-presence: only provided fields are changed (direction=null clears).
+    data = payload.model_dump(exclude_unset=True)
     if "role" in data and data["role"] not in ROLES:
         raise HTTPException(status_code=400, detail=f"Rôle invalide (attendu {ROLES})")
+
+    # Resolve resulting role + direction after this patch
+    new_role = data.get("role", user.get("role"))
+    new_direction = data["direction"] if "direction" in data else user.get("direction")
+    # A direction_editor must always have a valid direction
+    if new_role == "direction_editor" and not new_direction:
+        raise HTTPException(status_code=422,
+                            detail="Un direction_editor doit avoir une direction assignée (changez aussi le rôle pour l'effacer).")
 
     # Safeguard: never remove the last active admin (by demotion or deactivation)
     removing_admin = (user["role"] == "admin") and (

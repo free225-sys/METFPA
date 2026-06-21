@@ -61,18 +61,7 @@ export default function CabinetView() {
             <FileDown size={16} /> {exporting ? "Génération…" : "Exporter la note (PDF)"}
           </button>
         </div>
-        {/* KPI strip */}
-        <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mt-4">
-          {!c ? [...Array(6)].map((_, i) => <Skeleton key={i} className="h-16" />) : <>
-            <Kpi label="Décisions en attente" value={c.kpis.decisions_en_attente} color="#6E40C9" />
-            <Kpi label="Risques critiques" value={c.kpis.risques_critiques} color="#C53030" pulse={c.kpis.risques_critiques > 0} />
-            <Kpi label="Activités bloquées" value={c.kpis.bloques} color="#C53030" pulse={c.kpis.bloques > 0} />
-            <Kpi label="En retard" value={c.kpis.en_retard} color="#FF8200" />
-            <Kpi label="Alertes" value={c.kpis.alertes} color="#C5A028" />
-            <Kpi label="Avancement moyen" value={`${c.kpis.avancement_moyen}%`} color="#009E49" />
-          </>}
-        </div>
-        <p className="text-[11px] text-[#A0AEC0] mt-2 flex items-center gap-1"><OriginBadge origin="demo_tracking" /> indicateurs opérationnels non officiels.</p>
+        <p className="text-[11px] text-[#A0AEC0] mt-3 flex items-center gap-1"><OriginBadge origin="demo_tracking" /> indicateurs opérationnels non officiels — synthèse décisionnelle ci-dessous.</p>
       </div>
 
       {/* ① Decisions requiring action */}
@@ -182,9 +171,18 @@ export default function CabinetView() {
       </Section>
 
       {/* ⑥ Progress analytics */}
-      <Section icon={BarChart3} color="#1F6FEB" title="⑥ Avancement & fiabilité des données" testid="cabinet-progress">
+      <Section icon={BarChart3} color="#1F6FEB" title="⑥ Avancement, KPI & fiabilité des données" testid="cabinet-progress">
         {!c ? <Skeleton className="h-16" /> : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-5" data-testid="cabinet-kpis">
+              <Kpi label="Décisions en attente" value={c.kpis.decisions_en_attente} color="#6E40C9" />
+              <Kpi label="Risques critiques" value={c.kpis.risques_critiques} color="#C53030" pulse={c.kpis.risques_critiques > 0} />
+              <Kpi label="Activités bloquées" value={c.kpis.bloques} color="#C53030" pulse={c.kpis.bloques > 0} />
+              <Kpi label="En retard" value={c.kpis.en_retard} color="#FF8200" />
+              <Kpi label="Alertes" value={c.kpis.alertes} color="#C5A028" />
+              <Kpi label="Avancement moyen" value={`${c.kpis.avancement_moyen}%`} color="#009E49" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <div className="text-xs font-semibold text-[#4A5568] mb-2">Répartition par statut ({c.progress_summary.total} activités)</div>
               <div className="space-y-1.5">
@@ -207,6 +205,7 @@ export default function CabinetView() {
               </ul>
             </div>
           </div>
+          </>
         )}
       </Section>
 

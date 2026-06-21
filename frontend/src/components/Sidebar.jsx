@@ -1,8 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Layers, Target, Activity, ListChecks, GitMerge, Gauge, Gavel, ShieldAlert, Wallet, Crown, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Layers, Target, Activity, ListChecks, GitMerge, Gauge, Gavel, ShieldAlert, Wallet, Crown, ShieldCheck, FileSpreadsheet } from "lucide-react";
 import { CoatOfArms } from "@/components/icons/Ivorian";
-import { useAuth, ROLE_LABELS, isAdmin } from "@/context/AuthContext";
+import { useAuth, ROLE_LABELS, isAdmin, canValidate } from "@/context/AuthContext";
 
 // S3A + S3B delivered views
 const NAV = [
@@ -25,6 +25,7 @@ const DECISIONNEL = [
 export function Sidebar() {
   const { user } = useAuth();
   const admin = isAdmin(user?.role);
+  const validator = canValidate(user?.role);
   return (
     <aside className="fixed left-0 top-0 h-full w-[280px] bg-[#1A202C] text-white flex flex-col z-30">
       <div className="px-6 py-6 border-b border-white/10 flex items-center gap-3">
@@ -73,6 +74,21 @@ export function Sidebar() {
                   isActive ? "bg-[#FF8200] text-white" : "text-white/65 hover:text-white hover:bg-white/8"
                 }`}>
               <ShieldCheck size={18} strokeWidth={1.6} /> Utilisateurs & rôles
+            </NavLink>
+          </>
+        )}
+
+        {validator && (
+          <>
+            <div className="px-3 pt-5 pb-2">
+              <p className="text-[10px] font-semibold tracking-[0.12em] text-white/35 uppercase">Données</p>
+            </div>
+            <NavLink to="/imports" data-testid="nav-imports"
+              className={({ isActive }) =>
+                `group flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-sm font-medium transition-all ${
+                  isActive ? "bg-[#FF8200] text-white" : "text-white/65 hover:text-white hover:bg-white/8"
+                }`}>
+              <FileSpreadsheet size={18} strokeWidth={1.6} /> Imports (dry-run)
             </NavLink>
           </>
         )}

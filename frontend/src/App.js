@@ -16,6 +16,7 @@ import DecisionRegister from "@/pages/DecisionRegister";
 import RiskRegister from "@/pages/RiskRegister";
 import BudgetConsolide from "@/pages/BudgetConsolide";
 import AdminUsers from "@/pages/AdminUsers";
+import ImportsDryRun from "@/pages/ImportsDryRun";
 import Dashboard from "@/pages/Dashboard";
 import TreeView from "@/pages/TreeView";
 import ActionsTable from "@/pages/ActionsTable";
@@ -72,6 +73,7 @@ function AppRoutes() {
         <Route path="/risks" element={<RiskRegister />} />
         <Route path="/budget-consolide" element={<BudgetConsolide />} />
         <Route path="/admin-users" element={<RoleRoute roles={["admin"]}><AdminUsers /></RoleRoute>} />
+        <Route path="/imports" element={<RoleRoute roles={["me_validator", "admin"]}><ImportsDryRun /></RoleRoute>} />
         <Route path="/legacy-pnd" element={<Dashboard />} />
         <Route path="/arborescence" element={<TreeView />} />
         <Route path="/actions" element={<ActionsTable />} />

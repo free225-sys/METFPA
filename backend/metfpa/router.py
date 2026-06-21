@@ -32,46 +32,46 @@ async def health():
 
 
 @metfpa_router.get("/frameworks")
-async def frameworks():
+async def frameworks(identity: dict = Depends(get_identity)):
     return await _list("frameworks")
 
 
 @metfpa_router.get("/pnd")
-async def pnd():
+async def pnd(identity: dict = Depends(get_identity)):
     return {"framework": await mdb.frameworks.find_one({"key": "PND"}, {"_id": 0}),
             "nodes": await _list("pnd_nodes", sort="code")}
 
 
 @metfpa_router.get("/politique")
-async def politique():
+async def politique(identity: dict = Depends(get_identity)):
     return {"framework": await mdb.frameworks.find_one({"key": "POL"}, {"_id": 0}),
             "nodes": await _list("pol_nodes", sort="code")}
 
 
 @metfpa_router.get("/digital")
-async def digital():
+async def digital(identity: dict = Depends(get_identity)):
     return {"framework": await mdb.frameworks.find_one({"key": "DIG"}, {"_id": 0}),
             "nodes": await _list("dig_nodes", sort="code"),
             "profile": await mdb.dig_profile.find_one({}, {"_id": 0})}
 
 
 @metfpa_router.get("/indicators")
-async def indicators():
+async def indicators(identity: dict = Depends(get_identity)):
     return await _list("indicators")
 
 
 @metfpa_router.get("/alignments")
-async def alignments():
+async def alignments(identity: dict = Depends(get_identity)):
     return await _list("alignments", sort="pol_axe")
 
 
 @metfpa_router.get("/activities")
-async def activities():
+async def activities(identity: dict = Depends(get_identity)):
     return await _list("activities", sort="code_action")
 
 
 @metfpa_router.get("/budget/consolidated")
-async def budget_consolidated():
+async def budget_consolidated(identity: dict = Depends(get_identity)):
     fr = await _list("frameworks")
     items = []
     for f in fr:
@@ -102,7 +102,7 @@ def _quarter_end(echeance):
 
 
 @metfpa_router.get("/cabinet")
-async def cabinet():
+async def cabinet(identity: dict = Depends(get_identity)):
     acts = await _list("activities")
     decisions = await _list("decisions")
     risks = await _list("risks")
@@ -181,10 +181,13 @@ async def cabinet():
 
 
 @metfpa_router.get("/activities/{aid}/history")
-async def activity_history(aid: str):
-    a = await mdb.activities.find_one({"id": aid}, {"_id": 0, "id": 1})
+async def activity_history(aid: str, identity: dict = Depends(get_identity)):
+    a = await mdb.activities.find_one({"id": aid}, {"_id": 0, "id": 1, "direction": 1})
     if not a:
         raise HTTPException(status_code=404, detail="Activité introuvable")
+    # direction_editor may only read history of their own direction's activities
+    if identity["role"] == "direction_editor":
+        assert_direction_scope(identity, a.get("direction"))
     entries = await mdb.audit_log.find(
         {"entite": "activity", "entite_id": aid}, {"_id": 0}
     ).sort("horodatage", -1).to_list(500)
@@ -242,5 +245,5 @@ async def promote_framework(payload: PromoteInput, identity: dict = Depends(requ
 
 
 @metfpa_router.get("/audit-log")
-async def audit_log():
+async def audit_log(identity: dict = Depends(require_role("me_validator", "admin"))):
     return await _list("audit_log")

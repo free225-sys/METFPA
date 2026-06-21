@@ -68,9 +68,9 @@ def _table(rows, col_widths, header=True):
     return t
 
 
-async def _build_pdf(note: str) -> tuple[bytes, bool]:
-    cab = await cabinet()
-    budget = await budget_consolidated()
+async def _build_pdf(note: str, identity: dict) -> tuple[bytes, bool]:
+    cab = await cabinet(identity)
+    budget = await budget_consolidated(identity)
     alerts = await build_alerts()
     ss = _styles()
     el = []
@@ -87,13 +87,6 @@ async def _build_pdf(note: str) -> tuple[bytes, bool]:
         el.append(Paragraph("⚠ Données de démonstration / provisoires — non encore validées par le METFPA. "
                             "Aucun budget engagé/exécuté ni liste de directions officielle n'est présenté comme validé.", ss["MWatermark"]))
     el.append(Spacer(1, 8))
-
-    k = cab["kpis"]
-    kpi_rows = [["Décisions en attente", "Risques critiques", "Bloquées", "En retard", "Alertes", "Avanc. moyen"],
-                [str(k["decisions_en_attente"]), str(k["risques_critiques"]), str(k["bloques"]),
-                 str(k["en_retard"]), str(k["alertes"]), f"{k['avancement_moyen']}%"]]
-    el.append(_table(kpi_rows, [30 * mm] * 6))
-    el.append(Spacer(1, 6))
 
     # ① Decisions
     el.append(Paragraph("① Décisions requises", ss["MH2"]))
@@ -154,7 +147,13 @@ async def _build_pdf(note: str) -> tuple[bytes, bool]:
                         "donnée absente (missing). Répartition État 15% / Bailleurs 85% applicable à la Stratégie digitale uniquement.", ss["MSmall"]))
 
     # ⑥ Progress
-    el.append(Paragraph("⑥ Avancement physique", ss["MH2"]))
+    el.append(Paragraph("⑥ Avancement physique & KPI", ss["MH2"]))
+    k = cab["kpis"]
+    kpi_rows = [["Décisions en attente", "Risques critiques", "Bloquées", "En retard", "Alertes", "Avanc. moyen"],
+                [str(k["decisions_en_attente"]), str(k["risques_critiques"]), str(k["bloques"]),
+                 str(k["en_retard"]), str(k["alertes"]), f"{k['avancement_moyen']}%"]]
+    el.append(_table(kpi_rows, [30 * mm] * 6))
+    el.append(Spacer(1, 4))
     ps = cab["progress_summary"]
     rows = [["Statut", "Nombre"]] + [[s, str(n)] for s, n in ps["by_statut"].items()]
     rows.append(["Avancement moyen", f"{ps['avancement_moyen']}%"])
@@ -180,7 +179,7 @@ async def _build_pdf(note: str) -> tuple[bytes, bool]:
 
 @pdf_router.get("/cabinet/export/pdf")
 async def export_cabinet_pdf(note: str = Query(default=""), identity: dict = Depends(get_identity)):
-    pdf_bytes, provisional = await _build_pdf(note)
+    pdf_bytes, provisional = await _build_pdf(note, identity)
     await audit("export_cabinet_pdf", "cabinet_brief", None,
                 apres={"provisional": provisional, "bytes": len(pdf_bytes)}, user=identity["email"])
     fname = f"METFPA_Cabinet_Brief_{datetime.now(timezone.utc).strftime('%Y-%m-%d')}.pdf"

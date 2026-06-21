@@ -1,0 +1,61 @@
+{
+  "summary": "Phase 2A (2A-0 security/S4 closure + 2A-1 Excel dry-run import) verified end-to-end. Backend: 53/53 pytest cases green in metfpa_phase2a_test.py (auth gating on all reads, audit-log RBAC, activity history scope, direction-clear/preserve/422, validation RBAC, imports RBAC + verdicts + no-mutation + list/get/delete). Validation workflow test (metfpa_validation_test.py) PASSES with snapshot+restore so no framework stays promoted. Frontend: cabinet decisions appear before KPI block (y=393.5 < y=2852), Imports page accessible to admin+validator with persistent dry-run notice and no Apply button, reader+editor get access-denied. Login rebranded Cockpit METFPA.",
+  "backend_results": {
+    "auth_gating": "21/21 — /health open; /pnd /politique /digital /indicators /alignments /activities /frameworks /cabinet /budget/consolidated /cabinet/alerts all return 401 unauth and 200 for cabinet_reader",
+    "audit_log_rbac": "5/5 — unauth 401, reader 403, editor 403, validator 200, admin 200",
+    "activity_history_scope": "4/4 — reader any activity 200, editor DAF 200 + non-DAF 403, validator+admin 200, unknown id 404",
+    "direction_clearing": "3/3 — omitting direction preserves DAF for editor; PUT {direction:null} on direction_editor returns 422; PUT {direction:null} on cabinet_reader returns 200 and clears it (restored after)",
+    "cabinet_pdf": "1/1 — admin GET /cabinet/export/pdf returns application/pdf 200",
+    "validation_rbac": "4/4 — unauth 401, reader 403, editor 403, validator with invalid framework key 400/404/422 (RBAC passes). Live DIG promotion+restore covered by metfpa_validation_test.py (PASSED)",
+    "imports_rbac": "5/5 — unauth 401, reader 403, editor 403, validator 200, admin 200",
+    "imports_file_validation": "1/1 — fake.xls returns 200 BLOCKED_BY_ERRORS with file_errors (extension)",
+    "imports_verdicts": "5/5 — valid.xlsx -> READY_FOR_REVIEW/READY_WITH_WARNINGS; warn.xlsx -> READY_WITH_WARNINGS; blocked.xlsx -> BLOCKED_BY_ERRORS; missingcol.xlsx -> BLOCKED_BY_ERRORS; verdict NEVER READY_TO_APPLY",
+    "no_mutation": "1/1 — GET /activities count unchanged after multiple dry-runs",
+    "imports_list_get_delete": "3/3 — list validator+admin 200, reader 403, POST dry-run -> GET /imports/{id} -> DELETE -> subsequent GET 404"
+  },
+  "frontend_results": {
+    "login_brand": "Login page displays 'Cockpit METFPA' / 'SECTEUR 4.02 · EFTP'. data-testid login-submit present.",
+    "cabinet_order": "On /pilotage-directeur as admin: cabinet-decisions bounding y=393.5 < cabinet-kpis y=2852. DECISIONS_BEFORE_KPIS=True. cabinet-exec-alerts panel present.",
+    "imports_admin": "Sidebar 'Imports (dry-run)' (nav-imports) visible. /imports renders page-imports with persistent 'Dry-run uniquement' notice. No 'Appliquer' button found. import-file-input + import-upload-btn present. Uploading /tmp/imp/valid.xlsx returns dryrun-verdict text 'Prêt pour revue', dryrun-rows visible, filter-sheet/filter-op/filter-severity all present, delete-import-* buttons rendered (17 in history).",
+    "imports_validator": "nav-imports visible after login as validateur.",
+    "imports_reader": "nav-imports hidden (count=0); direct /imports navigation -> access-denied panel (Accès refusé).",
+    "imports_editor": "nav-imports hidden (count=0); direct /imports -> access-denied panel."
+  },
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Console noise on transitions",
+        "issues": [
+          "Multiple 'Failed to load resource: 401' console errors during login/logout transitions because pages probe /api/metfpa/* before the token is persisted/cleared. Non-blocking but increases noise; consider guarding fetches on AuthContext.ready."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/metfpa_phase2a_test.py",
+    "/app/backend/tests/metfpa_validation_test.py",
+    "/app/test_reports/pytest/phase2a_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "router.py: all /api/metfpa GETs except /health and /auth/login are correctly gated via Depends(get_identity); /audit-log additionally require_role(validator,admin); activity history uses assert_direction_scope or direction match for direction_editor — looks right.",
+    "auth.py patch_user: uses Pydantic .model_fields_set / exclude_unset to distinguish 'omitted' from 'null' on the direction field — explicit field presence honored; direction_editor → null without role change returns 422; audit entry recorded on every change.",
+    "imports.py: dry-run only — verdict ∈ {READY_FOR_REVIEW, READY_WITH_WARNINGS, BLOCKED_BY_ERRORS}; no /apply endpoint exists; mutations confined to import_jobs collection + audit_log. proposed_data_origin and proposed_validation_status attached to each row. SHEET_SPEC enforces 8 required sheets and column presence; size limit and extension/zip-signature check honored (fake.xls rejected).",
+    "imports.py classification: rows tagged insert/update/unchanged/conflict/reject; duplicate codes flagged in-file; bad echeance format YYYY-TQ flagged as warning; statut outside controlled vocabulary -> error; negative budget -> error; avancement outside 0-100 -> error; invalid parent reference -> warning; missing financials preserved as missing (not zero).",
+    "frontend CabinetView.jsx: KPI block (cabinet-kpis) moved to section 6, well after cabinet-decisions. PDF generation server-side also reorders Decisions before KPIs.",
+    "ImportsDryRun.jsx: persistent 'Dry-run uniquement — aucune donnée METFPA n'est modifiée' banner shown; no Apply button; filters wired; deletion buttons audited server-side.",
+    "Sidebar.jsx + App.js RoleRoute: nav-imports rendered only for me_validator/admin; /imports route enforces same RBAC with AccessDenied fallback for reader/editor.",
+    "Console: 'Failed to load resource: 401' noise on login transitions due to early API probes before token persistence — purely cosmetic."
+  ],
+  "updated_files": ["/app/backend/tests/metfpa_phase2a_test.py"],
+  "success_rate": { "backend": "100% (53/53 in phase2a + 1/1 validation workflow)", "frontend": "100% (login brand, cabinet order, imports RBAC for 4 roles, dry-run upload+verdict+filters+delete, regression on access-denied)" },
+  "test_credentials": "admin@metfpa.ci / validateur@metfpa.ci / direction.daf@metfpa.ci / cabinet@metfpa.ci — all with Metfpa@2026Demo (METFPA_SEED_PASSWORD). Token key in localStorage: 'metfpa_token'.",
+  "seed_data_creation": "Tests create transient import_jobs via /imports/excel/dry-run and immediately DELETE them (audited cleanup). One transient direction patch (reader cleared then restored). DIG framework snapshot+restore handled by metfpa_validation_test.py. No persistent business-data mutation; GET /activities count unchanged (62) after multiple dry-runs.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Phase 2A is green. Test files of record: /app/backend/tests/metfpa_phase2a_test.py (53 cases) and /app/backend/tests/metfpa_validation_test.py (DIG snapshot+restore). Sample workbooks live at /tmp/imp/{valid,warn,blocked,missingcol}.xlsx + fake.xls; regenerate with openpyxl using sheets [PND, Politique_EFTP, Strategie_Digitale, Activites, Indicateurs, Alignements, Budget, Directions]. Verdict set: READY_FOR_REVIEW, READY_WITH_WARNINGS, BLOCKED_BY_ERRORS (never READY_TO_APPLY). echeance YYYY-TQ. Statut enum: 'Non démarré, À l'heure, En cours, En retard, Bloqué, Achevé'. Cabinet decisions-first verified via bounding box on /pilotage-directeur (cabinet-decisions vs cabinet-kpis). Frontend testids confirmed: nav-imports, page-imports, import-file-input, import-upload-btn, dryrun-verdict, dryrun-rows, filter-sheet, filter-op, filter-severity, delete-import-<id>, access-denied. Console emits 'Failed to load resource: 401' on login transitions — known, non-blocking.",
+  "rca of the issue": "n/a — no failures in this iteration."
+}
