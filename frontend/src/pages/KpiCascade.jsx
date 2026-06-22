@@ -57,20 +57,20 @@ export default function KpiCascade() {
       <DemoBanner />
 
       {isValidator ? (
-        <div className="rounded-[8px] border border-[#6E40C9]/20 bg-gradient-to-br from-[#2D2150] to-[#1A202C] p-6 text-white" data-testid="validation-workspace">
-          <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#C5A028]">
-            <BadgeCheck size={13} className="inline mr-1" /> Suivi & évaluation · contrôle qualité
+        <div className="rounded-[10px] border border-[var(--border)] border-t-[3px] border-t-[var(--ci-green-600)] bg-[var(--surface)] p-6" data-testid="validation-workspace">
+          <div className="text-[11px] font-semibold tracking-[0.1em] uppercase text-[var(--ci-green-700)]">
+            <BadgeCheck size={13} className="inline mr-1" /> Suivi et évaluation · contrôle qualité
           </div>
-          <h1 className="text-2xl font-bold tracking-tight mt-1">Espace de validation M&amp;E</h1>
-          <p className="text-sm text-white/70 mt-2 max-w-3xl">
+          <h1 className="text-[27px] leading-tight font-bold tracking-tight text-[var(--ink-900)] mt-1">Espace de validation M&amp;E</h1>
+          <p className="text-[15px] text-[var(--ink-700)] mt-2 max-w-3xl leading-relaxed">
             Vue priorisée des données à fiabiliser avant validation : valeurs manquantes, statut en attente,
             sources de vérification absentes et enregistrements incomplets.
           </p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
-            <VWStat testid="vw-missing" label="Valeurs actuelles manquantes" value={vw.missingValue.length} color="#FF8200" icon={AlertCircle} />
-            <VWStat testid="vw-pending" label="En attente de validation" value={vw.pending.length} color="#C5A028" icon={ClipboardList} />
-            <VWStat testid="vw-nosource" label="Sans source de vérification" value={vw.noSource.length} color="#C53030" icon={FileQuestion} />
-            <VWStat testid="vw-incomplete" label="Enregistrements incomplets" value={vw.incomplete.length} color="#1F6FEB" icon={Info} />
+            <VWStat testid="vw-missing" label="Valeurs actuelles manquantes" value={vw.missingValue.length} color="#D97706" icon={AlertCircle} />
+            <VWStat testid="vw-pending" label="En attente de validation" value={vw.pending.length} color="#C89A2B" icon={ClipboardList} />
+            <VWStat testid="vw-nosource" label="Sans source de vérification" value={vw.noSource.length} color="#52667A" icon={FileQuestion} />
+            <VWStat testid="vw-incomplete" label="Enregistrements incomplets" value={vw.incomplete.length} color="#52667A" icon={Info} />
           </div>
         </div>
       ) : (
@@ -172,10 +172,12 @@ export default function KpiCascade() {
 
 function VWStat({ label, value, color, icon: Icon, testid }) {
   return (
-    <div data-testid={testid} className="rounded-[6px] bg-white/8 border border-white/10 p-3">
-      <Icon size={16} style={{ color }} />
-      <div className="text-2xl font-bold tabular-nums mt-1" style={{ color }}>{value}</div>
-      <div className="text-[10px] text-white/60 leading-tight mt-0.5">{label}</div>
+    <div data-testid={testid} className="rounded-[10px] border border-[var(--border)] bg-[var(--surface-soft)] p-3.5">
+      <div className="flex items-center gap-2">
+        <Icon size={16} style={{ color }} />
+        <span className="text-2xl font-bold tabular-nums text-[var(--ink-900)]">{value}</span>
+      </div>
+      <div className="text-[11.5px] text-[var(--ink-500)] leading-tight mt-1">{label}</div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
-import { LogOut, Maximize2 } from "lucide-react";
+import { LogOut, Menu, PanelLeft } from "lucide-react";
 import { useAuth, ROLE_LABELS } from "@/context/AuthContext";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator,
@@ -24,42 +24,47 @@ const TITLES = {
   "/legacy-pnd": "Tableau de bord exécutif (PND générique)",
 };
 
-export function Header({ onPresentation }) {
+export function Header({ onToggleSidebar, onOpenDrawer, isMobile }) {
   const { user, logout } = useAuth();
   const loc = useLocation();
   const title = TITLES[loc.pathname] || "Cockpit METFPA";
   const initials = (user?.name || "PM").split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
 
   return (
-    <header className="fixed top-0 right-0 left-[280px] h-[64px] bg-white border-b border-[#E2E8F0] z-20 px-8 flex items-center justify-between">
-      <div className="min-w-0">
-        <h1 className="text-lg font-bold tracking-tight text-[#1A202C] truncate" data-testid="header-title">{title}</h1>
+    <header className="sticky top-0 z-20 h-[64px] bg-[var(--surface)] border-b border-[var(--border)] px-4 sm:px-8 flex items-center justify-between">
+      <div className="flex items-center gap-3 min-w-0">
+        {isMobile ? (
+          <button data-testid="mobile-menu-button" onClick={onOpenDrawer} aria-label="Ouvrir le menu"
+            className="w-9 h-9 rounded-[7px] border border-[var(--border)] flex items-center justify-center text-[var(--ink-700)] hover:bg-[var(--surface-soft)]">
+            <Menu size={18} />
+          </button>
+        ) : (
+          <button data-testid="header-sidebar-toggle" onClick={onToggleSidebar} aria-label="Replier ou déplier le menu"
+            className="w-9 h-9 rounded-[7px] border border-[var(--border)] flex items-center justify-center text-[var(--ink-700)] hover:bg-[var(--surface-soft)]">
+            <PanelLeft size={18} />
+          </button>
+        )}
+        <h1 className="text-[17px] font-bold tracking-tight text-[var(--ink-900)] truncate" data-testid="header-title">{title}</h1>
       </div>
 
       <div className="flex items-center gap-3">
         {user && (
           <div className="hidden md:flex flex-col items-end leading-tight mr-1" data-testid="header-role">
-            <span className="text-[11px] font-semibold text-[#1A202C]">{ROLE_LABELS[user.role] || user.role}</span>
-            {user.direction && <span className="text-[10px] text-[#C5A028] font-medium uppercase tracking-wide">{user.direction}</span>}
+            <span className="text-[12px] font-semibold text-[var(--ink-900)]">{ROLE_LABELS[user.role] || user.role}</span>
+            {user.direction && <span className="text-[10px] text-[var(--ci-gold-600)] font-medium">{user.direction}</span>}
           </div>
         )}
-
-        <button data-testid="presentation-button" onClick={onPresentation} title="Mode présentation"
-          className="w-9 h-9 rounded-[6px] border border-[#E2E8F0] flex items-center justify-center text-[#4A5568] hover:bg-[#F7F7F5] transition-colors">
-          <Maximize2 size={17} strokeWidth={1.8} />
-        </button>
-
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button data-testid="user-menu-trigger" className="flex items-center gap-2.5 outline-none">
-              <div className="w-9 h-9 rounded-full bg-[#1A202C] text-white flex items-center justify-center text-xs font-bold">{initials}</div>
+            <button data-testid="user-menu-trigger" className="outline-none">
+              <div className="w-9 h-9 rounded-full bg-[var(--ink-900)] text-white flex items-center justify-center text-xs font-bold">{initials}</div>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-64">
             <DropdownMenuLabel>
-              <div className="font-semibold text-sm text-[#1A202C]">{user?.name}</div>
-              <div className="text-xs text-[#FF8200] font-medium">{ROLE_LABELS[user?.role] || user?.role}{user?.direction ? ` · ${user.direction}` : ""}</div>
-              <div className="text-xs text-[#718096] font-normal mt-0.5">{user?.email}</div>
+              <div className="font-semibold text-sm text-[var(--ink-900)]">{user?.name}</div>
+              <div className="text-xs text-[var(--ci-orange-600)] font-medium">{ROLE_LABELS[user?.role] || user?.role}{user?.direction ? ` · ${user.direction}` : ""}</div>
+              <div className="text-xs text-[var(--ink-500)] font-normal mt-0.5">{user?.email}</div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={logout} data-testid="logout-button" className="text-red-600 cursor-pointer">

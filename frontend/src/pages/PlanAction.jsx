@@ -132,13 +132,13 @@ export default function PlanAction() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-[4px] border border-[#E2E8F0] overflow-hidden">
-        <div className="overflow-x-auto">
+      <div className="bg-[var(--surface)] rounded-[10px] border border-[var(--border)] overflow-hidden">
+        <div className="overflow-x-auto max-h-[calc(100vh-280px)]">
           <table className="w-full text-sm" data-testid="activities-table">
-            <thead className="bg-[#F7F7F5] text-[#718096] text-[11px] uppercase tracking-wide">
+            <thead className="bg-[var(--surface-soft)] text-[var(--ink-500)] text-[11px] uppercase tracking-wide sticky top-0 z-10">
               <tr>
                 <th className="text-left px-3 py-2.5 font-semibold">Code</th>
-                <th className="text-left px-3 py-2.5 font-semibold">Intitulé</th>
+                <th className="text-left px-3 py-2.5 font-semibold min-w-[320px]">Intitulé</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Direction</th>
                 <th className="text-left px-3 py-2.5 font-semibold">Axe</th>
                 <th className="text-right px-3 py-2.5 font-semibold">Prévu / Exécuté · Engagé</th>
@@ -151,11 +151,11 @@ export default function PlanAction() {
             <tbody>
               {!acts ? [...Array(6)].map((_, i) => <tr key={i}><td colSpan={9} className="p-2"><Skeleton className="h-8" /></td></tr>) :
                 filtered.map((a) => (
-                  <tr key={a.id} data-testid={`activity-row-${a.id}`} className="border-t border-[#E2E8F0] hover:bg-[#F7F7F5]">
-                    <td className="px-3 py-2.5 font-mono text-xs text-[#718096] whitespace-nowrap">{a.code_action}</td>
-                    <td className="px-3 py-2.5 max-w-[280px]"><span className="text-[#1A202C] line-clamp-2">{a.intitule}</span></td>
-                    <td className="px-3 py-2.5 whitespace-nowrap"><span className="text-xs">{a.direction}</span> <span className="text-[9px] text-[#C5A028]">à valider</span></td>
-                    <td className="px-3 py-2.5 text-xs whitespace-nowrap">{a.axe_pol}</td>
+                  <tr key={a.id} data-testid={`activity-row-${a.id}`} className="border-t border-[var(--border)] hover:bg-[var(--surface-warm)]">
+                    <td className="px-3 py-2.5 font-mono text-xs text-[var(--ink-500)] whitespace-nowrap align-top">{a.code_action}</td>
+                    <td className="px-3 py-2.5 min-w-[320px] align-top"><span className="text-[var(--ink-900)]" title={a.intitule}>{a.intitule}</span></td>
+                    <td className="px-3 py-2.5 whitespace-nowrap align-top"><span className="text-xs">{a.direction}</span> <span className="text-[9px] text-[var(--ci-gold-600)]">à valider</span></td>
+                    <td className="px-3 py-2.5 text-xs whitespace-nowrap align-top">{a.axe_pol}</td>
                     <td className="px-3 py-2.5 text-right text-xs tabular-nums whitespace-nowrap">
                       <div>{a.budget_prevu != null ? fmtMillions(a.budget_prevu) : <MissingValue label="manquant" />}</div>
                       <div className="text-[#718096]">{a.budget_execute != null ? fmtMillions(a.budget_execute) : "—"} <span className="text-[9px]">(démo)</span></div>

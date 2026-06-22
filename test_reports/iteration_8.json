@@ -1,0 +1,121 @@
+{
+  "summary": "Visual-polish sprint verified end-to-end on the preview URL. All 12 acceptance criteria pass: collapsible sidebar (280→76, persists via localStorage metfpa_sidebar_collapsed), single-active nav item across the 5 direction_editor /plan-action variants, mobile off-canvas drawer at 390px with full labels + overlay + close-on-nav, KPI validation workspace de-purpled (white bg, green top border, dark text), no purple (#6E40C9) hits on /pilotage-directeur or /decisions, money format renders as 'X XXX,Y milliards FCFA' on /budget-consolide and Cabinet ⑤ (no Bn/Md), header cleaned (no global-search, no notifications-trigger), regression on /accueil, /pnd-402, /politique-eftp, /strategie-digitale, /alignement, /decisions, /risks all render header-title without errors, accessibility (sidebar-toggle aria-expanded toggles, collapsed nav-* gain title attr, keyboard focus reaches nav-cabinet).",
+  "frontend_results": {
+    "sidebar_collapse_desktop": {
+      "expanded_width_px": 280,
+      "collapsed_width_px": 76,
+      "data_collapsed_attr_toggles": true,
+      "logo_visible_when_collapsed": true,
+      "labels_hidden_when_collapsed": "Cockpit METFPA text count goes from 1 to 0",
+      "header_sidebar_toggle_works": true,
+      "sidebar_toggle_in_footer_works": true
+    },
+    "collapse_persistence": {
+      "localStorage_key": "metfpa_sidebar_collapsed",
+      "value_when_collapsed": "1",
+      "stays_collapsed_after_F5": true,
+      "stays_expanded_after_F5": true
+    },
+    "single_active_item_DAF": {
+      "/plan-action": ["nav-plan-action"],
+      "/plan-action?vue=delayed": ["nav-delayed"],
+      "/plan-action?vue=updates": ["nav-updates"],
+      "/plan-action?vue=alerts": ["nav-alerts"],
+      "issue_with_four_simultaneous_orange_buttons": "FIXED — verified exactly one aria-current=page nav-* item at every URL"
+    },
+    "mobile_drawer_390x844": {
+      "sidebar_off_canvas_initial": "x=-280",
+      "mobile_menu_button_visible": true,
+      "header_sidebar_toggle_hidden_on_mobile": true,
+      "drawer_opens_with_full_labels": true,
+      "sidebar_overlay_present": true,
+      "drawer_closes_and_navigates_on_nav_click": true,
+      "main_content_full_width_marginLeft_0": true
+    },
+    "role_navigation": {
+      "cabinet_reader_landing": "/pilotage-directeur OK; sidebar groups Pilotage + Progression stratégique + Référentiels",
+      "direction_editor_landing": "/plan-action OK; 'Mon portefeuille de direction'; 5 DAF rows; 5 items in 'Ma Direction'",
+      "me_validator_landing": "/kpi-cascade OK; validation-workspace + 4 vw-list-* rendered",
+      "header_role_label": "present",
+      "user_menu_and_logout": "user-menu-trigger + logout-button present and clickable"
+    },
+    "kpi_validation_workspace_de_purpled": {
+      "background": "rgb(255,255,255)",
+      "background_image": "none",
+      "text_color": "rgb(24,33,47)",
+      "border_top_color": "rgb(0,135,81) (institutional green)",
+      "counters_present": ["vw-missing", "vw-pending", "vw-nosource", "vw-incomplete"],
+      "lists_above_full_table": ["vw-list-missing", "vw-list-pending", "vw-list-nosource", "vw-list-incomplete"]
+    },
+    "no_purple_audit": {
+      "/pilotage-directeur": "0 hits for #6E40C9 / rgb(110,64,201) / purple / violet",
+      "/decisions": "0 hits for #6E40C9 / rgb(110,64,201)"
+    },
+    "money_format": {
+      "cabinet_budget_block": "'milliards FCFA' present, no 'Bn'/'Md'",
+      "/budget-consolide": "samples: '240,4 milliards FCFA', '293,8 milliards FCFA', '5,6 milliards FCFA', '1\u202f202,1 milliards FCFA'; 0 Bn/Md occurrences"
+    },
+    "direction_portfolio_polish": {
+      "activities_table_present": true,
+      "row_count_DAF": 5,
+      "edit_history_columns_visible": true
+    },
+    "header_cleanup": {
+      "global_search_absent": true,
+      "notifications_trigger_absent": true,
+      "header_title_present": true,
+      "header_role_present": true,
+      "user_menu_trigger_present": true,
+      "logout_button_present": true
+    },
+    "regression_pages": {
+      "/accueil": "title='Accueil intégré METFPA' no errors",
+      "/pnd-402": "title='Vue PND 4.02' no errors",
+      "/politique-eftp": "title='Politique EFTP 2026-2035' no errors",
+      "/strategie-digitale": "title='Stratégie digitale 2026-2031' no errors",
+      "/alignement": "title='Alignement stratégique' no errors",
+      "/decisions": "title='Registre des décisions' no errors",
+      "/risks": "title='Registre des risques' no errors"
+    },
+    "accessibility": {
+      "sidebar_toggle_aria_expanded_toggles": "true → false on collapse",
+      "sidebar_toggle_aria_label_expanded": "Replier le menu",
+      "sidebar_toggle_aria_label_collapsed": "Déplier le menu",
+      "nav_cabinet_title_attr_when_collapsed": "Pilotage Directeur",
+      "keyboard_tab_reaches_nav_items": true
+    },
+    "institutional_brand": {
+      "img_alt": "Armoiries de la République de Côte d'Ivoire",
+      "img_src": "/CIV.png",
+      "subtitle": "Pilotage du secteur EFTP",
+      "title": "Cockpit METFPA"
+    }
+  },
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Layout.jsx: matchMedia (max-width:1023px) handler correctly toggles isMobile; sidebar uses translate-x-full off-canvas + lg:translate-x-0 + dynamic marginLeft on the main column — clean and reactive on resize.",
+    "Sidebar.jsx SidebarItem active detection compares loc.pathname AND loc.search === (qs ? `?${qs}` : '') — this is what guarantees only one of the 5 direction_editor items lights up at a time. Verified empirically across /plan-action, ?vue=delayed, ?vue=updates, ?vue=alerts.",
+    "Sidebar collapsed state is hoisted to Layout; effectiveCollapsed = isMobile ? false : collapsed ensures the mobile drawer always renders full labels even when desktop preference is collapsed — correct UX.",
+    "Header.jsx renders header-sidebar-toggle vs mobile-menu-button based on isMobile prop — no overlap between the two buttons; previously reported global-search-input and notifications-trigger are confirmed removed.",
+    "KpiCascade validation-workspace verified at runtime: background rgb(255,255,255), border-top rgb(0,135,81) (var(--ci-green-600)), text rgb(24,33,47) (var(--ink-900)). Dark purple gradient is gone.",
+    "Money format: fmtMilliards across /budget-consolide outputs French-formatted '1\u202f202,1 milliards FCFA' (NBSP thousand separator + comma decimal) — no 'Bn'/'Md' anywhere on audited pages.",
+    "Accessibility: aria-expanded on data-testid=sidebar-toggle flips correctly, and collapsed nav items expose accessible name through the title attribute (verified Pilotage Directeur on nav-cabinet). Focus styles are preserved via Tailwind defaults — adequate for keyboard navigation.",
+    "Minor maintenance: /app/memory/test_credentials.md still references the older PND credentials (not the METFPA ones). Updating this file would prevent future testing agents from guessing.",
+    "Nit only: Sidebar group 'Ma Direction' separator border colors and the icon-rail spacing look balanced at 76px; if a future variant needs to remember a per-role default collapse, the single localStorage key is sufficient."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "skipped (frontend-only request)", "frontend": "100% — 12/12 acceptance criteria passed (collapse, persistence, single-active, mobile drawer, role landings, KPI workspace de-purpled, no purple, money format, direction portfolio, header cleanup, 7/7 regression pages, accessibility)" },
+  "test_credentials": "Cabinet: cabinet@metfpa.ci | Direction (DAF): direction.daf@metfpa.ci | M&E Validator: validateur@metfpa.ci | Admin: admin@metfpa.ci — all with Metfpa@2026Demo. Login testids: login-email-input, login-password-input, login-submit-button.",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "localStorage key for sidebar state is 'metfpa_sidebar_collapsed' (value '1' = collapsed, '0'/absent = expanded). Mobile breakpoint is max-width:1023px (matchMedia in Layout.jsx). Sidebar widths: 280 / 76. On mobile the drawer always renders full labels even if desktop preference was collapsed (effectiveCollapsed=false on mobile). Single-active nav detection compares pathname AND search (loc.search === (qs ? `?${qs}` : '')) — so direction_editor's 5 /plan-action variants light up exactly one at a time, and admin's nav-admin-users vs nav-roles (?tab=roles) also single-active. data-testid catalogue: sidebar, sidebar-toggle (footer), header-sidebar-toggle (header desktop), mobile-menu-button (header mobile), sidebar-overlay (mobile only), institutional-brand, validation-workspace, vw-missing/pending/nosource/incomplete, vw-list-*, cabinet-decisions, cabinet-kpis, cabinet-budget, activities-table, edit-activity-*, save-activity, header-title, header-role, user-menu-trigger, logout-button. Screenshots saved to /tmp/visual_polish/.",
+  "rca of the issue": "n/a — visual-polish sprint fully landed."
+}

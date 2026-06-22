@@ -4,12 +4,33 @@
 @tailwind utilities;
 
 :root {
-  --orange: #FF8200;
-  --green: #009E49;
-  --gold: #C5A028;
-  --slate: #1A202C;
-  --soft-gray: #F7F7F5;
-  --row-hover: #FFF7ED;
+  /* Côte d'Ivoire institutional palette */
+  --ci-green-700: #006B3C;
+  --ci-green-600: #008751;
+  --ci-green-100: #E8F4EE;
+  --ci-orange-600: #F47C20;
+  --ci-orange-100: #FFF1E7;
+  --ci-gold-600: #C89A2B;
+  --ci-gold-100: #F8F1DD;
+  --ink-900: #18212F;
+  --ink-700: #344054;
+  --ink-500: #667085;
+  --surface: #FFFFFF;
+  --surface-soft: #F7F8FA;
+  --surface-warm: #FAF8F3;
+  --border: #E3E7ED;
+  --danger: #C93C37;
+  --warning: #D97706;
+  --success: #16794A;
+  --info: #52667A;
+
+  /* legacy aliases (kept for existing pages) */
+  --orange: #F47C20;
+  --green: #008751;
+  --gold: #C89A2B;
+  --slate: #18212F;
+  --soft-gray: #F7F8FA;
+  --row-hover: #FFF1E7;
 }
 
 body {

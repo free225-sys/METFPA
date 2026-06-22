@@ -8,7 +8,7 @@ function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2
 
 const ACTION_COLOR = {
   login_success: "#009E49", login_failed: "#C53030",
-  promote_framework: "#6E40C9", admin_update_user: "#1F6FEB",
+  promote_framework: "#C89A2B", admin_update_user: "#1F6FEB",
   update_activity: "#FF8200", create_decision: "#C5A028", create_risk: "#C5A028",
   import_dryrun_complete: "#1F6FEB", export_cabinet_pdf: "#009E49",
 };

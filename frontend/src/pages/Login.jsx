@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth, roleHome } from "@/context/AuthContext";
-import { CoatOfArms } from "@/components/icons/Ivorian";
 import { Loader2, Lock } from "lucide-react";
 
 export default function Login() {
@@ -33,10 +32,12 @@ export default function Login() {
 
       <div className="w-full max-w-md animate-slide-up">
         <div className="flex flex-col items-center mb-8">
-          <CoatOfArms size={68} stroke="#C5A028" />
-          <h1 className="mt-4 text-2xl font-bold tracking-tight text-[#1A202C]">Cockpit METFPA</h1>
-          <p className="text-sm text-[#718096] mt-1 font-medium tracking-wide">SECTEUR 4.02 · EFTP</p>
-          <p className="text-xs text-[#A0AEC0] mt-2 text-center">Enseignement Technique, Formation Professionnelle & Apprentissage</p>
+          <div className="w-[88px] h-[88px] rounded-[12px] bg-white border border-[var(--border)] flex items-center justify-center p-2 shadow-[0_2px_10px_rgba(24,33,47,0.08)]">
+            <img src="/CIV.png" alt="Armoiries de la République de Côte d'Ivoire" className="object-contain w-full h-full" />
+          </div>
+          <h1 className="mt-4 text-2xl font-bold tracking-tight text-[var(--ink-900)]">Cockpit METFPA</h1>
+          <p className="text-sm text-[var(--ink-500)] mt-1 font-medium">Pilotage du secteur EFTP</p>
+          <p className="text-xs text-[var(--ink-500)]/80 mt-2 text-center">Enseignement Technique, Formation Professionnelle &amp; Apprentissage</p>
         </div>
 
         <div className="bg-white rounded-[8px] shadow-[0_4px_24px_rgba(26,32,44,0.06)] border border-[#1A202C]/5 p-8">

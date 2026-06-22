@@ -65,7 +65,7 @@ export default function CabinetView() {
       </div>
 
       {/* ① Decisions requiring action */}
-      <Section icon={Gavel} color="#6E40C9" title="① Décisions requises" testid="cabinet-decisions"
+      <Section icon={Gavel} color="#C89A2B" title="① Décisions requises" testid="cabinet-decisions"
         action={<LinkBtn onClick={() => nav("/decisions")}>Registre des décisions</LinkBtn>}>
         {!c ? <Skeleton className="h-16" /> : c.decisions_required.length === 0 ? <Empty label="Aucune décision en attente." /> : (
           <div className="space-y-2">
@@ -76,7 +76,7 @@ export default function CabinetView() {
                   <div className="text-[11px] text-[#718096]">{d.decision_type} · demandé par {d.requested_by || "—"} {d.due_date && `· échéance ${d.due_date.slice(0, 10)}`}</div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <StatusPill label={d.status} color="#6E40C9" />
+                  <StatusPill label={d.status} color="#C89A2B" />
                   <OriginBadge origin={d.data_origin} status={d.validation_status} />
                   <ArrowRight size={15} className="text-[#CBD5E0]" />
                 </div>
@@ -175,7 +175,7 @@ export default function CabinetView() {
         {!c ? <Skeleton className="h-16" /> : (
           <>
             <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-5" data-testid="cabinet-kpis">
-              <Kpi label="Décisions en attente" value={c.kpis.decisions_en_attente} color="#6E40C9" />
+              <Kpi label="Décisions en attente" value={c.kpis.decisions_en_attente} color="#C89A2B" />
               <Kpi label="Risques critiques" value={c.kpis.risques_critiques} color="#C53030" pulse={c.kpis.risques_critiques > 0} />
               <Kpi label="Activités bloquées" value={c.kpis.bloques} color="#C53030" pulse={c.kpis.bloques > 0} />
               <Kpi label="En retard" value={c.kpis.en_retard} color="#FF8200" />

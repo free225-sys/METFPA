@@ -11,7 +11,7 @@ export const AXIS_COLOR = {
   // Policy axes AX1-AX3 (orange family)
   AX1: "#FF8200", AX2: "#C5A028", AX3: "#B85C00",
   // Digital axes D1-D3 (blue/teal/violet family)
-  D1: "#1F6FEB", D2: "#0E7490", D3: "#6E40C9",
+  D1: "#1F6FEB", D2: "#0E7490", D3: "#52667A",
 };
 
 export function frameworkColor(k) { return FRAMEWORK_COLOR[k] || "#1A202C"; }

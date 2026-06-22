@@ -30,11 +30,11 @@ export default function DecisionRegister() {
       <DemoBanner />
       <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6 flex items-start justify-between gap-3">
         <div>
-          <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#6E40C9]"><Gavel size={13} className="inline mr-1" /> Décisions & arbitrages</div>
+          <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#C89A2B]"><Gavel size={13} className="inline mr-1" /> Décisions & arbitrages</div>
           <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Registre des décisions</h1>
           <p className="text-sm text-[#4A5568] mt-2">Suivi des décisions requises ; alimente le Pilotage Directeur. Données <strong>démo · à valider</strong>.</p>
         </div>
-        <button data-testid="add-decision" disabled={!editor} onClick={() => setEdit({ ...EMPTY })} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#6E40C9] text-white px-3.5 py-2 text-sm font-medium hover:bg-[#5b34a8] disabled:opacity-40 disabled:cursor-not-allowed" title={editor ? "" : "Lecture seule"}><Plus size={15} /> Nouvelle décision</button>
+        <button data-testid="add-decision" disabled={!editor} onClick={() => setEdit({ ...EMPTY })} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#C89A2B] text-white px-3.5 py-2 text-sm font-medium hover:bg-[#A87F1E] disabled:opacity-40 disabled:cursor-not-allowed" title={editor ? "" : "Lecture seule"}><Plus size={15} /> Nouvelle décision</button>
       </div>
 
       <div className="bg-white rounded-[4px] border border-[#E2E8F0] overflow-hidden">
@@ -57,7 +57,7 @@ export default function DecisionRegister() {
                     <td className="px-4 py-2.5"><OriginBadge origin={d.data_origin} status={d.validation_status} /></td>
                     <td className="px-4 py-2.5 text-center whitespace-nowrap">
                       {editor ? <>
-                        <button data-testid={`edit-decision-${d.id}`} onClick={() => setEdit({ ...EMPTY, ...d, due_date: (d.due_date || "").slice(0, 10), decision_date: (d.decision_date || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#6E40C9]/10 hover:text-[#6E40C9] inline-flex items-center justify-center"><Pencil size={14} /></button>
+                        <button data-testid={`edit-decision-${d.id}`} onClick={() => setEdit({ ...EMPTY, ...d, due_date: (d.due_date || "").slice(0, 10), decision_date: (d.decision_date || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C89A2B]/10 hover:text-[#C89A2B] inline-flex items-center justify-center"><Pencil size={14} /></button>
                         <button data-testid={`delete-decision-${d.id}`} onClick={() => setDel(d)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>
                       </> : <span className="text-[11px] text-[#A0AEC0]">Lecture</span>}
                     </td>
@@ -114,7 +114,7 @@ function EditDialog({ form, meta, onClose, onSaved }) {
         </div>
         <DialogFooter>
           <button onClick={onClose} className="px-4 py-2 text-sm rounded-[6px] border border-[#E2E8F0] text-[#4A5568] hover:bg-[#F7F7F5]">Annuler</button>
-          <button data-testid="save-decision" onClick={save} disabled={saving} className="px-4 py-2 text-sm rounded-[6px] bg-[#6E40C9] text-white font-medium hover:bg-[#5b34a8] disabled:opacity-60">{saving ? "…" : "Enregistrer"}</button>
+          <button data-testid="save-decision" onClick={save} disabled={saving} className="px-4 py-2 text-sm rounded-[6px] bg-[#C89A2B] text-white font-medium hover:bg-[#A87F1E] disabled:opacity-60">{saving ? "…" : "Enregistrer"}</button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -138,7 +138,7 @@ function DeleteDialog({ item, onClose, onDeleted }) {
   );
 }
 
-const inputCls = "w-full rounded-[6px] border border-[#E2E8F0] px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#6E40C9]";
+const inputCls = "w-full rounded-[6px] border border-[#E2E8F0] px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#C89A2B]";
 function Field({ label, children }) { return <label className="block"><span className="text-xs font-semibold text-[#4A5568]">{label}</span><div className="mt-1">{children}</div></label>; }
 function Select({ value, onChange, options, testid }) { return <select data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} className={inputCls}>{options.map((o) => <option key={o} value={o}>{o || "—"}</option>)}</select>; }
 function Pill({ label, color }) { return <span className="text-[11px] font-semibold px-2 py-0.5 rounded-[4px] capitalize" style={{ color, background: `${color}14` }}>{label}</span>; }
