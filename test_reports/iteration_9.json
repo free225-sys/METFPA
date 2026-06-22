@@ -1,0 +1,43 @@
+{
+  "summary": "Visual-polish follow-up for the 4 strategic reference pages verified end-to-end on the preview URL (cabinet@metfpa.ci / Metfpa@2026Demo). All 6 acceptance criteria pass: (1) /pnd-402 renders page-pnd with green top accent rgb(0,135,81), h1 'Vue PND 4.02', PageHeader title 'Secteur 4.02 — Enseignement Technique et Formation Professionnelle', exactly 3 MetricCards (Effets/Produits/Budget=1 202,1 milliards FCFA), HierTree renders chain Pilier P4 → Secteur 4.02 → Effets 4.02.1/2/3, single DataStatusBanner at top, zero purple hits. (2) /politique-eftp renders page-politique with orange top accent rgb(244,124,32), 5 MetricCards (Période/Axes/Produits/Actions/Budget total), axe-link-AX1/AX2/AX3 all visible with PND-effet mapping, Axe→Produit→Action HierTree present, FR money formatting. (3) /strategie-digitale renders page-digital with financing-bar/annual-profile/priorities/digital-indicators all present, dig-axe-D1/D2/D3 accordion items present, D1 toggles (202px → 49px on collapse and re-expands on second click), milliards FCFA FR formatting. (4) /alignement renders page-alignement with alignment-legend, alignment-AX1/AX2/AX3 cards (PND→Politique mapping with 'contribue à' arrow), 3 alignment-anchor-* digital anchor blocks, FR money formatting. (5) CONSISTENCY: all 4 pages share the institutional look (white surface, thin top accent line, dark ink text, gold/green/orange/blue accents), each PageHeader title is unique and distinct, zero purple (#6E40C9/rgb 110,64,201) hits across the 4 pages, no console errors, no page errors. (6) REGRESSION: sidebar Référentiels group exposes nav-pnd, nav-politique, nav-digital, nav-alignement — clicking each navigates correctly; header-sidebar-toggle still collapses/expands (data-collapsed true ↔ false) while on /pnd-402.",
+  "frontend_results": {
+    "/pnd-402": { "root_visible": true, "h1": "Vue PND 4.02", "demo_banner_count": 1, "purple_hits": 0, "has_milliards_FCFA": true, "has_Bn_or_Md": false, "hero_border_top_color": "rgb(0,135,81) (PND green)", "top_grid_metric_cards": 3, "console_errors": 0, "page_errors": 0 },
+    "/politique-eftp": { "root_visible": true, "h1": "Politique EFTP 2026-2035", "demo_banner_count": 1, "purple_hits": 0, "has_milliards_FCFA": true, "has_Bn_or_Md": false, "hero_border_top_color": "rgb(244,124,32) (POL orange)", "metric_card_count_top": 5, "axe_link_AX1": true, "axe_link_AX2": true, "axe_link_AX3": true, "console_errors": 0, "page_errors": 0 },
+    "/strategie-digitale": { "root_visible": true, "h1": "Stratégie digitale 2026-2031", "demo_banner_count": 1, "purple_hits": 0, "has_milliards_FCFA": true, "has_Bn_or_Md": false, "financing_bar": true, "annual_profile": true, "priorities": true, "digital_indicators": true, "dig_axe_D1_D2_D3": [true, true, true], "dig_axe_D1_toggle": "Height 202px (expanded by default) → 49px after 1st click (collapsed) → grows again after 2nd click — accordion toggle works", "console_errors": 0, "page_errors": 0 },
+    "/alignement": { "root_visible": true, "h1": "Alignement stratégique", "demo_banner_count": 1, "purple_hits": 0, "has_milliards_FCFA": true, "has_Bn_or_Md": false, "alignment_legend": true, "alignment_AX1_AX2_AX3": [true, true, true], "alignment_anchor_count": 3, "console_errors": 0, "page_errors": 0 },
+    "regression_navigation": {
+      "nav_items_visible_for_cabinet_reader": ["nav-cabinet","nav-decisions","nav-risks","nav-budget","nav-cabinet-note","nav-accueil","nav-plan-action","nav-kpi","nav-pnd","nav-politique","nav-digital","nav-alignement"],
+      "nav_pnd_lands_on": "/pnd-402",
+      "nav_politique_lands_on": "/politique-eftp",
+      "nav_digital_lands_on": "/strategie-digitale",
+      "nav_alignement_lands_on": "/alignement",
+      "sidebar_collapse_toggle_on_pnd_page": "data-collapsed: true → false (works)"
+    }
+  },
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "VuePND.jsx (53 lines), PolitiqueEFTP.jsx (70), StrategieDigitale.jsx, Alignement.jsx all use shared components/Institutional.jsx primitives (PageHeader, InstitutionalSection, MetricCard, DataStatusBanner) — DRY achieved, flat card structure (no nested bordered cards inside hero).",
+    "Institutional.PageHeader uses the framework accent only on the eyebrow color; main title uses var(--ink-900) — consistent dark-ink hierarchy across PND green / POL orange / DIG blue.",
+    "Hero top accent verified at runtime: PND rgb(0,135,81) ✓, POL rgb(244,124,32) ✓. Both pages use border-t-[3px] with style={{borderTopColor: color}} — implementation matches spec.",
+    "Single DataStatusBanner per page (banner_count=1 on all 4) — no duplicated/repeated banner.",
+    "Zero purple hits (#6E40C9 / rgb(110,64,201)) audited via computed-style scan on all 4 pages — de-purpling holds.",
+    "FR money formatting consistent: 'X XXX,Y milliards FCFA' present on PND/POL/Digital/Alignement; zero 'Bn'/'Md' occurrences.",
+    "Sidebar Référentiels group remains intact (nav-pnd, nav-politique, nav-digital, nav-alignement) and navigation to each route works; header-sidebar-toggle continues to collapse/expand on these pages — no regression from iteration_8.",
+    "Minor nit (not blocking): /app/memory/test_credentials.md still references the old PND/ministre@pnd.ci credentials. Should be refreshed to METFPA credentials (cabinet@metfpa.ci / direction.daf@metfpa.ci / validateur@metfpa.ci / admin@metfpa.ci — Metfpa@2026Demo) for future testing agents."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "skipped (frontend-only request per testing_type)", "frontend": "100% — 6/6 acceptance criteria passed across the 4 reference pages and the sidebar regression" },
+  "test_credentials": "cabinet@metfpa.ci / Metfpa@2026Demo (Lecteur Cabinet — read access to all 4 reference pages, lands on /pilotage-directeur).",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Reference pages all use components/Institutional.jsx: PageHeader (eyebrow + h1 + description + actions), InstitutionalSection (titled card with left-border-accent), MetricCard (rounded label/value/hint), DataStatusBanner (single demo banner at page top). Framework accent colors via frameworkColor(): PND=rgb(0,135,81) green, POL=rgb(244,124,32) orange, DIG=rgb(31,111,235) blue. Hero card pattern: <div className='bg-[var(--surface)] rounded-[10px] border border-[var(--border)] border-t-[3px] p-6' style={borderTopColor: color}>. data-testid catalogue confirmed live: page-pnd, page-politique, page-digital, page-alignement, demo-banner, axe-link-AX1/AX2/AX3, financing-bar, annual-profile, priorities, digital-indicators, dig-axe-D1/D2/D3 (D1 expanded by default; click toggles), alignment-legend, alignment-AX1/AX2/AX3, alignment-anchor-* (3 visible). Cabinet sidebar exposes nav-pnd, nav-politique, nav-digital, nav-alignement in the Référentiels group. Screenshots in /app/.screenshots/ref_pages/. Note: page.screenshot() needs type='jpeg' when using quality= param (PNG rejects quality).",
+  "rca of the issue": "n/a — visual polish for the 4 reference pages fully landed; no defects found."
+}

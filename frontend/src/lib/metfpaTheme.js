@@ -1,16 +1,16 @@
 // METFPA axes-oriented visual language (replaces generic 6-pillar semantics)
 
 export const FRAMEWORK_COLOR = {
-  PND: "#009E49", // PND 4.02 — national green
-  POL: "#FF8200", // EFTP Policy — national orange
+  PND: "#008751", // PND 4.02 — institutional green
+  POL: "#F47C20", // EFTP Policy — institutional orange
   DIG: "#1F6FEB", // Digital Strategy — digital blue
 };
 
 // Axes within each framework
 export const AXIS_COLOR = {
-  // Policy axes AX1-AX3 (orange family)
-  AX1: "#FF8200", AX2: "#C5A028", AX3: "#B85C00",
-  // Digital axes D1-D3 (blue/teal/violet family)
+  // Policy axes AX1-AX3 (orange/gold family)
+  AX1: "#F47C20", AX2: "#C89A2B", AX3: "#B85C00",
+  // Digital axes D1-D3 (blue/teal/slate family)
   D1: "#1F6FEB", D2: "#0E7490", D3: "#52667A",
 };
 

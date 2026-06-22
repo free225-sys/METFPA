@@ -3,12 +3,12 @@ import metfpaApi from "@/lib/metfpaApi";
 import { fmtMillions } from "@/lib/format";
 import { frameworkColor } from "@/lib/metfpaTheme";
 import { OriginBadge } from "@/components/OriginBadge";
-import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { HierTree } from "@/components/HierTree";
-import { Target, ArrowRight } from "lucide-react";
+import { PageHeader, InstitutionalSection, MetricCard, DataStatusBanner } from "@/components/Institutional";
+import { ArrowRight } from "lucide-react";
 
-function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
+function Skeleton({ className }) { return <div className={`animate-pulse bg-[var(--border)] rounded-[6px] ${className}`} />; }
 
 export default function PolitiqueEFTP() {
   const [data, setData] = useState(null);
@@ -25,66 +25,45 @@ export default function PolitiqueEFTP() {
   return (
     <div className="space-y-6 animate-slide-up" data-testid="page-politique">
       <Breadcrumb items={[{ label: "Politique EFTP" }]} />
-      <DemoBanner />
+      <DataStatusBanner />
 
-      <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6" style={{ borderTop: `3px solid ${color}` }}>
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.12em] uppercase" style={{ color }}>
-              <Target size={13} className="inline mr-1" /> Politique sectorielle décennale
-            </div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">{fw?.label || "Politique EFTP 2026-2035"}</h1>
-          </div>
-          {fw && <OriginBadge origin={fw.data_origin} status={fw.validation_status} />}
+      <div className="bg-[var(--surface)] rounded-[10px] border border-[var(--border)] border-t-[3px] p-6" style={{ borderTopColor: color }}>
+        <PageHeader eyebrow="Politique sectorielle décennale" accent={color}
+          title={fw?.label || "Politique EFTP 2026-2035"}
+          description={fw?.vision}
+          actions={fw && <OriginBadge origin={fw.data_origin} status={fw.validation_status} />} />
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-5">
+          <MetricCard label="Période" value={fw ? `${fw.period_start}-${fw.period_end}` : "…"} accent={color} hint={fw ? `${fw.period_years} ans` : null} />
+          <MetricCard label="Axes" value={fw ? axes.length : "…"} accent={color} />
+          <MetricCard label="Produits" value={fw ? produits : "…"} accent={color} />
+          <MetricCard label="Actions clés" value={fw ? actions : "…"} accent={color} />
+          <MetricCard label="Budget total" value={fw ? fmtMillions(fw.total) : "…"} accent={color} />
         </div>
-        {fw?.vision && <p className="text-sm text-[#4A5568] mt-3 leading-relaxed italic max-w-4xl">{fw.vision}</p>}
-        <div className="flex flex-wrap gap-3 mt-4">
-          <Stat label="Période" value={fw ? `${fw.period_start}-${fw.period_end} (${fw.period_years} ans)` : "…"} color={color} />
-          <Stat label="Axes" value={fw ? axes.length : "…"} color={color} />
-          <Stat label="Produits" value={fw ? produits : "…"} color={color} />
-          <Stat label="Actions clés" value={fw ? actions : "…"} color={color} />
-          <Stat label="Budget total" value={fw ? fmtMillions(fw.total) : "…"} color={color} />
-        </div>
-        <p className="text-[11px] text-[#718096] mt-3">Périmètre : {fw?.budget_scope} · Source : {fw?.source_document}</p>
+        {fw && <p className="text-[12px] text-[var(--ink-500)] mt-3">Périmètre : {fw.budget_scope} · Source : {fw.source_document}</p>}
       </div>
 
-      {/* Axe → PND effect linkage */}
-      <div className="bg-white rounded-[4px] border border-[#E2E8F0] p-5">
-        <h2 className="text-base font-semibold tracking-tight text-[#1A202C] mb-1">Rattachement des axes au PND 4.02</h2>
-        <p className="text-xs text-[#718096] mb-4">Chaque axe de la Politique contribue à un effet sectoriel du PND.</p>
+      <InstitutionalSection title="Rattachement des axes au PND 4.02" accent={color}>
+        <p className="text-[13px] text-[var(--ink-500)] -mt-1 mb-4">Chaque axe de la Politique contribue à un effet sectoriel du PND.</p>
         {!data ? <Skeleton className="h-24" /> : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {axes.map((a) => (
-              <div key={a.code} data-testid={`axe-link-${a.code}`} className="rounded-[6px] border border-[#E2E8F0] p-3" style={{ borderLeft: `3px solid ${color}` }}>
-                <div className="text-[10px] font-bold uppercase" style={{ color }}>{a.code}</div>
-                <p className="text-xs text-[#1A202C] mt-1 leading-snug font-medium">{a.nom}</p>
-                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-[#718096]">
-                  contribue à <ArrowRight size={12} /> <span className="font-semibold text-[#009E49]">PND {a.pnd_effet}</span>
+              <div key={a.code} data-testid={`axe-link-${a.code}`} className="rounded-[8px] border border-[var(--border)] p-3.5" style={{ borderLeft: `3px solid ${color}` }}>
+                <div className="text-[10px] font-bold uppercase tracking-wide" style={{ color }}>{a.code}</div>
+                <p className="text-[13px] text-[var(--ink-900)] mt-1 leading-snug font-medium">{a.nom}</p>
+                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-[var(--ink-500)]">
+                  contribue à <ArrowRight size={12} /> <span className="font-semibold text-[var(--ci-green-700)]">PND {a.pnd_effet}</span>
                 </div>
-                <div className="mt-1.5"><OriginBadge origin={a.data_origin} status={a.validation_status} /></div>
               </div>
             ))}
           </div>
         )}
-      </div>
+      </InstitutionalSection>
 
-      <div className="bg-white rounded-[4px] border border-[#E2E8F0] p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold tracking-tight text-[#1A202C]">Hiérarchie — Axe → Produit → Action clé</h2>
-          {fw && <OriginBadge origin={fw.data_origin} status={fw.validation_status} />}
-        </div>
+      <InstitutionalSection title="Hiérarchie — Axe → Produit → Action clé" accent={color}
+        action={fw && <OriginBadge origin={fw.data_origin} status={fw.validation_status} />}>
         {!data ? <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12" />)}</div>
           : <HierTree nodes={nodes} color={color} expandDepth={1} highlightCodes={[]} />}
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value, color }) {
-  return (
-    <div className="rounded-[6px] border border-[#E2E8F0] px-4 py-2.5">
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-[#718096]">{label}</div>
-      <div className="text-lg font-bold tabular-nums mt-0.5" style={{ color }}>{value}</div>
+      </InstitutionalSection>
     </div>
   );
 }
