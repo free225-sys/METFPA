@@ -4,7 +4,9 @@ import { frameworkColor, axisColor } from "@/lib/metfpaTheme";
 import { OriginBadge, MissingValue } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { Gauge, Info } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { fmtDateTime } from "@/lib/format";
+import { Gauge, Info, BadgeCheck, AlertCircle, ClipboardList, FileQuestion, Activity as ActivityIcon } from "lucide-react";
 
 function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
 
@@ -15,8 +17,15 @@ const LEVEL_META = {
 };
 
 export default function KpiCascade() {
+  const { user } = useAuth();
+  const isValidator = user?.role === "me_validator";
   const [indics, setIndics] = useState(null);
-  useEffect(() => { metfpaApi.get("/indicators").then((r) => setIndics(r.data)); }, []);
+  const [acts, setActs] = useState([]);
+
+  useEffect(() => {
+    metfpaApi.get("/indicators").then((r) => setIndics(r.data));
+    if (isValidator) metfpaApi.get("/activities").then((r) => setActs(r.data)).catch(() => {});
+  }, [isValidator]);
 
   const grouped = useMemo(() => {
     const g = {};
@@ -24,28 +33,98 @@ export default function KpiCascade() {
     return g;
   }, [indics]);
 
-  // Preserve stored order; do not invent hierarchy
   const order = ["PND (national)", "Politique EFTP", "Stratégie digitale"];
   const levels = indics ? [...new Set([...order.filter((l) => grouped[l]), ...Object.keys(grouped)])] : [];
 
+  // Validation workspace buckets (computed from real data, nothing invented)
+  const vw = useMemo(() => {
+    const list = indics || [];
+    return {
+      missingValue: list.filter((k) => k.valeur_actuelle == null),
+      pending: list.filter((k) => String(k.validation_status || "").startsWith("pending")),
+      noSource: list.filter((k) => !k.source),
+      incomplete: list.filter((k) => k.base === "n.d." || k.cible == null || k.cible === ""),
+      recent: [...acts]
+        .filter((a) => a.derniere_maj)
+        .sort((a, b) => (b.derniere_maj || "").localeCompare(a.derniere_maj || ""))
+        .slice(0, 6),
+    };
+  }, [indics, acts]);
+
   return (
     <div className="space-y-6 animate-slide-up" data-testid="page-kpi-cascade">
-      <Breadcrumb items={[{ label: "KPI en cascade" }]} />
+      <Breadcrumb items={[{ label: isValidator ? "Espace de validation M&E" : "KPI en cascade" }]} />
       <DemoBanner />
 
-      <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6">
-        <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#4A5568]">
-          <Gauge size={13} className="inline mr-1" /> Indicateurs de résultat
+      {isValidator ? (
+        <div className="rounded-[8px] border border-[#6E40C9]/20 bg-gradient-to-br from-[#2D2150] to-[#1A202C] p-6 text-white" data-testid="validation-workspace">
+          <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#C5A028]">
+            <BadgeCheck size={13} className="inline mr-1" /> Suivi & évaluation · contrôle qualité
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight mt-1">Espace de validation M&amp;E</h1>
+          <p className="text-sm text-white/70 mt-2 max-w-3xl">
+            Vue priorisée des données à fiabiliser avant validation : valeurs manquantes, statut en attente,
+            sources de vérification absentes et enregistrements incomplets.
+          </p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+            <VWStat testid="vw-missing" label="Valeurs actuelles manquantes" value={vw.missingValue.length} color="#FF8200" icon={AlertCircle} />
+            <VWStat testid="vw-pending" label="En attente de validation" value={vw.pending.length} color="#C5A028" icon={ClipboardList} />
+            <VWStat testid="vw-nosource" label="Sans source de vérification" value={vw.noSource.length} color="#C53030" icon={FileQuestion} />
+            <VWStat testid="vw-incomplete" label="Enregistrements incomplets" value={vw.incomplete.length} color="#1F6FEB" icon={Info} />
+          </div>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">KPI en cascade — national → sectoriel → digital</h1>
-        <p className="text-sm text-[#4A5568] mt-2 max-w-3xl">
-          {indics ? indics.length : "…"} indicateurs regroupés selon le niveau réellement enregistré dans la source.
-        </p>
-        <div className="flex items-start gap-2 rounded-[6px] border border-[#1F6FEB]/30 bg-[#1F6FEB]/8 px-4 py-2.5 mt-4">
-          <Info size={15} className="text-[#1F6FEB] shrink-0 mt-0.5" />
-          <p className="text-xs text-[#1A4E8A]">Valeur actuelle non renseignée dans la source → affichée <strong>« manquante »</strong> (jamais 0). Périodicité et responsable non fournis par la source.</p>
+      ) : (
+        <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6">
+          <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#4A5568]">
+            <Gauge size={13} className="inline mr-1" /> Indicateurs de résultat
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">KPI en cascade — national → sectoriel → digital</h1>
+          <p className="text-sm text-[#4A5568] mt-2 max-w-3xl">
+            {indics ? indics.length : "…"} indicateurs regroupés selon le niveau réellement enregistré dans la source.
+          </p>
+          <div className="flex items-start gap-2 rounded-[6px] border border-[#1F6FEB]/30 bg-[#1F6FEB]/8 px-4 py-2.5 mt-4">
+            <Info size={15} className="text-[#1F6FEB] shrink-0 mt-0.5" />
+            <p className="text-xs text-[#1A4E8A]">Valeur actuelle non renseignée dans la source → affichée <strong>« manquante »</strong> (jamais 0). Périodicité et responsable non fournis par la source.</p>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Validation-first sections (M&E Validator only) */}
+      {isValidator && !indics && <Skeleton className="h-32" />}
+      {isValidator && indics && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <VWList testid="vw-list-missing" title="① Indicateurs sans valeur actuelle" color="#FF8200"
+            rows={vw.missingValue} render={(k) => k.libelle} empty="Toutes les valeurs sont renseignées." />
+          <VWList testid="vw-list-pending" title="② Données en attente de validation" color="#C5A028"
+            rows={vw.pending} render={(k) => k.libelle} badge={(k) => <OriginBadge origin={k.data_origin} status={k.validation_status} />}
+            empty="Aucune donnée en attente." />
+          <VWList testid="vw-list-nosource" title="③ Indicateurs sans source de vérification" color="#C53030"
+            rows={vw.noSource} render={(k) => k.libelle} empty="Toutes les sources sont renseignées." />
+          <VWList testid="vw-list-incomplete" title="④ Enregistrements incohérents / incomplets" color="#1F6FEB"
+            rows={vw.incomplete} render={(k) => `${k.libelle} ${k.base === "n.d." ? "· base n.d." : ""}`}
+            empty="Aucun enregistrement incomplet." />
+          <div className="lg:col-span-2 bg-white rounded-[8px] border border-[#E2E8F0] p-5" data-testid="vw-recent">
+            <h2 className="text-sm font-semibold text-[#1A202C] flex items-center gap-2 mb-3"><ActivityIcon size={15} className="text-[#009E49]" /> ⑤ Mises à jour opérationnelles récentes</h2>
+            {vw.recent.length === 0 ? <p className="text-sm text-[#A0AEC0] italic">Aucune mise à jour récente enregistrée.</p> : (
+              <div className="space-y-1.5">
+                {vw.recent.map((a) => (
+                  <div key={a.id} className="flex items-center justify-between gap-3 text-sm rounded-[6px] border border-[#E2E8F0] px-3 py-2">
+                    <span className="truncate"><span className="font-mono text-[11px] text-[#718096]">{a.code_action}</span> {a.intitule}</span>
+                    <span className="text-[11px] text-[#718096] whitespace-nowrap tabular-nums">{fmtDateTime(a.derniere_maj)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isValidator && (
+        <div className="px-1">
+          <h2 className="text-base font-semibold text-[#1A202C]">⑥ Tableau de référence KPI complet</h2>
+          <p className="text-xs text-[#718096] mt-0.5">Référentiel intégral des indicateurs (lecture).</p>
+        </div>
+      )}
 
       {!indics ? <Skeleton className="h-40" /> : levels.map((lv) => {
         const meta = LEVEL_META[lv] || { color: "#1A202C", label: lv };
@@ -77,7 +156,7 @@ export default function KpiCascade() {
                       <td className="px-4 py-2.5 text-center text-xs tabular-nums">{k.base === "n.d." ? <span className="text-[#A0AEC0] italic">n.d.</span> : <span className="font-medium">{k.base}</span>}</td>
                       <td className="px-4 py-2.5 text-center text-xs tabular-nums font-semibold text-[#1A202C]">{k.cible}</td>
                       <td className="px-4 py-2.5 text-center">{k.valeur_actuelle == null ? <MissingValue label="manquante" /> : <span className="text-xs font-semibold tabular-nums">{k.valeur_actuelle}</span>}</td>
-                      <td className="px-4 py-2.5 text-xs text-[#718096] max-w-[180px] truncate">{k.source}</td>
+                      <td className="px-4 py-2.5 text-xs text-[#718096] max-w-[180px] truncate">{k.source || <MissingValue label="source absente" />}</td>
                       <td className="px-4 py-2.5"><OriginBadge origin={k.data_origin} status={k.validation_status} /></td>
                     </tr>
                   ))}
@@ -87,6 +166,37 @@ export default function KpiCascade() {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function VWStat({ label, value, color, icon: Icon, testid }) {
+  return (
+    <div data-testid={testid} className="rounded-[6px] bg-white/8 border border-white/10 p-3">
+      <Icon size={16} style={{ color }} />
+      <div className="text-2xl font-bold tabular-nums mt-1" style={{ color }}>{value}</div>
+      <div className="text-[10px] text-white/60 leading-tight mt-0.5">{label}</div>
+    </div>
+  );
+}
+
+function VWList({ title, color, rows, render, badge, empty, testid }) {
+  return (
+    <div data-testid={testid} className="bg-white rounded-[8px] border border-[#E2E8F0] p-5">
+      <h2 className="text-sm font-semibold text-[#1A202C] mb-3 flex items-center justify-between">
+        <span style={{ color }}>{title}</span>
+        <span className="text-xs font-normal text-[#718096]">{rows.length}</span>
+      </h2>
+      {rows.length === 0 ? <p className="text-sm text-[#009E49] italic">{empty}</p> : (
+        <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
+          {rows.map((k, i) => (
+            <div key={i} className="flex items-center justify-between gap-2 text-sm rounded-[6px] border border-[#E2E8F0] px-3 py-2">
+              <span className="text-[#1A202C] truncate">{render(k)}</span>
+              {badge ? badge(k) : <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

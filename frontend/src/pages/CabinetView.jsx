@@ -214,7 +214,7 @@ export default function CabinetView() {
         <textarea data-testid="director-note" value={note} onChange={(e) => saveNote(e.target.value)} rows={4}
           placeholder="Synthèse, décisions à arbitrer, instructions…"
           className="w-full rounded-[6px] border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:border-[#C5A028]" />
-        <p className="text-[11px] text-[#A0AEC0] mt-1">Note de démonstration (enregistrée localement). Export PDF = Phase 2.</p>
+        <p className="text-[11px] text-[#A0AEC0] mt-1">Note enregistrée localement (démonstration). Utilisez « Exporter la note (PDF) » en haut de page pour générer la note de Cabinet.</p>
       </Section>
     </div>
   );

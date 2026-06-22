@@ -23,7 +23,7 @@ export function AuthProvider({ children }) {
       const { data } = await metfpaApi.post("/auth/login", { email, password });
       localStorage.setItem(TOKEN_KEY, data.access_token);
       setUser(data.user);
-      return { ok: true };
+      return { ok: true, user: data.user };
     } catch (e) {
       return { ok: false, error: formatApiErrorDetail(e.response?.data?.detail) || e.message };
     }
@@ -51,6 +51,16 @@ export const ROLE_LABELS = {
   direction_editor: "Éditeur Direction",
   cabinet_reader: "Lecteur Cabinet",
 };
+
+// Role-specific operational landing page
+export const ROLE_HOME = {
+  cabinet_reader: "/pilotage-directeur",
+  direction_editor: "/plan-action",
+  me_validator: "/kpi-cascade",
+  admin: "/admin-users",
+};
+export const roleHome = (role) => ROLE_HOME[role] || "/pilotage-directeur";
+
 export const canEdit = (role) => ["direction_editor", "me_validator", "admin"].includes(role);
 export const canValidate = (role) => ["me_validator", "admin"].includes(role);
 export const isAdmin = (role) => role === "admin";

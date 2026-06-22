@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth, roleHome } from "@/context/AuthContext";
 import { CoatOfArms } from "@/components/icons/Ivorian";
 import { Loader2, Lock } from "lucide-react";
 
@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true);
     const res = await login(email, password);
     setLoading(false);
-    if (res.ok) navigate("/");
+    if (res.ok) navigate(roleHome(res.user?.role), { replace: true });
     else setError(res.error);
   };
 

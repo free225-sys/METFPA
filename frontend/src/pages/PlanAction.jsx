@@ -5,6 +5,7 @@ import { OriginBadge, MissingValue } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { useSearchParams } from "react-router-dom";
 import { useAuth, canEdit } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { ListChecks, Pencil, Filter, X, AlertTriangle, History } from "lucide-react";
@@ -23,6 +24,9 @@ export default function PlanAction() {
   const [editing, setEditing] = useState(null);
   const [history, setHistory] = useState(null);
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const vue = searchParams.get("vue");
+  const isDirEditor = user?.role === "direction_editor";
   const editable = (a) => canEdit(user?.role) && (user?.role !== "direction_editor" || a.direction === user?.direction);
 
   const load = () => metfpaApi.get("/activities").then((r) => setActs(r.data));
@@ -33,12 +37,35 @@ export default function PlanAction() {
     return { axe: u("axe_pol"), produit: u("produit_pol"), direction: u("direction"), echeance: u("echeance") };
   }, [acts]);
 
-  const filtered = useMemo(() => (acts || []).filter((a) =>
-    (!f.axe || a.axe_pol === f.axe) && (!f.produit || a.produit_pol === f.produit) &&
-    (!f.direction || a.direction === f.direction) && (!f.statut || a.statut === f.statut) &&
-    (!f.echeance || a.echeance === f.echeance) &&
-    (!f.alerte || (f.alerte === "with" ? !!a.alerte : !a.alerte))
-  ), [acts, f]);
+  const mine = useMemo(() => {
+    if (!isDirEditor || !acts) return null;
+    const list = acts.filter((a) => a.direction === user?.direction);
+    const recent = [...list].filter((a) => a.derniere_maj).sort((a, b) => (b.derniere_maj || "").localeCompare(a.derniere_maj || ""))[0];
+    return {
+      total: list.length,
+      retard: list.filter((a) => a.statut === "En retard").length,
+      bloque: list.filter((a) => a.statut === "Bloqué").length,
+      alerte: list.filter((a) => !!a.alerte).length,
+      aFaire: list.filter((a) => a.statut !== "Achevé").length,
+      lastMaj: recent?.derniere_maj,
+    };
+  }, [acts, isDirEditor, user]);
+
+  const VUE_LABEL = { updates: "Mises à jour requises", delayed: "Activités en retard / bloquées", alerts: "Activités avec alerte" };
+
+  const filtered = useMemo(() => {
+    let base = acts || [];
+    if (isDirEditor && user?.direction) base = base.filter((a) => a.direction === user.direction);
+    if (vue === "delayed") base = base.filter((a) => a.statut === "En retard" || a.statut === "Bloqué");
+    else if (vue === "alerts") base = base.filter((a) => !!a.alerte);
+    else if (vue === "updates") base = base.filter((a) => a.statut !== "Achevé");
+    return base.filter((a) =>
+      (!f.axe || a.axe_pol === f.axe) && (!f.produit || a.produit_pol === f.produit) &&
+      (!f.direction || a.direction === f.direction) && (!f.statut || a.statut === f.statut) &&
+      (!f.echeance || a.echeance === f.echeance) &&
+      (!f.alerte || (f.alerte === "with" ? !!a.alerte : !a.alerte))
+    );
+  }, [acts, f, isDirEditor, user, vue]);
 
   const reset = () => setF({ axe: "", produit: "", direction: "", statut: "", echeance: "", alerte: "" });
   const active = Object.values(f).some(Boolean);
@@ -48,21 +75,43 @@ export default function PlanAction() {
       <Breadcrumb items={[{ label: "Plan d'action ministère" }]} />
       <DemoBanner />
 
-      <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6">
+      <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-6">
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#FF8200]">
-              <ListChecks size={13} className="inline mr-1" /> Suivi opérationnel des directions
+              <ListChecks size={13} className="inline mr-1" /> {isDirEditor ? `Direction ${user?.direction || ""}` : "Suivi opérationnel des directions"}
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Plan d'action ministériel</h1>
+            <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1" data-testid="plan-action-title">
+              {isDirEditor ? "Mon portefeuille de direction" : "Plan d'action ministériel"}
+            </h1>
             <p className="text-sm text-[#4A5568] mt-2 max-w-3xl">
-              {acts ? acts.length : "…"} activités suivies. Édition de l'<strong>avancement</strong>, du <strong>statut</strong> et de l'<strong>alerte</strong> uniquement.
-              Les données de référence (budgets, financement, directions) ne sont pas modifiables.
+              {isDirEditor
+                ? <>Activités rattachées à <strong>votre direction</strong> uniquement. Édition de l'<strong>avancement</strong>, du <strong>statut</strong> et de l'<strong>alerte</strong>.</>
+                : <>{acts ? acts.length : "…"} activités suivies. Édition de l'<strong>avancement</strong>, du <strong>statut</strong> et de l'<strong>alerte</strong> uniquement. Les données de référence (budgets, financement, directions) ne sont pas modifiables.</>}
             </p>
           </div>
           <OriginBadge origin="demo_tracking" />
         </div>
+
+        {isDirEditor && mine && (
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-5" data-testid="portfolio-stats">
+            <PStat label="Mes activités" value={mine.total} color="#1A202C" />
+            <PStat label="À mettre à jour" value={mine.aFaire} color="#FF8200" />
+            <PStat label="En retard" value={mine.retard} color="#C53030" />
+            <PStat label="Bloquées" value={mine.bloque} color="#C53030" />
+            <PStat label="Avec alerte" value={mine.alerte} color="#C5A028" />
+          </div>
+        )}
+        {isDirEditor && mine?.lastMaj && (
+          <p className="text-[11px] text-[#718096] mt-3">Dernière mise à jour de votre portefeuille : <strong>{fmtDateTime(mine.lastMaj)}</strong></p>
+        )}
       </div>
+
+      {vue && (
+        <div className="flex items-center justify-between gap-3 rounded-[6px] border border-[#FF8200]/30 bg-[#FF8200]/8 px-4 py-2.5" data-testid="vue-banner">
+          <span className="text-sm font-medium text-[#9A4D00]">Vue filtrée : {VUE_LABEL[vue] || vue} · {filtered.length} activité(s)</span>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-[4px] border border-[#E2E8F0] p-4">
@@ -74,7 +123,7 @@ export default function PlanAction() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
           <Sel testid="filter-axe" label="Axe" value={f.axe} onChange={(v) => setF({ ...f, axe: v })} options={opts.axe} />
           <Sel testid="filter-produit" label="Produit" value={f.produit} onChange={(v) => setF({ ...f, produit: v })} options={opts.produit} />
-          <Sel testid="filter-direction" label="Direction" value={f.direction} onChange={(v) => setF({ ...f, direction: v })} options={opts.direction} />
+          {!isDirEditor && <Sel testid="filter-direction" label="Direction" value={f.direction} onChange={(v) => setF({ ...f, direction: v })} options={opts.direction} />}
           <Sel testid="filter-statut" label="Statut" value={f.statut} onChange={(v) => setF({ ...f, statut: v })} options={STATUTS} />
           <Sel testid="filter-echeance" label="Échéance" value={f.echeance} onChange={(v) => setF({ ...f, echeance: v })} options={opts.echeance} />
           <Sel testid="filter-alerte" label="Alerte" value={f.alerte} onChange={(v) => setF({ ...f, alerte: v })} options={[["with", "Avec alerte"], ["without", "Sans alerte"]]} />
@@ -263,6 +312,15 @@ function Sel({ label, value, onChange, options, testid }) {
         <option value="">Tous</option>
         {options.map((o) => Array.isArray(o) ? <option key={o[0]} value={o[0]}>{o[1]}</option> : <option key={o} value={o}>{o}</option>)}
       </select>
+    </div>
+  );
+}
+
+function PStat({ label, value, color }) {
+  return (
+    <div className="rounded-[6px] border border-[#E2E8F0] p-3">
+      <div className="text-[10px] font-semibold uppercase tracking-wide text-[#718096]">{label}</div>
+      <div className="text-2xl font-bold tabular-nums mt-0.5" style={{ color }}>{value}</div>
     </div>
   );
 }

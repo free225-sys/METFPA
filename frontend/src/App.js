@@ -1,7 +1,7 @@
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
-import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { AuthProvider, useAuth, roleHome } from "@/context/AuthContext";
 import { Layout } from "@/components/Layout";
 import Login from "@/pages/Login";
 import AccueilIntegre from "@/pages/AccueilIntegre";
@@ -17,6 +17,7 @@ import RiskRegister from "@/pages/RiskRegister";
 import BudgetConsolide from "@/pages/BudgetConsolide";
 import AdminUsers from "@/pages/AdminUsers";
 import ImportsDryRun from "@/pages/ImportsDryRun";
+import AuditLog from "@/pages/AuditLog";
 import Dashboard from "@/pages/Dashboard";
 import TreeView from "@/pages/TreeView";
 import ActionsTable from "@/pages/ActionsTable";
@@ -56,12 +57,19 @@ function RoleRoute({ roles, children }) {
   return <AccessDenied />;
 }
 
+// Role-specific landing: redirect "/" to each role's operational homepage.
+function HomeRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={roleHome(user?.role)} replace />;
+}
+
 function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-        <Route path="/" element={<AccueilIntegre />} />
+        <Route path="/" element={<HomeRedirect />} />
+        <Route path="/accueil" element={<AccueilIntegre />} />
         <Route path="/pnd-402" element={<VuePND />} />
         <Route path="/politique-eftp" element={<PolitiqueEFTP />} />
         <Route path="/strategie-digitale" element={<StrategieDigitale />} />
@@ -73,6 +81,7 @@ function AppRoutes() {
         <Route path="/risks" element={<RiskRegister />} />
         <Route path="/budget-consolide" element={<BudgetConsolide />} />
         <Route path="/admin-users" element={<RoleRoute roles={["admin"]}><AdminUsers /></RoleRoute>} />
+        <Route path="/audit-log" element={<RoleRoute roles={["me_validator", "admin"]}><AuditLog /></RoleRoute>} />
         <Route path="/imports" element={<RoleRoute roles={["me_validator", "admin"]}><ImportsDryRun /></RoleRoute>} />
         <Route path="/legacy-pnd" element={<Dashboard />} />
         <Route path="/arborescence" element={<TreeView />} />

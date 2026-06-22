@@ -1,0 +1,75 @@
+{
+  "summary": "Presentation-readiness sprint verified end-to-end. ALL 4 role landings and per-role sidebars distinct and correct. RBAC negatives enforced. Cabinet decisions-before-KPIs, French money format (X XXX,Y milliards FCFA), PDF export, Direction portfolio (DAF=5 rows) with vue=delayed banner and edit-save flow, M&E validation workspace + audit log, Admin user-management land all working. Header has no global search and no notifications. Regression: /accueil, /pnd-402, /politique-eftp, /strategie-digitale, /alignement, /legacy-pnd, /budget-consolide all render.",
+  "frontend_results": {
+    "cabinet_reader": {
+      "landing": "/pilotage-directeur OK",
+      "sidebar_nav_cabinet_reader": "present, groups Pilotage + Progression stratégique + Référentiels rendered",
+      "nav_admin_users_hidden": true,
+      "decisions_before_kpis": true,
+      "cabinet_budget_format": "'milliards FCFA' present, no ' Bn' in cabinet-budget block",
+      "budget_consolide_page_format": "1 202,1 / 293,8 / 5,6 milliards FCFA rendered correctly",
+      "pdf_export": "GET /cabinet/export/pdf -> 200 application/pdf, no error toast",
+      "rbac_admin_users": "access-denied shown",
+      "regression_pages_load": "/accueil, /pnd-402, /politique-eftp, /strategie-digitale, /alignement, /legacy-pnd, /budget-consolide all rendered header-title",
+      "header_clean": "no global-search-input, no notifications-trigger"
+    },
+    "direction_editor": {
+      "landing": "/plan-action OK",
+      "plan_action_title": "Mon portefeuille de direction",
+      "portfolio_stats_visible": true,
+      "row_count_DAF": 5,
+      "nav_admin_hidden": true,
+      "nav_audit_hidden": true,
+      "nav_imports_hidden": true,
+      "nav_delayed_navigates": "/plan-action?vue=delayed and vue-banner visible",
+      "edit_save_flow": "edit-activity-* opens edit-dialog, save-activity closes dialog (toast confirmed indirectly via dialog dismissal)",
+      "rbac_admin_users": "access-denied"
+    },
+    "me_validator": {
+      "landing": "/kpi-cascade OK",
+      "validation_workspace": true,
+      "vw_lists_present": "vw-list-missing, vw-list-pending, vw-list-nosource, vw-list-incomplete all rendered FIRST before full KPI table",
+      "sidebar_groups": "Suivi & Validation + Référentiels; nav-validation, nav-plan-action, nav-imports, nav-audit visible",
+      "nav_admin_hidden": true,
+      "audit_log": "nav-audit opens /audit-log with page-audit-log + audit-table",
+      "rbac_admin_users": "access-denied"
+    },
+    "admin": {
+      "landing": "/admin-users OK (NOT cabinet homepage)",
+      "sidebar_nav_admin": "present with nav-admin-users + nav-audit + nav-imports + Application group (nav-cabinet, nav-plan-action, nav-kpi)",
+      "header_clean": "no global-search-input, no notifications-trigger"
+    }
+  },
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Budget consolidé / Cabinet section ⑤",
+        "issues": ["All large totals correctly rendered in 'X XXX,Y milliards FCFA' (e.g. '1 202,1 milliards FCFA', '293,8 milliards FCFA') — no remaining 'Bn'/'Md' ambiguous abbreviations spotted."]
+      }
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/metfpa_phase2a_test.py (prior canonical suite, not re-run)"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "AuthContext.roleHome correctly maps the 4 roles to operational landing URLs; HomeRedirect in App.js consumes it on '/'.",
+    "RoleRoute in App.js gates /admin-users to admin only and /audit-log + /imports to me_validator/admin — confirmed via UI access-denied for the other roles.",
+    "Sidebar.jsx exposes 4 distinct navConfigs keyed by role; nav-admin-users only appears for admin; direction_editor only sees 'Ma Direction' + a trimmed Référentiels (3 items) with no Alignement.",
+    "PlanAction.jsx properly filters by user.direction for direction_editor (5 rows for DAF), renders portfolio-stats, vue=delayed banner via useSearchParams, and constrains edit/save to own-direction activities.",
+    "KpiCascade.jsx shows validation-workspace + vw-list-* sections FIRST when role===me_validator, and falls back to standard KPI cascade for other roles.",
+    "CabinetView.jsx orders sections: cabinet-decisions (①) before cabinet-kpis (inside ⑥), confirmed visually and via bounding-box ordering.",
+    "Header.jsx has been stripped of global search input and notifications bell; user-menu-trigger and logout-button still functional.",
+    "format.js fmtMilliards/fmtMillions render 'milliards FCFA' with French separators; verified live values '1 202,1 milliards FCFA', '293,8 milliards FCFA', '5,6 milliards FCFA' on /budget-consolide.",
+    "test_credentials.md in /app/memory references a different (PND) app and does NOT contain METFPA credentials — should be updated to the METFPA accounts for future agents."
+  ],
+  "updated_files": [],
+  "success_rate": { "backend": "skipped (frontend-only request)", "frontend": "100% — 4/4 role landings, 4/4 sidebars, 3/3 RBAC negatives, 7/7 regression pages, PDF, money format, edit flow, audit, header cleanup all green" },
+  "test_credentials": "Cabinet: cabinet@metfpa.ci | Direction (DAF): direction.daf@metfpa.ci | M&E Validator: validateur@metfpa.ci | Admin: admin@metfpa.ci — all with Metfpa@2026Demo. Token key in localStorage: 'metfpa_token'. Login testids: login-email-input, login-password-input, login-submit-button.",
+  "seed_data_creation": "None. One transient direction_editor edit on the first DAF activity (avancement set to 55 or 60). No permanent data drift.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Login button testid is 'login-submit-button' (NOT 'login-submit'). 4 role accounts work with Metfpa@2026Demo. Role landings: cabinet_reader→/pilotage-directeur, direction_editor→/plan-action, me_validator→/kpi-cascade, admin→/admin-users. Sidebars are data-testid='sidebar-nav-<role>'. AccessDenied panel testid='access-denied' for RBAC negatives. Cabinet decisions-before-KPIs is verified via bounding-box (cabinet-decisions vs cabinet-kpis). Direction_editor's portfolio shows exactly 5 rows for DAF (out of 62 total). /app/memory/test_credentials.md still has the OLD PND credentials — update to METFPA accounts. Screenshots saved to /tmp/role_{cabinet,direction,validator,admin}.png.",
+  "rca of the issue": "n/a — all acceptance criteria met."
+}

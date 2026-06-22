@@ -1,4 +1,4 @@
-// Formatting helpers (French, FCFA millions) + strict pillar palette
+// Formatting helpers (French, FCFA) + strict pillar palette
 
 export const STATUS_LABELS = {
   non_demarre: "Non démarré",
@@ -31,11 +31,20 @@ export function pillarColor(code) {
 
 const MONTHS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
 
+// Institutional French monetary formatting. Input values are expressed in
+// MILLIONS de FCFA. We render large amounts in « milliards FCFA » (ex.
+// « 1 202,1 milliards FCFA ») and smaller ones in « M FCFA ». No ambiguous
+// « Bn » / « Md » abbreviations.
+export function fmtMilliards(n) {
+  if (n == null) return "—";
+  const md = n / 1000;
+  return `${md.toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} milliards FCFA`;
+}
+
 export function fmtMillions(n) {
   if (n == null) return "—";
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(2)} Bn`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)} Md`;
-  return `${Math.round(n).toLocaleString("fr-FR")} M`;
+  if (Math.abs(n) >= 1000) return fmtMilliards(n);
+  return `${n.toLocaleString("fr-FR", { maximumFractionDigits: 1 })} M FCFA`;
 }
 
 export function fmtFCFA(n) {

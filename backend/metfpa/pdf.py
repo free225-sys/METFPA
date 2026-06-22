@@ -39,11 +39,11 @@ def _styles():
 def _fmt_m(n):
     if n is None:
         return "Donnée absente"
-    if n >= 1_000_000:
-        return f"{n/1_000_000:.2f} Bn"
-    if n >= 1000:
-        return f"{n/1000:.1f} Md"
-    return f"{round(n):,} M".replace(",", " ")
+    if abs(n) >= 1000:
+        s = f"{n/1000:,.1f}".replace(",", " ").replace(".", ",")
+        return f"{s} milliards FCFA"
+    s = f"{n:,.1f}".replace(",", " ").replace(".", ",")
+    return f"{s} M FCFA"
 
 
 def _footer(canvas, doc):
