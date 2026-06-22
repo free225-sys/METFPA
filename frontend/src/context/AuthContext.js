@@ -30,7 +30,8 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
-    try { await metfpaApi.post("/auth/logout"); } catch (e) {}
+    try { await metfpaApi.post("/auth/logout"); }
+    catch (error) { console.error("Logout request failed:", error); }
     localStorage.removeItem(TOKEN_KEY);
     setUser(false);
   };

@@ -4,10 +4,10 @@ import pytest
 import requests
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/") if os.environ.get("REACT_APP_BACKEND_URL") else "https://etat-progression.preview.emergentagent.com"
-ADMIN_EMAIL = "ministre@pnd.ci"
-ADMIN_PASSWORD = "PND2030!"
-DIRECTOR_EMAIL = "koffi.kouassi@pnd.ci"
-DIRECTOR_PASSWORD = "Directeur2030!"
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "ministre@pnd.ci")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "PND2030!")
+DIRECTOR_EMAIL = os.getenv("PND_DIRECTOR_EMAIL", "koffi.kouassi@pnd.ci")
+DIRECTOR_PASSWORD = os.getenv("PND_DIRECTOR_PASSWORD", "Directeur2030!")
 
 
 def _login(email, pw):
