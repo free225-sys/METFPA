@@ -52,6 +52,7 @@ Logique de rôle préservée, hiérarchie améliorée (groupe primaire + « Réf
 
 ## 9–10. Pages de référence & Portefeuille Direction
 - PND/Politique/Digital : montants au format institutionnel FR « milliards FCFA » (déjà global via `fmtMilliards`/`fmtMillions`).
+- **Migration complète des 4 pages référentiels** (PND 4.02, Politique EFTP, Stratégie digitale, Alignement) vers les composants partagés (`PageHeader`, `InstitutionalSection`, `MetricCard`, `DataStatusBanner`) + tokens institutionnels : aplatissement des « cards-in-cards » (objectifs digitaux en lignes indentées avec fine ligne d'accent), couleurs de cadre tokenisées (PND vert `#008751`, POL orange `#F47C20`, DIG bleu), un seul bandeau de statut par page, statut de validation discret. **Vérifié testing_agent `iteration_9.json` → 100% (6/6), 0 violet.**
 - Portefeuille Direction : en-tête de tableau **collant**, colonne **Intitulé élargie** (≥ 320 px, titre complet + `title`, plus d'ellipse prématurée), séparateurs de lignes discrets ; édition/historique préservés ; valeurs manquantes restent manquantes.
 
 ## 11. Nettoyage du header
