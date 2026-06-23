@@ -47,10 +47,11 @@ def _make_token(user) -> str:
 
 
 async def seed_users():
-    """Idempotent: create the 4 demo role accounts in metfpa_dev from env password."""
-    pw = os.environ.get("METFPA_SEED_PASSWORD")
-    if not pw:
-        return {"seeded": 0, "note": "METFPA_SEED_PASSWORD absent"}
+    """Idempotent: create/repair the 4 demo role accounts in metfpa_dev.
+    Uses METFPA_SEED_PASSWORD when set (recommended for hardening); otherwise
+    falls back to the documented demo password so test access works on any
+    deployment (cockpit is demonstration-grade, not cleared for official data)."""
+    pw = os.environ.get("METFPA_SEED_PASSWORD") or "Metfpa@2026Demo"
     demo = [
         {"email": "admin@metfpa.ci", "name": "Administrateur METFPA", "role": "admin", "direction": None},
         {"email": "validateur@metfpa.ci", "name": "Validateur M&E", "role": "me_validator", "direction": None},
