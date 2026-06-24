@@ -25,7 +25,15 @@ export function AuthProvider({ children }) {
       setUser(data.user);
       return { ok: true, user: data.user };
     } catch (e) {
-      return { ok: false, error: formatApiErrorDetail(e.response?.data?.detail) || e.message };
+      const status = e.response?.status;
+      let error;
+      if (status === 401) error = "Adresse e-mail ou mot de passe incorrect.";
+      else if (status === 403) error = "Ce compte n'est pas autorisé à accéder au cockpit.";
+      else if (status === 422) error = "Les informations saisies sont invalides.";
+      else if (status >= 500) error = "Une erreur serveur empêche actuellement la connexion.";
+      else if (!e.response) error = "Le service d'authentification est momentanément indisponible.";
+      else error = formatApiErrorDetail(e.response?.data?.detail) || "Une erreur est survenue. Veuillez réessayer.";
+      return { ok: false, error };
     }
   };
 

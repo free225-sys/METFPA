@@ -1,0 +1,60 @@
+{
+  "summary": "End-to-end browser regression of the METFPA DB-layer migration (separate _metfpa DB -> shared DB_NAME with metfpa_ collection prefix) on preview URL https://etat-progression.preview.emergentagent.com. All 6 acceptance areas PASS: (1) 4-role login + landing + role-specific sidebar all OK; (2) new specific FR 401 error 'Adresse e-mail ou mot de passe incorrect.' shown for both wrong-password and unknown-email, generic 'Une erreur est survenue' NOT shown; (3) data integrity after migration is intact — cabinet KPIs+decisions render, budget shows 'milliards FCFA', /kpi-cascade renders 19 indicators, /decisions and /risks load with content; (4) RBAC intact — cabinet_reader has NO nav-admin-users in sidebar and /admin-users shows access-denied page, direction_editor sees 5 DAF activity rows; (5) F5 reload preserves session (stays on /pilotage-directeur, not bounced to /login) and logout via sidebar user-menu-trigger -> logout-button works; (6) regression of reference pages /pnd-402, /politique-eftp, /strategie-digitale, /alignement, /accueil all load successfully with content (no 500s).",
+  "frontend_results": {
+    "login_error_messages": {
+      "wrong_password_for_admin": "Adresse e-mail ou mot de passe incorrect. (PASS — specific FR message)",
+      "wrong_password_no_generic": "Generic 'Une erreur est survenue' NOT shown (PASS)",
+      "unknown_email": "Adresse e-mail ou mot de passe incorrect. (PASS — same 401 message)"
+    },
+    "logins": {
+      "admin@metfpa.ci": {"landed": "/admin-users", "sidebar-nav-admin": true, "500": false, "ok": true},
+      "validateur@metfpa.ci": {"landed": "/kpi-cascade", "sidebar_testid": "sidebar-nav-me_validator (NOT sidebar-nav-validator as named in spec — but sidebar renders correctly with SUIVI ET VALIDATION group, Espace de validation, KPI cascade with 19 indicators)", "500": false, "ok": true},
+      "direction.daf@metfpa.ci": {"landed": "/plan-action", "sidebar-nav-direction_editor": true, "daf_rows": 5, "500": false, "ok": true},
+      "cabinet@metfpa.ci": {"landed": "/pilotage-directeur", "sidebar-nav-cabinet_reader": true, "cabinet-kpis": true, "cabinet-decisions": true, "500": false, "ok": true}
+    },
+    "data_integrity_after_migration": {
+      "/pilotage-directeur (cabinet)": "cabinet-kpis + cabinet-decisions render, 4 critical alerts + 11 elevated visible, 24 total — data populated correctly from metfpa_ prefixed collections",
+      "/budget-consolide": "Contains 'milliards FCFA' FR money formatting (PASS)",
+      "/kpi-cascade (validator)": "Renders exactly 19 indicators (Valeurs actuelles manquantes=19, En attente=19) — matches spec (PASS)",
+      "/decisions": "Loads with content (len=894, no 500)",
+      "/risks": "Loads with 'Registre des risques' content (no 500)"
+    },
+    "rbac": {
+      "cabinet_sees_nav-admin-users": false,
+      "cabinet_admin_users_route": "Access-denied page shown (PASS)",
+      "direction_editor_daf_rows": 5
+    },
+    "session_persistence": {"before_reload": "/pilotage-directeur", "after_F5": "/pilotage-directeur", "ok": true},
+    "logout": "logout-button is nested inside user-menu (must first click [data-testid=user-menu-trigger] in the top-right user avatar to reveal the dropdown with [data-testid=logout-button] (label 'Se déconnecter') — works correctly",
+    "reference_pages_regression": {
+      "/pnd-402": "loads (len=2383, no 500)",
+      "/politique-eftp": "loads (len=5524, no 500)",
+      "/strategie-digitale": "loads (len=5471, no 500)",
+      "/alignement": "loads (len=2604, no 500)",
+      "/accueil": "loads (len=2696, no 500)"
+    }
+  },
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "DB-layer migration (backend/metfpa/db.py _PrefixedDB proxy with metfpa_ collection prefix on shared DB_NAME) is working end-to-end through the browser — all 4 role journeys load data correctly, 62-activity / 19-indicator dataset is intact, no 500s on any tested route.",
+    "Login error mapping in frontend/src/context/AuthContext.js correctly translates 401 to the specific FR message 'Adresse e-mail ou mot de passe incorrect.' for both wrong-password and unknown-email — the generic 'Une erreur est survenue' is no longer shown for credential errors (Section 7 requirement met).",
+    "Minor naming nit (NOT blocking): the validator role's sidebar testid renders as 'sidebar-nav-me_validator' instead of the 'sidebar-nav-validator' name used in the review request. The sidebar itself renders correctly (SUIVI ET VALIDATION group, Espace de validation, Revue du plan d'action, Qualité des données, Historique d'audit). Just a spec/implementation naming mismatch — either accept the current testid or rename it to sidebar-nav-validator to match the spec.",
+    "Minor UX observation (NOT blocking): the logout control [data-testid=logout-button] is hidden behind [data-testid=user-menu-trigger] (the avatar dropdown in the top-right). It is not directly visible in the sidebar footer, so any future Playwright test for logout must open the user-menu first. Working as designed; just worth documenting.",
+    "Session persistence on F5 confirmed — cookie/storage based session survives a hard reload without bouncing to /login (Section 5 requirement met)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "skipped per testing_type=frontend only", "frontend": "100% — all 6 acceptance areas pass (login x4 roles, specific 401 FR error, data integrity post-migration, RBAC, session+logout, reference-page regression)"},
+  "test_credentials": "admin@metfpa.ci / Metfpa@2026Demo (admin); validateur@metfpa.ci / Metfpa@2026Demo (me_validator); direction.daf@metfpa.ci / Metfpa@2026Demo (direction_editor); cabinet@metfpa.ci / Metfpa@2026Demo (cabinet_reader). All 4 verified working on preview.",
+  "seed_data_creation": "None.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "METFPA data now lives in collections named metfpa_frameworks, metfpa_users, metfpa_activities, etc. inside the shared DB_NAME (test_database) — single-DB architecture via _PrefixedDB proxy in backend/metfpa/db.py. /api/metfpa/health reports db=test_database, activities=62. Sidebar testids: sidebar-nav-admin, sidebar-nav-me_validator (NOT sidebar-nav-validator), sidebar-nav-direction_editor, sidebar-nav-cabinet_reader. To test logout: click [data-testid=user-menu-trigger] first (top-right avatar), then [data-testid=logout-button] appears in the dropdown. Wrong-password error text to assert: 'Adresse e-mail ou mot de passe incorrect.'. Cabinet sees nav-admin-users=false (RBAC). Direction DAF /plan-action shows exactly 5 activity rows. KPI cascade has exactly 19 indicators.",
+  "rca of the issue": "n/a — DB-layer migration regression suite is fully green; no defects found through the browser."
+}

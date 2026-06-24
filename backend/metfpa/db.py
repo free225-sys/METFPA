@@ -3,8 +3,40 @@ from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
 
 _client = AsyncIOMotorClient(os.environ["MONGO_URL"])
-METFPA_DB_NAME = os.environ.get("METFPA_DB_NAME", os.environ["DB_NAME"] + "_metfpa")
-mdb = _client[METFPA_DB_NAME]
+
+# Managed/production MongoDB authorizes a SINGLE database (DB_NAME). METFPA
+# therefore shares that authorized database but namespaces every collection
+# under METFPA_PREFIX, so legacy collections (actions, users) are never touched
+# and no second (unauthorized) database is required. An explicit METFPA_DB_NAME
+# may override the target database (used by isolated local/dev setups).
+METFPA_PREFIX = "metfpa_"
+METFPA_DB_NAME = os.environ.get("METFPA_DB_NAME") or os.environ["DB_NAME"]
+_db = _client[METFPA_DB_NAME]
+
+
+class _PrefixedDB:
+    """Transparent collection-name prefixing inside the authorized database.
+
+    `mdb.users` and `mdb["users"]` both resolve to the `metfpa_users` collection
+    in DB_NAME, keeping METFPA data isolated from legacy collections without a
+    separate database."""
+
+    def __init__(self, db, prefix):
+        object.__setattr__(self, "_db", db)
+        object.__setattr__(self, "_prefix", prefix)
+
+    @property
+    def name(self):
+        return self._db.name
+
+    def __getitem__(self, collection):
+        return self._db[self._prefix + collection]
+
+    def __getattr__(self, collection):
+        return self._db[self._prefix + collection]
+
+
+mdb = _PrefixedDB(_db, METFPA_PREFIX)
 
 # Framework planning metadata (period-normalized budget rule)
 FRAMEWORK_META = {
