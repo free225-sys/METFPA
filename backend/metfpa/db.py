@@ -5,12 +5,12 @@ from motor.motor_asyncio import AsyncIOMotorClient
 _client = AsyncIOMotorClient(os.environ["MONGO_URL"])
 
 # Managed/production MongoDB authorizes a SINGLE database (DB_NAME). METFPA
-# therefore shares that authorized database but namespaces every collection
+# therefore ALWAYS uses that authorized database and namespaces every collection
 # under METFPA_PREFIX, so legacy collections (actions, users) are never touched
-# and no second (unauthorized) database is required. An explicit METFPA_DB_NAME
-# may override the target database (used by isolated local/dev setups).
+# and no second (unauthorized) database is ever targeted. Any stale
+# METFPA_DB_NAME runtime variable is intentionally ignored.
 METFPA_PREFIX = "metfpa_"
-METFPA_DB_NAME = os.environ.get("METFPA_DB_NAME") or os.environ["DB_NAME"]
+METFPA_DB_NAME = os.environ["DB_NAME"]  # fail-fast if missing; no hardcoded fallback
 _db = _client[METFPA_DB_NAME]
 
 
