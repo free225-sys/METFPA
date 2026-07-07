@@ -55,10 +55,11 @@ export const useAuth = () => useContext(AuthContext);
 
 // Role helpers
 export const ROLE_LABELS = {
-  admin: "Administrateur",
-  me_validator: "Validateur M&E",
-  direction_editor: "Éditeur Direction",
+  admin: "Administrateur système",
+  me_validator: "Validateur Suivi-Évaluation",
+  direction_editor: "Point focal Direction",
   cabinet_reader: "Lecteur Cabinet",
+  dircab: "DIRCAB / Cabinet décisionnel",
 };
 
 // Role-specific operational landing page
@@ -67,9 +68,13 @@ export const ROLE_HOME = {
   direction_editor: "/plan-action",
   me_validator: "/kpi-cascade",
   admin: "/admin-users",
+  dircab: "/pilotage-directeur",
 };
 export const roleHome = (role) => ROLE_HOME[role] || "/pilotage-directeur";
 
 export const canEdit = (role) => ["direction_editor", "me_validator", "admin"].includes(role);
 export const canValidate = (role) => ["me_validator", "admin"].includes(role);
 export const isAdmin = (role) => role === "admin";
+// DIRCAB workflow: decision management (create/update/close, arbitration, relances)
+export const canManageDecisions = (role) => ["direction_editor", "me_validator", "admin", "dircab"].includes(role);
+export const isDircab = (role) => role === "dircab";

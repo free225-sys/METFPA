@@ -4,16 +4,22 @@ import { OriginBadge } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { useAuth, canEdit } from "@/context/AuthContext";
+import { useAuth, canEdit, canManageDecisions, isDircab, isAdmin } from "@/context/AuthContext";
 import { ValidationActions } from "@/components/ValidationActions";
 import { VALIDATION_OUTCOMES } from "@/lib/metfpaTheme";
+import { addRelance } from "@/lib/demoStore";
 import { toast } from "sonner";
 import { Gavel, Plus, Pencil, Trash2 } from "lucide-react";
 
 function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
 const STATUS_COLOR = { draft: "#718096", pending: "#C5A028", approved: "#009E49", rejected: "#C53030", implemented: "#1F6FEB", closed: "#4A5568" };
 const PRIO_COLOR = { faible: "#718096", moyenne: "#1F6FEB", haute: "#FF8200", critique: "#C53030" };
-const EMPTY = { title: "", description: "", decision_type: "autre", priority: "moyenne", status: "draft", requested_by: "", assigned_to: "", related_activity_id: "", related_framework: "", due_date: "", decision_date: "", resolution: "" };
+export const ARBITRAGE_META = {
+  a_arbitrer: { label: "À arbitrer", color: "#7C3AED" },
+  arbitre: { label: "Arbitré", color: "#009E49" },
+  a_relancer: { label: "À relancer", color: "#D97706" },
+};
+const EMPTY = { title: "", description: "", decision_type: "autre", priority: "moyenne", status: "draft", requested_by: "", assigned_to: "", related_activity_id: "", related_framework: "", due_date: "", decision_date: "", resolution: "", arbitrage: "", relance_direction: "" };
 
 export default function DecisionRegister() {
   const [rows, setRows] = useState(null);
@@ -21,10 +27,26 @@ export default function DecisionRegister() {
   const [edit, setEdit] = useState(null); // form object or null
   const [del, setDel] = useState(null);
   const { user } = useAuth();
-  const editor = canEdit(user?.role);
+  // Decision management includes DIRCAB (create/update/close, arbitrage);
+  // delete stays restricted to EDIT_ROLES (mirrors the backend guards).
+  const editor = canManageDecisions(user?.role);
+  const deleter = canEdit(user?.role);
+  const arbitre = isDircab(user?.role) || isAdmin(user?.role);
   // Mirror of assert_direction_scope (backend) : un direction_editor ne peut
   // modifier que les enregistrements rattachés à sa propre direction.
   const canMutate = (row) => editor && (user?.role !== "direction_editor" || row.direction === user?.direction);
+
+  const quickArbitrage = async (d, value) => {
+    try {
+      const r = await metfpaApi.put(`/decisions/${d.id}`, { ...d, arbitrage: value || null });
+      setRows((p) => p.map((x) => x.id === d.id ? r.data : x));
+      toast.success(value ? `Marquée « ${ARBITRAGE_META[value].label} »` : "Marquage d'arbitrage retiré", { description: d.title });
+      if (value === "a_relancer" && d.relance_direction) {
+        addRelance({ direction: d.relance_direction, objet: `Décision à relancer : ${d.title}`, source: "registre décisions" });
+        toast.info("Relance affectée (démo)", { description: d.relance_direction });
+      }
+    } catch (e) { toast.error("Échec du marquage", { description: e?.response?.data?.detail || "Erreur" }); }
+  };
 
   const load = () => metfpaApi.get("/decisions").then((r) => setRows(r.data));
   useEffect(() => { load(); metfpaApi.get("/decisions/meta").then((r) => setMeta(r.data)); }, []);
@@ -46,17 +68,28 @@ export default function DecisionRegister() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" data-testid="decisions-table">
             <thead className="bg-[#F7F7F5] text-[#718096] text-[11px] uppercase tracking-wide">
-              <tr><th className="text-left px-4 py-2.5 font-semibold">Objet</th><th className="text-left px-4 py-2.5 font-semibold">Type</th><th className="text-left px-4 py-2.5 font-semibold">Priorité</th><th className="text-left px-4 py-2.5 font-semibold">Statut</th><th className="text-left px-4 py-2.5 font-semibold">Direction</th><th className="text-left px-4 py-2.5 font-semibold">Demandeur</th><th className="text-left px-4 py-2.5 font-semibold">Échéance</th><th className="text-left px-4 py-2.5 font-semibold">Origine</th><th className="text-center px-4 py-2.5 font-semibold">Actions</th></tr>
+              <tr><th className="text-left px-4 py-2.5 font-semibold">Objet</th><th className="text-left px-4 py-2.5 font-semibold">Type</th><th className="text-left px-4 py-2.5 font-semibold">Priorité</th><th className="text-left px-4 py-2.5 font-semibold">Statut</th><th className="text-left px-4 py-2.5 font-semibold">Arbitrage</th><th className="text-left px-4 py-2.5 font-semibold">Direction</th><th className="text-left px-4 py-2.5 font-semibold">Demandeur</th><th className="text-left px-4 py-2.5 font-semibold">Échéance</th><th className="text-left px-4 py-2.5 font-semibold">Origine</th><th className="text-center px-4 py-2.5 font-semibold">Actions</th></tr>
             </thead>
             <tbody>
-              {!rows ? <tr><td colSpan={9} className="p-3"><Skeleton className="h-20" /></td></tr> :
-                rows.length === 0 ? <tr><td colSpan={9} className="p-8 text-center text-sm text-[#A0AEC0] italic" data-testid="empty-state">Aucune décision enregistrée. Créez-en une pour commencer.</td></tr> :
+              {!rows ? <tr><td colSpan={10} className="p-3"><Skeleton className="h-20" /></td></tr> :
+                rows.length === 0 ? <tr><td colSpan={10} className="p-8 text-center text-sm text-[#A0AEC0] italic" data-testid="empty-state">Aucune décision enregistrée. Créez-en une pour commencer.</td></tr> :
                 rows.map((d) => (
                   <tr key={d.id} data-testid={`decision-row-${d.id}`} className="border-t border-[#E2E8F0] hover:bg-[#F7F7F5]">
                     <td className="px-4 py-2.5 max-w-[280px]"><div className="font-medium text-[#1A202C]">{d.title}</div>{d.description && <div className="text-[11px] text-[#718096] truncate">{d.description}</div>}</td>
                     <td className="px-4 py-2.5 text-xs">{d.decision_type}</td>
                     <td className="px-4 py-2.5"><Pill label={d.priority} color={PRIO_COLOR[d.priority]} /></td>
                     <td className="px-4 py-2.5"><Pill label={d.status} color={STATUS_COLOR[d.status]} /></td>
+                    <td className="px-4 py-2.5">
+                      {arbitre ? (
+                        <select data-testid={`arbitrage-select-${d.id}`} value={d.arbitrage || ""} onChange={(e) => quickArbitrage(d, e.target.value)}
+                          className="rounded-[5px] border border-[#E2E8F0] px-1.5 py-1 text-[11px] font-semibold bg-white"
+                          style={{ color: d.arbitrage ? ARBITRAGE_META[d.arbitrage]?.color : "#718096" }}>
+                          <option value="">—</option>
+                          {Object.entries(ARBITRAGE_META).map(([k, m]) => <option key={k} value={k}>{m.label}</option>)}
+                        </select>
+                      ) : d.arbitrage ? <Pill label={ARBITRAGE_META[d.arbitrage]?.label || d.arbitrage} color={ARBITRAGE_META[d.arbitrage]?.color || "#718096"} /> : <span className="text-[#CBD5E0] text-xs">—</span>}
+                      {d.relance_direction && <div className="text-[10px] text-[#D97706] mt-0.5">relance : {d.relance_direction}</div>}
+                    </td>
                     <td className="px-4 py-2.5 text-xs">{d.direction || "—"}</td>
                     <td className="px-4 py-2.5 text-xs">{d.requested_by || "—"}</td>
                     <td className="px-4 py-2.5 text-xs">{d.due_date ? d.due_date.slice(0, 10) : "—"}</td>
@@ -68,8 +101,8 @@ export default function DecisionRegister() {
                     </td>
                     <td className="px-4 py-2.5 text-center whitespace-nowrap">
                       {canMutate(d) ? <>
-                        <button data-testid={`edit-decision-${d.id}`} onClick={() => setEdit({ ...EMPTY, ...d, due_date: (d.due_date || "").slice(0, 10), decision_date: (d.decision_date || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C89A2B]/10 hover:text-[#C89A2B] inline-flex items-center justify-center"><Pencil size={14} /></button>
-                        <button data-testid={`delete-decision-${d.id}`} onClick={() => setDel(d)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>
+                        <button data-testid={`edit-decision-${d.id}`} onClick={() => setEdit({ ...EMPTY, ...d, arbitrage: d.arbitrage || "", relance_direction: d.relance_direction || "", due_date: (d.due_date || "").slice(0, 10), decision_date: (d.decision_date || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C89A2B]/10 hover:text-[#C89A2B] inline-flex items-center justify-center"><Pencil size={14} /></button>
+                        {deleter && <button data-testid={`delete-decision-${d.id}`} onClick={() => setDel(d)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>}
                       </> : <span className="text-[11px] text-[#A0AEC0]" title={editor ? "Hors de votre direction" : "Lecture seule"}>Lecture</span>}
                       <ValidationActions entityType="decisions" item={d} onStale={load}
                         onUpdated={(doc) => setRows((p) => p.map((x) => x.id === doc.id ? doc : x))} />
@@ -97,9 +130,12 @@ function EditDialog({ form, meta, onClose, onSaved }) {
     if (!f.title.trim()) { toast.error("Le titre est requis"); return; }
     setSaving(true);
     try {
-      const payload = { ...f, due_date: f.due_date ? `${f.due_date}T00:00:00+00:00` : null, decision_date: f.decision_date ? `${f.decision_date}T00:00:00+00:00` : null, related_activity_id: f.related_activity_id || null, related_framework: f.related_framework || null };
+      const payload = { ...f, due_date: f.due_date ? `${f.due_date}T00:00:00+00:00` : null, decision_date: f.decision_date ? `${f.decision_date}T00:00:00+00:00` : null, related_activity_id: f.related_activity_id || null, related_framework: f.related_framework || null, arbitrage: f.arbitrage || null, relance_direction: f.relance_direction || null };
       if (f.id) await metfpaApi.put(`/decisions/${f.id}`, payload);
       else await metfpaApi.post("/decisions", payload);
+      if (payload.arbitrage === "a_relancer" && payload.relance_direction) {
+        addRelance({ direction: payload.relance_direction, objet: `Décision à relancer : ${f.title}`, source: "registre décisions" });
+      }
       toast.success(f.id ? "Décision mise à jour" : "Décision créée", { description: f.title });
       onSaved();
     } catch (e) { toast.error("Échec", { description: e?.response?.data?.detail?.[0]?.msg || e?.response?.data?.detail || "Erreur" }); }
@@ -122,6 +158,13 @@ function EditDialog({ form, meta, onClose, onSaved }) {
             <Field label="Assigné à"><input value={f.assigned_to} onChange={(e) => set("assigned_to", e.target.value)} className={inputCls} /></Field>
             <Field label="Échéance"><input type="date" value={f.due_date} onChange={(e) => set("due_date", e.target.value)} className={inputCls} /></Field>
             <Field label="Date de décision"><input type="date" value={f.decision_date} onChange={(e) => set("decision_date", e.target.value)} className={inputCls} /></Field>
+            <Field label="Arbitrage (DIRCAB)">
+              <select data-testid="decision-arbitrage" value={f.arbitrage || ""} onChange={(v) => set("arbitrage", v.target.value)} className={inputCls}>
+                <option value="">—</option>
+                {Object.entries(ARBITRAGE_META).map(([k, m]) => <option key={k} value={k}>{m.label}</option>)}
+              </select>
+            </Field>
+            <Field label="Relance → direction"><input data-testid="decision-relance" value={f.relance_direction || ""} onChange={(e) => set("relance_direction", e.target.value)} placeholder="ex. DAF" className={inputCls} /></Field>
           </div>
           <Field label="Résolution"><textarea value={f.resolution} onChange={(e) => set("resolution", e.target.value)} rows={2} className={inputCls} /></Field>
         </div>

@@ -1,35 +1,81 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  LayoutDashboard, Layers, Target, Activity, ListChecks, GitMerge, Gauge, Gavel,
+  Layers, Target, Activity, ListChecks, GitMerge, Gauge, Gavel,
   ShieldAlert, Wallet, Crown, FileSpreadsheet, Users, History, BadgeCheck, Clock,
-  AlertTriangle, FileText, PanelLeftClose, PanelLeftOpen, Briefcase,
+  AlertTriangle, PanelLeftClose, PanelLeftOpen, Briefcase, CalendarClock,
+  ClipboardList, Layers3, Users2, FileDown, GraduationCap,
 } from "lucide-react";
 import { InstitutionalBrand } from "@/components/Institutional";
 import { useAuth, ROLE_LABELS } from "@/context/AuthContext";
 
-const REF_ITEMS = [
+// Ordre recommandé DIRCAB (formation) : Vue Directeur → référentiels →
+// alignement → plan/déclinaison/suivi → directions → budget & KPI →
+// décisions & risques → reporting → administration.
+const NAV_PILOTAGE = [
+  { to: "/pilotage-directeur", label: "Vue Directeur", icon: Crown, testid: "nav-cabinet" },
+];
+const NAV_REFERENTIELS = [
   { to: "/pnd-402", label: "PND 4.02", icon: Layers, testid: "nav-pnd" },
   { to: "/politique-eftp", label: "Politique EFTP", icon: Target, testid: "nav-politique" },
   { to: "/strategie-digitale", label: "Stratégie digitale", icon: Activity, testid: "nav-digital" },
-  { to: "/alignement", label: "Alignement", icon: GitMerge, testid: "nav-alignement" },
+  { to: "/alignement", label: "Matrice d'alignement", icon: GitMerge, testid: "nav-alignement" },
+];
+const NAV_PLAN = [
+  { to: "/plan-action", label: "Plan d'action annuel", icon: ListChecks, testid: "nav-plan-action" },
+  { to: "/declinaison", label: "Déclinaison périodique", icon: Layers3, testid: "nav-declinaison" },
+  { to: "/suivi-hebdo", label: "Suivi hebdomadaire", icon: CalendarClock, testid: "nav-suivi-hebdo" },
+  { to: "/ordre-du-jour", label: "Ordre du jour", icon: ClipboardList, testid: "nav-ordre-du-jour" },
+  { to: "/vue-directions", label: "Vue par Direction", icon: Users2, testid: "nav-vue-directions" },
+];
+const NAV_BUDGET_KPI = [
+  { to: "/budget-consolide", label: "Budget consolidé", icon: Wallet, testid: "nav-budget" },
+  { to: "/kpi-cascade", label: "KPI en cascade", icon: Gauge, testid: "nav-kpi" },
+];
+const NAV_DECISION = [
+  { to: "/decisions", label: "Décisions", icon: Gavel, testid: "nav-decisions" },
+  { to: "/risks", label: "Risques", icon: ShieldAlert, testid: "nav-risks" },
+  { to: "/reporting", label: "Reporting", icon: FileDown, testid: "nav-reporting" },
+];
+const NAV_ADMIN = [
+  { to: "/admin-users", label: "Utilisateurs", icon: Users, testid: "nav-admin-users" },
+  { to: "/admin-users?tab=roles", label: "Rôles et directions", icon: BadgeCheck, testid: "nav-roles" },
+  { to: "/imports", label: "Qualité des données", icon: FileSpreadsheet, testid: "nav-imports" },
+  { to: "/audit-log", label: "Journal d'audit", icon: History, testid: "nav-audit" },
+];
+const NAV_FORMATION = [
+  { to: "/scenario-formation", label: "Scénario formation", icon: GraduationCap, testid: "nav-scenario" },
+];
+
+const COMMON_GROUPS = [
+  { title: "Pilotage", items: NAV_PILOTAGE },
+  { title: "Référentiels stratégiques", items: NAV_REFERENTIELS },
+  { title: "Plan & suivi", items: NAV_PLAN },
+  { title: "Budget & KPI", items: NAV_BUDGET_KPI },
+  { title: "Décisions & reporting", items: NAV_DECISION },
 ];
 
 function navConfig(role) {
-  if (role === "cabinet_reader") return [
-    { title: "Pilotage", items: [
-      { to: "/pilotage-directeur", label: "Pilotage Directeur", icon: Crown, testid: "nav-cabinet" },
-      { to: "/decisions", label: "Décisions", icon: Gavel, testid: "nav-decisions" },
-      { to: "/risks", label: "Alertes et risques", icon: ShieldAlert, testid: "nav-risks" },
-      { to: "/budget-consolide", label: "Budget consolidé", icon: Wallet, testid: "nav-budget" },
-      { to: "/pilotage-directeur?focus=note", label: "Note de Cabinet", icon: FileText, testid: "nav-cabinet-note" },
+  if (role === "admin") return [
+    ...COMMON_GROUPS,
+    { title: "Administration", items: NAV_ADMIN },
+    { title: "Formation", items: NAV_FORMATION },
+  ];
+
+  if (role === "me_validator") return [
+    { title: "Pilotage", items: NAV_PILOTAGE },
+    { title: "Référentiels stratégiques", items: NAV_REFERENTIELS },
+    { title: "Plan & suivi", items: [
+      { to: "/kpi-cascade", label: "Espace de validation", icon: BadgeCheck, testid: "nav-validation" },
+      ...NAV_PLAN,
     ]},
-    { title: "Progression stratégique", items: [
-      { to: "/accueil", label: "Progression intégrée", icon: LayoutDashboard, testid: "nav-accueil" },
-      { to: "/plan-action", label: "Synthèse plan d'action", icon: ListChecks, testid: "nav-plan-action" },
-      { to: "/kpi-cascade", label: "Synthèse KPI", icon: Gauge, testid: "nav-kpi" },
+    { title: "Budget & KPI", items: NAV_BUDGET_KPI },
+    { title: "Décisions & reporting", items: NAV_DECISION },
+    { title: "Qualité & audit", items: [
+      { to: "/imports", label: "Qualité des données", icon: FileSpreadsheet, testid: "nav-imports" },
+      { to: "/audit-log", label: "Historique d'audit", icon: History, testid: "nav-audit" },
     ]},
-    { title: "Référentiels", items: REF_ITEMS },
+    { title: "Formation", items: NAV_FORMATION },
   ];
 
   if (role === "direction_editor") return [
@@ -37,38 +83,21 @@ function navConfig(role) {
       { to: "/plan-action", label: "Mon portefeuille", icon: Briefcase, testid: "nav-plan-action" },
       { to: "/plan-action?vue=updates", label: "Mises à jour requises", icon: Clock, testid: "nav-updates" },
       { to: "/plan-action?vue=delayed", label: "Activités en retard", icon: AlertTriangle, testid: "nav-delayed" },
-      { to: "/plan-action?vue=alerts", label: "Alertes", icon: ShieldAlert, testid: "nav-alerts" },
+      { to: "/suivi-hebdo", label: "Suivi hebdomadaire", icon: CalendarClock, testid: "nav-suivi-hebdo" },
       { to: "/kpi-cascade", label: "Mes indicateurs", icon: Gauge, testid: "nav-kpi" },
     ]},
-    { title: "Référentiels", items: REF_ITEMS.slice(0, 3) },
+    { title: "Référentiels stratégiques", items: NAV_REFERENTIELS },
+    { title: "Formation", items: NAV_FORMATION },
   ];
 
-  if (role === "me_validator") return [
-    { title: "Suivi et validation", items: [
-      { to: "/kpi-cascade", label: "Espace de validation", icon: BadgeCheck, testid: "nav-validation" },
-      { to: "/plan-action", label: "Revue du plan d'action", icon: ListChecks, testid: "nav-plan-action" },
-      { to: "/imports", label: "Qualité des données", icon: FileSpreadsheet, testid: "nav-imports" },
-      { to: "/audit-log", label: "Historique d'audit", icon: History, testid: "nav-audit" },
-    ]},
-    { title: "Référentiels", items: REF_ITEMS },
+  // cabinet_reader et dircab : parcours complet en ordre recommandé
+  // (le DIRCAB dispose en plus des actions de décision/arbitrage dans les pages)
+  if (role === "cabinet_reader" || role === "dircab") return [
+    ...COMMON_GROUPS,
+    { title: "Formation", items: NAV_FORMATION },
   ];
 
-  if (role === "admin") return [
-    { title: "Administration", items: [
-      { to: "/admin-users", label: "Utilisateurs", icon: Users, testid: "nav-admin-users" },
-      { to: "/admin-users?tab=roles", label: "Rôles et directions", icon: BadgeCheck, testid: "nav-roles" },
-      { to: "/imports", label: "Qualité des données", icon: FileSpreadsheet, testid: "nav-imports" },
-      { to: "/audit-log", label: "Journal d'audit", icon: History, testid: "nav-audit" },
-    ]},
-    { title: "Application", items: [
-      { to: "/pilotage-directeur", label: "Pilotage Directeur", icon: Crown, testid: "nav-cabinet" },
-      { to: "/plan-action", label: "Plan d'action", icon: ListChecks, testid: "nav-plan-action" },
-      { to: "/kpi-cascade", label: "KPI en cascade", icon: Gauge, testid: "nav-kpi" },
-    ]},
-    { title: "Référentiels", items: REF_ITEMS },
-  ];
-
-  return [{ title: "Navigation", items: [{ to: "/pilotage-directeur", label: "Pilotage Directeur", icon: Crown, testid: "nav-cabinet" }] }];
+  return [{ title: "Navigation", items: NAV_PILOTAGE }];
 }
 
 function SidebarItem({ to, label, icon: Icon, testid, collapsed, onNavigate }) {

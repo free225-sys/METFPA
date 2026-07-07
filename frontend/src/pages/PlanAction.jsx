@@ -6,16 +6,17 @@ import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useSearchParams } from "react-router-dom";
-import { useAuth, canEdit } from "@/context/AuthContext";
+import { useAuth, canEdit, isDircab, isAdmin } from "@/context/AuthContext";
 import { ValidationActions, lastCorrectionComment } from "@/components/ValidationActions";
 import { VALIDATION_OUTCOMES } from "@/lib/metfpaTheme";
+import { addAgendaItem } from "@/lib/demoStore";
 import { toast } from "sonner";
-import { ListChecks, Pencil, Filter, X, AlertTriangle, History, Undo2 } from "lucide-react";
+import { ListChecks, Pencil, Filter, X, AlertTriangle, History, Undo2, ClipboardList } from "lucide-react";
 
-const STATUTS = ["Non démarré", "À l'heure", "En cours", "En retard", "Bloqué", "Achevé"];
+const STATUTS = ["Non démarré", "À l'heure", "En cours", "En retard", "Bloqué", "Achevé", "Suspendu"];
 const STATUT_COLOR = {
   "Non démarré": "#718096", "À l'heure": "#1F6FEB", "En cours": "#C5A028",
-  "En retard": "#FF8200", "Bloqué": "#C53030", "Achevé": "#009E49",
+  "En retard": "#FF8200", "Bloqué": "#C53030", "Achevé": "#009E49", "Suspendu": "#7C3AED",
 };
 
 function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
@@ -30,6 +31,13 @@ export default function PlanAction() {
   const vue = searchParams.get("vue");
   const isDirEditor = user?.role === "direction_editor";
   const editable = (a) => canEdit(user?.role) && (user?.role !== "direction_editor" || a.direction === user?.direction);
+  const canOdj = isDircab(user?.role) || isAdmin(user?.role);
+  const toOdj = (a) => {
+    const ok = addAgendaItem({ linked_id: a.id, sujet: `${a.code_action} — ${a.intitule}`, direction: a.direction || "",
+                               blocage: a.alerte || (a.statut === "Bloqué" ? "Activité bloquée" : ""), priorite: a.statut === "Bloqué" ? "haute" : "moyenne" });
+    ok ? toast.success("Ajoutée à l'ordre du jour (démo)", { description: a.code_action })
+       : toast.info("Déjà inscrite à l'ordre du jour", { description: a.code_action });
+  };
 
   const load = () => metfpaApi.get("/activities").then((r) => setActs(r.data));
   useEffect(() => { load(); }, []);
@@ -208,6 +216,7 @@ export default function PlanAction() {
                         ? <button data-testid={`edit-activity-${a.id}`} onClick={() => setEditing(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#FF8200]/10 hover:text-[#FF8200] transition-colors"><Pencil size={14} /></button>
                         : <span className="inline-flex items-center gap-1 text-[#CBD5E0]" title="Lecture seule"><Pencil size={14} /><span className="text-[10px] text-[#A0AEC0]">Lecture</span></span>}
                       <button data-testid={`history-activity-${a.id}`} onClick={() => setHistory(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#1F6FEB]/10 hover:text-[#1F6FEB] transition-colors"><History size={14} /></button>
+                      {canOdj && <button data-testid={`odj-activity-${a.id}`} title="Ajouter à l'ordre du jour (démo)" onClick={() => toOdj(a)} className="inline-flex items-center justify-center w-7 h-7 rounded-[4px] text-[#C89A2B] hover:bg-[#C89A2B]/10 transition-colors"><ClipboardList size={14} /></button>}
                       <ValidationActions entityType="activities" item={a} onStale={load}
                         onUpdated={(doc) => setActs((p) => p.map((x) => x.id === doc.id ? doc : x))} />
                     </td>

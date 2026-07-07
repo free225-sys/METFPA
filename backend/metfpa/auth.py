@@ -19,9 +19,12 @@ JWT_ALGORITHM = "HS256"
 TOKEN_TYPE = "metfpa_access"
 TOKEN_TTL_HOURS = 8
 
-ROLES = ["cabinet_reader", "direction_editor", "me_validator", "admin"]
+ROLES = ["cabinet_reader", "direction_editor", "me_validator", "admin", "dircab"]
 EDIT_ROLES = {"direction_editor", "me_validator", "admin"}
 VALIDATE_ROLES = {"me_validator", "admin"}
+# DIRCAB (cabinet décisionnel) : lecture globale + gestion des décisions
+# (création / mise à jour / clôture / arbitrage), sans administration.
+DECISION_ROLES = EDIT_ROLES | {"dircab"}
 
 
 def _hash(pw: str) -> str:
@@ -55,8 +58,9 @@ async def seed_users():
     demo = [
         {"email": "admin@metfpa.ci", "name": "Administrateur METFPA", "role": "admin", "direction": None},
         {"email": "validateur@metfpa.ci", "name": "Validateur M&E", "role": "me_validator", "direction": None},
-        {"email": "direction.daf@metfpa.ci", "name": "Éditeur DAF", "role": "direction_editor", "direction": "DAF"},
+        {"email": "direction.daf@metfpa.ci", "name": "Point focal DAF", "role": "direction_editor", "direction": "DAF"},
         {"email": "cabinet@metfpa.ci", "name": "Lecteur Cabinet", "role": "cabinet_reader", "direction": None},
+        {"email": "dircab@metfpa.ci", "name": "DIRCAB — Cabinet décisionnel", "role": "dircab", "direction": None},
     ]
     n = 0
     for u in demo:

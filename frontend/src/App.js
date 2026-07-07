@@ -18,6 +18,12 @@ import BudgetConsolide from "@/pages/BudgetConsolide";
 import AdminUsers from "@/pages/AdminUsers";
 import ImportsDryRun from "@/pages/ImportsDryRun";
 import AuditLog from "@/pages/AuditLog";
+import SuiviHebdo from "@/pages/SuiviHebdo";
+import OrdreDuJour from "@/pages/OrdreDuJour";
+import DeclinaisonPeriodique from "@/pages/DeclinaisonPeriodique";
+import VueDirections from "@/pages/VueDirections";
+import Reporting from "@/pages/Reporting";
+import ScenarioFormation from "@/pages/ScenarioFormation";
 import { Loader2, ShieldX } from "lucide-react";
 
 function ProtectedRoute({ children }) {
@@ -74,6 +80,12 @@ function AppRoutes() {
         <Route path="/decisions" element={<DecisionRegister />} />
         <Route path="/risks" element={<RiskRegister />} />
         <Route path="/budget-consolide" element={<BudgetConsolide />} />
+        <Route path="/suivi-hebdo" element={<SuiviHebdo />} />
+        <Route path="/ordre-du-jour" element={<OrdreDuJour />} />
+        <Route path="/declinaison" element={<DeclinaisonPeriodique />} />
+        <Route path="/vue-directions" element={<VueDirections />} />
+        <Route path="/reporting" element={<Reporting />} />
+        <Route path="/scenario-formation" element={<ScenarioFormation />} />
         <Route path="/admin-users" element={<RoleRoute roles={["admin"]}><AdminUsers /></RoleRoute>} />
         <Route path="/audit-log" element={<RoleRoute roles={["me_validator", "admin"]}><AuditLog /></RoleRoute>} />
         <Route path="/imports" element={<RoleRoute roles={["me_validator", "admin"]}><ImportsDryRun /></RoleRoute>} />

@@ -8,12 +8,14 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field, field_validator
 
 from .db import mdb, audit
-from .auth import get_identity, require_role, assert_direction_scope, EDIT_ROLES
+from .auth import get_identity, require_role, assert_direction_scope, EDIT_ROLES, DECISION_ROLES
 
 registers_router = APIRouter(prefix="/api/metfpa")
 
 DECISION_STATUSES = ["draft", "pending", "approved", "rejected", "implemented", "closed"]
 DECISION_TYPES = ["arbitrage", "validation", "orientation", "ressource", "autre"]
+# DIRCAB arbitration markers (optional field, additive)
+ARBITRAGE_STATUSES = ["a_arbitrer", "arbitre", "a_relancer"]
 RISK_STATUSES = ["open", "monitored", "mitigating", "closed"]
 RISK_CATEGORIES = ["strategique", "operationnel", "financier", "gouvernance", "technique", "externe"]
 PRIORITIES = ["faible", "moyenne", "haute", "critique"]
@@ -50,6 +52,16 @@ class DecisionIn(BaseModel):
     due_date: Optional[str] = None
     decision_date: Optional[str] = None
     resolution: str = ""
+    # DIRCAB workflow (optional): arbitration marker + follow-up assignment
+    arbitrage: Optional[str] = None
+    relance_direction: Optional[str] = None
+
+    @field_validator("arbitrage")
+    @classmethod
+    def _arbitrage(cls, v):
+        if v is not None and v != "" and v not in ARBITRAGE_STATUSES:
+            raise ValueError(f"arbitrage invalide (attendu: {ARBITRAGE_STATUSES})")
+        return v or None
 
     @field_validator("status")
     @classmethod
@@ -80,7 +92,8 @@ async def list_decisions(identity: dict = Depends(get_identity)):
 
 @registers_router.get("/decisions/meta")
 async def decisions_meta(identity: dict = Depends(get_identity)):
-    return {"statuses": DECISION_STATUSES, "types": DECISION_TYPES, "priorities": PRIORITIES}
+    return {"statuses": DECISION_STATUSES, "types": DECISION_TYPES, "priorities": PRIORITIES,
+            "arbitrage": ARBITRAGE_STATUSES}
 
 
 @registers_router.get("/decisions/{did}")
@@ -92,7 +105,7 @@ async def get_decision(did: str, identity: dict = Depends(get_identity)):
 
 
 @registers_router.post("/decisions")
-async def create_decision(payload: DecisionIn, identity: dict = Depends(require_role(*EDIT_ROLES))):
+async def create_decision(payload: DecisionIn, identity: dict = Depends(require_role(*DECISION_ROLES))):
     x_user = identity["email"]
     direction = identity.get("direction")
     doc = {"id": uuid.uuid4().hex, **payload.model_dump(), "direction": direction, **DEFAULT_ORIGIN,
@@ -104,7 +117,7 @@ async def create_decision(payload: DecisionIn, identity: dict = Depends(require_
 
 
 @registers_router.put("/decisions/{did}")
-async def update_decision(did: str, payload: DecisionIn, identity: dict = Depends(require_role(*EDIT_ROLES))):
+async def update_decision(did: str, payload: DecisionIn, identity: dict = Depends(require_role(*DECISION_ROLES))):
     cur = await mdb.decisions.find_one({"id": did}, {"_id": 0})
     if not cur:
         raise HTTPException(404, "Décision introuvable")

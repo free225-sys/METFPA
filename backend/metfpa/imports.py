@@ -17,7 +17,7 @@ from .auth import require_role
 imports_router = APIRouter(prefix="/api/metfpa/imports")
 
 MAX_BYTES = int(os.environ.get("METFPA_IMPORT_MAX_BYTES", str(10 * 1024 * 1024)))
-ALLOWED_STATUTS = {"Non démarré", "À l'heure", "En cours", "En retard", "Bloqué", "Achevé"}
+ALLOWED_STATUTS = {"Non démarré", "À l'heure", "En cours", "En retard", "Bloqué", "Achevé", "Suspendu"}
 IMPORT_ROLES = ("me_validator", "admin")
 
 # Approved workbook specification (sheet -> rules). Used for this dry-run.
