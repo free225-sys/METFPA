@@ -5,6 +5,8 @@ import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useAuth, canEdit } from "@/context/AuthContext";
+import { ValidationActions } from "@/components/ValidationActions";
+import { VALIDATION_OUTCOMES } from "@/lib/metfpaTheme";
 import { toast } from "sonner";
 import { Gavel, Plus, Pencil, Trash2 } from "lucide-react";
 
@@ -58,12 +60,19 @@ export default function DecisionRegister() {
                     <td className="px-4 py-2.5 text-xs">{d.direction || "—"}</td>
                     <td className="px-4 py-2.5 text-xs">{d.requested_by || "—"}</td>
                     <td className="px-4 py-2.5 text-xs">{d.due_date ? d.due_date.slice(0, 10) : "—"}</td>
-                    <td className="px-4 py-2.5"><OriginBadge origin={d.data_origin} status={d.validation_status} /></td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex flex-col gap-1">
+                        <OriginBadge origin={d.data_origin} status={d.validation_status} />
+                        {VALIDATION_OUTCOMES.includes(d.validation_status) && <OriginBadge status={d.validation_status} testid={`validation-status-${d.id}`} />}
+                      </div>
+                    </td>
                     <td className="px-4 py-2.5 text-center whitespace-nowrap">
                       {canMutate(d) ? <>
                         <button data-testid={`edit-decision-${d.id}`} onClick={() => setEdit({ ...EMPTY, ...d, due_date: (d.due_date || "").slice(0, 10), decision_date: (d.decision_date || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C89A2B]/10 hover:text-[#C89A2B] inline-flex items-center justify-center"><Pencil size={14} /></button>
                         <button data-testid={`delete-decision-${d.id}`} onClick={() => setDel(d)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>
                       </> : <span className="text-[11px] text-[#A0AEC0]" title={editor ? "Hors de votre direction" : "Lecture seule"}>Lecture</span>}
+                      <ValidationActions entityType="decisions" item={d} onStale={load}
+                        onUpdated={(doc) => setRows((p) => p.map((x) => x.id === doc.id ? doc : x))} />
                     </td>
                   </tr>
                 ))}

@@ -4,9 +4,11 @@ import { frameworkColor, axisColor } from "@/lib/metfpaTheme";
 import { OriginBadge, MissingValue } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { useAuth } from "@/context/AuthContext";
+import { ValidationActions } from "@/components/ValidationActions";
+import { VALIDATION_OUTCOMES } from "@/lib/metfpaTheme";
+import { useAuth, canValidate } from "@/context/AuthContext";
 import { fmtDateTime } from "@/lib/format";
-import { Gauge, Info, BadgeCheck, AlertCircle, ClipboardList, FileQuestion, Activity as ActivityIcon } from "lucide-react";
+import { Gauge, Info, BadgeCheck, AlertCircle, ClipboardList, FileQuestion, Activity as ActivityIcon, Undo2 } from "lucide-react";
 
 function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
 
@@ -18,14 +20,21 @@ const LEVEL_META = {
 
 export default function KpiCascade() {
   const { user } = useAuth();
-  const isValidator = user?.role === "me_validator";
+  // The validation workspace applies to every role with validation rights
+  // (me_validator and admin), matching the server-side VALIDATE_ROLES guard.
+  const isValidator = canValidate(user?.role);
   const [indics, setIndics] = useState(null);
   const [acts, setActs] = useState([]);
 
+  const loadIndics = () => metfpaApi.get("/indicators").then((r) => setIndics(r.data));
+  const loadActs = () => metfpaApi.get("/activities").then((r) => setActs(r.data)).catch(() => {});
   useEffect(() => {
-    metfpaApi.get("/indicators").then((r) => setIndics(r.data));
-    if (isValidator) metfpaApi.get("/activities").then((r) => setActs(r.data)).catch(() => {});
+    loadIndics();
+    if (isValidator) loadActs();
   }, [isValidator]);
+
+  const updIndic = (doc) => setIndics((p) => (p || []).map((x) => x.id === doc.id ? doc : x));
+  const updAct = (doc) => setActs((p) => (p || []).map((x) => x.id === doc.id ? doc : x));
 
   const grouped = useMemo(() => {
     const g = {};
@@ -44,6 +53,8 @@ export default function KpiCascade() {
       pending: list.filter((k) => String(k.validation_status || "").startsWith("pending")),
       noSource: list.filter((k) => !k.source),
       incomplete: list.filter((k) => k.base === "n.d." || k.cible == null || k.cible === ""),
+      corrections: [...list.filter((k) => k.validation_status === "correction_requested"),
+                    ...acts.filter((a) => a.validation_status === "correction_requested")],
       recent: [...acts]
         .filter((a) => a.derniere_maj)
         .sort((a, b) => (b.derniere_maj || "").localeCompare(a.derniere_maj || ""))
@@ -66,11 +77,12 @@ export default function KpiCascade() {
             Vue priorisée des données à fiabiliser avant validation : valeurs manquantes, statut en attente,
             sources de vérification absentes et enregistrements incomplets.
           </p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-5">
             <VWStat testid="vw-missing" label="Valeurs actuelles manquantes" value={vw.missingValue.length} color="#D97706" icon={AlertCircle} />
             <VWStat testid="vw-pending" label="En attente de validation" value={vw.pending.length} color="#C89A2B" icon={ClipboardList} />
             <VWStat testid="vw-nosource" label="Sans source de vérification" value={vw.noSource.length} color="#52667A" icon={FileQuestion} />
             <VWStat testid="vw-incomplete" label="Enregistrements incomplets" value={vw.incomplete.length} color="#52667A" icon={Info} />
+            <VWStat testid="vw-corrections" label="Corrections en cours" value={vw.corrections.length} color="#D97706" icon={Undo2} />
           </div>
         </div>
       ) : (
@@ -94,23 +106,37 @@ export default function KpiCascade() {
       {isValidator && indics && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <VWList testid="vw-list-missing" title="① Indicateurs sans valeur actuelle" color="#FF8200"
-            rows={vw.missingValue} render={(k) => k.libelle} empty="Toutes les valeurs sont renseignées." />
+            rows={vw.missingValue} render={(k) => k.libelle} empty="Toutes les valeurs sont renseignées."
+            actions={(k) => <ValidationActions entityType="indicators" item={k} onUpdated={updIndic} onStale={loadIndics} />} />
           <VWList testid="vw-list-pending" title="② Données en attente de validation" color="#C5A028"
             rows={vw.pending} render={(k) => k.libelle} badge={(k) => <OriginBadge origin={k.data_origin} status={k.validation_status} />}
-            empty="Aucune donnée en attente." />
+            empty="Aucune donnée en attente."
+            actions={(k) => <ValidationActions entityType="indicators" item={k} onUpdated={updIndic} onStale={loadIndics} />} />
           <VWList testid="vw-list-nosource" title="③ Indicateurs sans source de vérification" color="#C53030"
-            rows={vw.noSource} render={(k) => k.libelle} empty="Toutes les sources sont renseignées." />
+            rows={vw.noSource} render={(k) => k.libelle} empty="Toutes les sources sont renseignées."
+            actions={(k) => <ValidationActions entityType="indicators" item={k} onUpdated={updIndic} onStale={loadIndics} />} />
           <VWList testid="vw-list-incomplete" title="④ Enregistrements incohérents / incomplets" color="#1F6FEB"
             rows={vw.incomplete} render={(k) => `${k.libelle} ${k.base === "n.d." ? "· base n.d." : ""}`}
-            empty="Aucun enregistrement incomplet." />
-          <div className="lg:col-span-2 bg-white rounded-[8px] border border-[#E2E8F0] p-5" data-testid="vw-recent">
-            <h2 className="text-sm font-semibold text-[#1A202C] flex items-center gap-2 mb-3"><ActivityIcon size={15} className="text-[#009E49]" /> ⑤ Mises à jour opérationnelles récentes</h2>
+            empty="Aucun enregistrement incomplet."
+            actions={(k) => <ValidationActions entityType="indicators" item={k} onUpdated={updIndic} onStale={loadIndics} />} />
+          <VWList testid="vw-list-corrections" title="⑤ Corrections en cours (indicateurs & activités)" color="#D97706"
+            rows={vw.corrections} render={(k) => k.libelle || `${k.code_action} ${k.intitule}`}
+            badge={(k) => <OriginBadge status={k.validation_status} />}
+            empty="Aucune correction en cours."
+            actions={(k) => <ValidationActions entityType={k.libelle ? "indicators" : "activities"} item={k}
+              onUpdated={k.libelle ? updIndic : updAct} onStale={() => { loadIndics(); loadActs(); }} />} />
+          <div className="bg-white rounded-[8px] border border-[#E2E8F0] p-5" data-testid="vw-recent">
+            <h2 className="text-sm font-semibold text-[#1A202C] flex items-center gap-2 mb-3"><ActivityIcon size={15} className="text-[#009E49]" /> ⑥ Mises à jour opérationnelles récentes</h2>
             {vw.recent.length === 0 ? <p className="text-sm text-[#A0AEC0] italic">Aucune mise à jour récente enregistrée.</p> : (
               <div className="space-y-1.5">
                 {vw.recent.map((a) => (
                   <div key={a.id} className="flex items-center justify-between gap-3 text-sm rounded-[6px] border border-[#E2E8F0] px-3 py-2">
                     <span className="truncate"><span className="font-mono text-[11px] text-[#718096]">{a.code_action}</span> {a.intitule}</span>
-                    <span className="text-[11px] text-[#718096] whitespace-nowrap tabular-nums">{fmtDateTime(a.derniere_maj)}</span>
+                    <span className="inline-flex items-center gap-2 shrink-0">
+                      {VALIDATION_OUTCOMES.includes(a.validation_status) && <OriginBadge status={a.validation_status} />}
+                      <span className="text-[11px] text-[#718096] whitespace-nowrap tabular-nums">{fmtDateTime(a.derniere_maj)}</span>
+                      <ValidationActions entityType="activities" item={a} onUpdated={updAct} onStale={loadActs} />
+                    </span>
                   </div>
                 ))}
               </div>
@@ -121,8 +147,8 @@ export default function KpiCascade() {
 
       {isValidator && (
         <div className="px-1">
-          <h2 className="text-base font-semibold text-[#1A202C]">⑥ Tableau de référence KPI complet</h2>
-          <p className="text-xs text-[#718096] mt-0.5">Référentiel intégral des indicateurs (lecture).</p>
+          <h2 className="text-base font-semibold text-[#1A202C]">⑦ Tableau de référence KPI complet</h2>
+          <p className="text-xs text-[#718096] mt-0.5">Référentiel intégral des indicateurs, avec actions de validation.</p>
         </div>
       )}
 
@@ -146,18 +172,27 @@ export default function KpiCascade() {
                     <th className="text-center px-4 py-2 font-semibold">Valeur actuelle</th>
                     <th className="text-left px-4 py-2 font-semibold">Source</th>
                     <th className="text-left px-4 py-2 font-semibold">Origine</th>
+                    {isValidator && <th className="text-center px-4 py-2 font-semibold">Validation</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((k, i) => (
-                    <tr key={i} data-testid="kpi-row" className="border-t border-[#E2E8F0] hover:bg-[#F7F7F5]">
+                    <tr key={k.id || i} data-testid="kpi-row" className="border-t border-[#E2E8F0] hover:bg-[#F7F7F5]">
                       <td className="px-4 py-2.5 max-w-[320px]"><span className="text-[#1A202C]">{k.libelle}</span></td>
                       <td className="px-4 py-2.5">{k.axe ? <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-[3px]" style={{ color: axisColor(k.axe), background: `${axisColor(k.axe)}14` }}>{k.axe}</span> : <span className="text-[#CBD5E0]">—</span>}</td>
                       <td className="px-4 py-2.5 text-center text-xs tabular-nums">{k.base === "n.d." ? <span className="text-[#A0AEC0] italic">n.d.</span> : <span className="font-medium">{k.base}</span>}</td>
                       <td className="px-4 py-2.5 text-center text-xs tabular-nums font-semibold text-[#1A202C]">{k.cible}</td>
                       <td className="px-4 py-2.5 text-center">{k.valeur_actuelle == null ? <MissingValue label="manquante" /> : <span className="text-xs font-semibold tabular-nums">{k.valeur_actuelle}</span>}</td>
                       <td className="px-4 py-2.5 text-xs text-[#718096] max-w-[180px] truncate">{k.source || <MissingValue label="source absente" />}</td>
-                      <td className="px-4 py-2.5"><OriginBadge origin={k.data_origin} status={k.validation_status} /></td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex flex-col gap-1">
+                          <OriginBadge origin={k.data_origin} status={k.validation_status} />
+                          {VALIDATION_OUTCOMES.includes(k.validation_status) && <OriginBadge status={k.validation_status} />}
+                        </div>
+                      </td>
+                      {isValidator && <td className="px-4 py-2.5 text-center whitespace-nowrap">
+                        <ValidationActions entityType="indicators" item={k} onUpdated={updIndic} onStale={loadIndics} />
+                      </td>}
                     </tr>
                   ))}
                 </tbody>
@@ -182,7 +217,7 @@ function VWStat({ label, value, color, icon: Icon, testid }) {
   );
 }
 
-function VWList({ title, color, rows, render, badge, empty, testid }) {
+function VWList({ title, color, rows, render, badge, empty, testid, actions }) {
   return (
     <div data-testid={testid} className="bg-white rounded-[8px] border border-[#E2E8F0] p-5">
       <h2 className="text-sm font-semibold text-[#1A202C] mb-3 flex items-center justify-between">
@@ -192,9 +227,12 @@ function VWList({ title, color, rows, render, badge, empty, testid }) {
       {rows.length === 0 ? <p className="text-sm text-[#009E49] italic">{empty}</p> : (
         <div className="space-y-1.5 max-h-[220px] overflow-y-auto pr-1">
           {rows.map((k, i) => (
-            <div key={i} className="flex items-center justify-between gap-2 text-sm rounded-[6px] border border-[#E2E8F0] px-3 py-2">
+            <div key={k.id || i} className="flex items-center justify-between gap-2 text-sm rounded-[6px] border border-[#E2E8F0] px-3 py-2">
               <span className="text-[#1A202C] truncate">{render(k)}</span>
-              {badge ? badge(k) : <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />}
+              <span className="inline-flex items-center gap-1.5 shrink-0">
+                {badge ? badge(k) : <span className="w-2 h-2 rounded-full shrink-0" style={{ background: color }} />}
+                {actions && actions(k)}
+              </span>
             </div>
           ))}
         </div>

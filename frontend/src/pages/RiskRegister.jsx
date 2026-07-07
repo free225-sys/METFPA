@@ -5,6 +5,8 @@ import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useAuth, canEdit } from "@/context/AuthContext";
+import { ValidationActions } from "@/components/ValidationActions";
+import { VALIDATION_OUTCOMES } from "@/lib/metfpaTheme";
 import { toast } from "sonner";
 import { ShieldAlert, Plus, Pencil, Trash2 } from "lucide-react";
 
@@ -61,12 +63,19 @@ export default function RiskRegister() {
                     <td className="px-4 py-2.5"><Pill label={r.status} color={STATUS_COLOR[r.status]} /></td>
                     <td className="px-4 py-2.5 text-xs">{r.direction || "—"}</td>
                     <td className="px-4 py-2.5 text-xs">{r.owner || "—"}</td>
-                    <td className="px-4 py-2.5"><OriginBadge origin={r.data_origin} status={r.validation_status} /></td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex flex-col gap-1">
+                        <OriginBadge origin={r.data_origin} status={r.validation_status} />
+                        {VALIDATION_OUTCOMES.includes(r.validation_status) && <OriginBadge status={r.validation_status} testid={`validation-status-${r.id}`} />}
+                      </div>
+                    </td>
                     <td className="px-4 py-2.5 text-center whitespace-nowrap">
                       {canMutate(r) ? <>
                         <button data-testid={`edit-risk-${r.id}`} onClick={() => setEdit({ ...EMPTY, ...r, residual_probability: r.residual_probability ?? "", residual_impact: r.residual_impact ?? "", mitigation_deadline: (r.mitigation_deadline || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#1F6FEB]/10 hover:text-[#1F6FEB] inline-flex items-center justify-center"><Pencil size={14} /></button>
                         <button data-testid={`delete-risk-${r.id}`} onClick={() => setDel(r)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>
                       </> : <span className="text-[11px] text-[#A0AEC0]" title={editor ? "Hors de votre direction" : "Lecture seule"}>Lecture</span>}
+                      <ValidationActions entityType="risks" item={r} onStale={load}
+                        onUpdated={(doc) => setRows((p) => p.map((x) => x.id === doc.id ? doc : x))} />
                     </td>
                   </tr>
                 ))}

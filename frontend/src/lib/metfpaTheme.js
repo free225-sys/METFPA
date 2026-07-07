@@ -28,4 +28,9 @@ export const ORIGIN_META = {
   computed: { label: "Calculé", color: "#1F6FEB", icon: "calc" },
   missing: { label: "Donnée absente", color: "#C53030", icon: "missing" },
   to_validate: { label: "À valider", color: "#C5A028", icon: "clock" },
+  rejected: { label: "Rejeté", color: "#C53030", icon: "missing" },
+  correction_requested: { label: "Correction demandée", color: "#D97706", icon: "clock" },
 };
+
+// Validation outcomes worth surfacing next to the data-origin badge
+export const VALIDATION_OUTCOMES = ["validated", "rejected", "correction_requested"];
