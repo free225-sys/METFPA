@@ -1,17 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import metfpaApi from "@/lib/metfpaApi";
 import { useAuth, ROLE_LABELS } from "@/context/AuthContext";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { toast } from "sonner";
-import { ShieldCheck, Check, X } from "lucide-react";
+import { ShieldCheck, Check, X, Users, BadgeCheck } from "lucide-react";
 
 const ROLES = ["cabinet_reader", "direction_editor", "me_validator", "admin"];
+
+// Read-only mirror of the server-side permission model
+// (backend/metfpa/auth.py : EDIT_ROLES, VALIDATE_ROLES, require_role).
+const ROLE_MATRIX = [
+  { cap: "Consultation (pages, registres, référentiels, PDF)", roles: ROLES },
+  { cap: "Édition des activités (avancement, statut, alerte)", roles: ["direction_editor", "me_validator", "admin"], note: "direction_editor : sa direction uniquement" },
+  { cap: "Créer / éditer / supprimer décisions et risques", roles: ["direction_editor", "me_validator", "admin"], note: "direction_editor : sa direction uniquement" },
+  { cap: "Promotion des référentiels (PND / POL / DIG)", roles: ["me_validator", "admin"] },
+  { cap: "Imports Excel (dry-run)", roles: ["me_validator", "admin"] },
+  { cap: "Journal d'audit", roles: ["me_validator", "admin"] },
+  { cap: "Gestion des utilisateurs et des rôles", roles: ["admin"] },
+];
+
 function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
 
 export default function AdminUsers() {
   const { user } = useAuth();
   const [rows, setRows] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = searchParams.get("tab") === "roles" ? "roles" : "users";
   const load = () => metfpaApi.get("/admin/users").then((r) => setRows(r.data));
   useEffect(() => { load(); }, []);
 
@@ -25,16 +41,25 @@ export default function AdminUsers() {
     }
   };
 
+  const directions = useMemo(() => [...new Set((rows || []).map((u) => u.direction).filter(Boolean))].sort(), [rows]);
+
   return (
     <div className="space-y-6 animate-slide-up" data-testid="page-admin-users">
-      <Breadcrumb items={[{ label: "Administration · Utilisateurs" }]} />
+      <Breadcrumb items={[{ label: tab === "roles" ? "Administration · Rôles et directions" : "Administration · Utilisateurs" }]} />
       <DemoBanner />
       <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6">
-        <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#1A202C]"><ShieldCheck size={13} className="inline mr-1" /> Administration (dev)</div>
+        <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#1A202C]"><ShieldCheck size={13} className="inline mr-1" /> Administration</div>
         <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Utilisateurs & rôles</h1>
-        <p className="text-sm text-[#4A5568] mt-2">Attribution des rôles et directions sur la base de développement <strong>metfpa_dev</strong>. Toute modification est auditée. Le dernier administrateur actif ne peut être retiré.</p>
+        <p className="text-sm text-[#4A5568] mt-2">Attribution des rôles et directions. Toute modification est auditée. Le dernier administrateur actif ne peut être retiré.</p>
+        <div className="flex gap-2 mt-4" role="tablist" data-testid="admin-tabs">
+          <TabBtn testid="tab-users" active={tab === "users"} icon={Users} onClick={() => setSearchParams({})}>Utilisateurs</TabBtn>
+          <TabBtn testid="tab-roles" active={tab === "roles"} icon={BadgeCheck} onClick={() => setSearchParams({ tab: "roles" })}>Rôles et directions</TabBtn>
+        </div>
       </div>
 
+      {tab === "roles" ? (
+        <RolesTab directions={directions} loading={!rows} />
+      ) : (
       <div className="bg-white rounded-[4px] border border-[#E2E8F0] overflow-hidden">
         <table className="w-full text-sm" data-testid="users-table">
           <thead className="bg-[#F7F7F5] text-[#718096] text-[11px] uppercase tracking-wide">
@@ -67,6 +92,67 @@ export default function AdminUsers() {
               ))}
           </tbody>
         </table>
+      </div>
+      )}
+    </div>
+  );
+}
+
+function TabBtn({ active, icon: Icon, onClick, children, testid }) {
+  return (
+    <button data-testid={testid} role="tab" aria-selected={active} onClick={onClick}
+      className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[6px] text-sm font-medium border transition-colors ${
+        active ? "bg-[#1A202C] text-white border-[#1A202C]" : "bg-white text-[#4A5568] border-[#E2E8F0] hover:bg-[#F7F7F5]"
+      }`}>
+      <Icon size={15} /> {children}
+    </button>
+  );
+}
+
+// Read-only view: the permission model itself is defined server-side; changing
+// it requires a code change, not an admin action.
+function RolesTab({ directions, loading }) {
+  return (
+    <div className="space-y-6" data-testid="roles-tab">
+      <div className="bg-white rounded-[4px] border border-[#E2E8F0] overflow-hidden">
+        <div className="px-5 py-3 border-b border-[#E2E8F0]">
+          <h2 className="text-base font-semibold text-[#1A202C]">Matrice des rôles (appliquée côté serveur)</h2>
+          <p className="text-xs text-[#718096] mt-0.5">Lecture seule — reflet du modèle d'autorisation du backend.</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" data-testid="roles-matrix">
+            <thead className="bg-[#F7F7F5] text-[#718096] text-[11px] uppercase tracking-wide">
+              <tr>
+                <th className="text-left px-4 py-2.5 font-semibold min-w-[260px]">Capacité</th>
+                {ROLES.map((r) => <th key={r} className="text-center px-4 py-2.5 font-semibold">{ROLE_LABELS[r]}</th>)}
+              </tr>
+            </thead>
+            <tbody>
+              {ROLE_MATRIX.map((row) => (
+                <tr key={row.cap} className="border-t border-[#E2E8F0]">
+                  <td className="px-4 py-2.5 text-[#1A202C]">{row.cap}{row.note && <div className="text-[11px] text-[#718096]">{row.note}</div>}</td>
+                  {ROLES.map((r) => (
+                    <td key={r} className="px-4 py-2.5 text-center">
+                      {row.roles.includes(r)
+                        ? <Check size={15} className="inline text-[#009E49]" aria-label="autorisé" />
+                        : <X size={15} className="inline text-[#CBD5E0]" aria-label="refusé" />}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-[4px] border border-[#E2E8F0] p-5" data-testid="directions-list">
+        <h2 className="text-base font-semibold text-[#1A202C] mb-1">Directions en usage</h2>
+        <p className="text-xs text-[#718096] mb-3">Directions actuellement assignées à des utilisateurs (onglet Utilisateurs pour modifier).</p>
+        {loading ? <Skeleton className="h-8" /> : directions.length === 0
+          ? <p className="text-sm text-[#A0AEC0] italic">Aucune direction assignée.</p>
+          : <div className="flex flex-wrap gap-2">{directions.map((d) => (
+              <span key={d} className="text-xs font-semibold px-2.5 py-1 rounded-[4px] bg-[#FF8200]/10 text-[#9A4D00]">{d}</span>
+            ))}</div>}
       </div>
     </div>
   );

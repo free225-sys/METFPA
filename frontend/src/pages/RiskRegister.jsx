@@ -22,6 +22,9 @@ export default function RiskRegister() {
   const [del, setDel] = useState(null);
   const { user } = useAuth();
   const editor = canEdit(user?.role);
+  // Mirror of assert_direction_scope (backend) : un direction_editor ne peut
+  // modifier que les enregistrements rattachés à sa propre direction.
+  const canMutate = (row) => editor && (user?.role !== "direction_editor" || row.direction === user?.direction);
 
   const load = () => metfpaApi.get("/risks").then((r) => setRows(r.data));
   useEffect(() => { load(); metfpaApi.get("/risks/meta").then((r) => setMeta(r.data)); }, []);
@@ -43,11 +46,11 @@ export default function RiskRegister() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" data-testid="risks-table">
             <thead className="bg-[#F7F7F5] text-[#718096] text-[11px] uppercase tracking-wide">
-              <tr><th className="text-left px-4 py-2.5 font-semibold">Risque</th><th className="text-left px-4 py-2.5 font-semibold">Catégorie</th><th className="text-center px-4 py-2.5 font-semibold">P×I</th><th className="text-center px-4 py-2.5 font-semibold">Score</th><th className="text-left px-4 py-2.5 font-semibold">Sévérité</th><th className="text-left px-4 py-2.5 font-semibold">Statut</th><th className="text-left px-4 py-2.5 font-semibold">Responsable</th><th className="text-left px-4 py-2.5 font-semibold">Origine</th><th className="text-center px-4 py-2.5 font-semibold">Actions</th></tr>
+              <tr><th className="text-left px-4 py-2.5 font-semibold">Risque</th><th className="text-left px-4 py-2.5 font-semibold">Catégorie</th><th className="text-center px-4 py-2.5 font-semibold">P×I</th><th className="text-center px-4 py-2.5 font-semibold">Score</th><th className="text-left px-4 py-2.5 font-semibold">Sévérité</th><th className="text-left px-4 py-2.5 font-semibold">Statut</th><th className="text-left px-4 py-2.5 font-semibold">Direction</th><th className="text-left px-4 py-2.5 font-semibold">Responsable</th><th className="text-left px-4 py-2.5 font-semibold">Origine</th><th className="text-center px-4 py-2.5 font-semibold">Actions</th></tr>
             </thead>
             <tbody>
-              {!rows ? <tr><td colSpan={9} className="p-3"><Skeleton className="h-20" /></td></tr> :
-                rows.length === 0 ? <tr><td colSpan={9} className="p-8 text-center text-sm text-[#A0AEC0] italic" data-testid="empty-state">Aucun risque enregistré. Ajoutez-en un pour commencer.</td></tr> :
+              {!rows ? <tr><td colSpan={10} className="p-3"><Skeleton className="h-20" /></td></tr> :
+                rows.length === 0 ? <tr><td colSpan={10} className="p-8 text-center text-sm text-[#A0AEC0] italic" data-testid="empty-state">Aucun risque enregistré. Ajoutez-en un pour commencer.</td></tr> :
                 rows.map((r) => (
                   <tr key={r.id} data-testid={`risk-row-${r.id}`} className="border-t border-[#E2E8F0] hover:bg-[#F7F7F5]">
                     <td className="px-4 py-2.5 max-w-[260px]"><div className="font-medium text-[#1A202C]">{r.title}</div>{r.mitigation_plan && <div className="text-[11px] text-[#718096] truncate">Mitigation : {r.mitigation_plan}</div>}</td>
@@ -56,13 +59,14 @@ export default function RiskRegister() {
                     <td className="px-4 py-2.5 text-center"><span className="inline-flex items-center justify-center w-8 h-8 rounded-[4px] font-bold tabular-nums text-white" style={{ background: SEV_COLOR[r.severity] }}>{r.risk_score}</span></td>
                     <td className="px-4 py-2.5"><Pill label={r.severity} color={SEV_COLOR[r.severity]} /></td>
                     <td className="px-4 py-2.5"><Pill label={r.status} color={STATUS_COLOR[r.status]} /></td>
+                    <td className="px-4 py-2.5 text-xs">{r.direction || "—"}</td>
                     <td className="px-4 py-2.5 text-xs">{r.owner || "—"}</td>
                     <td className="px-4 py-2.5"><OriginBadge origin={r.data_origin} status={r.validation_status} /></td>
                     <td className="px-4 py-2.5 text-center whitespace-nowrap">
-                      {editor ? <>
+                      {canMutate(r) ? <>
                         <button data-testid={`edit-risk-${r.id}`} onClick={() => setEdit({ ...EMPTY, ...r, residual_probability: r.residual_probability ?? "", residual_impact: r.residual_impact ?? "", mitigation_deadline: (r.mitigation_deadline || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#1F6FEB]/10 hover:text-[#1F6FEB] inline-flex items-center justify-center"><Pencil size={14} /></button>
                         <button data-testid={`delete-risk-${r.id}`} onClick={() => setDel(r)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>
-                      </> : <span className="text-[11px] text-[#A0AEC0]">Lecture</span>}
+                      </> : <span className="text-[11px] text-[#A0AEC0]" title={editor ? "Hors de votre direction" : "Lecture seule"}>Lecture</span>}
                     </td>
                   </tr>
                 ))}

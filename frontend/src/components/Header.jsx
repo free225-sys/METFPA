@@ -21,7 +21,6 @@ const TITLES = {
   "/admin-users": "Administration · Utilisateurs",
   "/audit-log": "Journal d'audit",
   "/imports": "Imports (dry-run)",
-  "/legacy-pnd": "Tableau de bord exécutif (PND générique)",
 };
 
 export function Header({ onToggleSidebar, onOpenDrawer, isMobile }) {

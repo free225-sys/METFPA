@@ -20,6 +20,9 @@ export default function DecisionRegister() {
   const [del, setDel] = useState(null);
   const { user } = useAuth();
   const editor = canEdit(user?.role);
+  // Mirror of assert_direction_scope (backend) : un direction_editor ne peut
+  // modifier que les enregistrements rattachés à sa propre direction.
+  const canMutate = (row) => editor && (user?.role !== "direction_editor" || row.direction === user?.direction);
 
   const load = () => metfpaApi.get("/decisions").then((r) => setRows(r.data));
   useEffect(() => { load(); metfpaApi.get("/decisions/meta").then((r) => setMeta(r.data)); }, []);
@@ -41,25 +44,26 @@ export default function DecisionRegister() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm" data-testid="decisions-table">
             <thead className="bg-[#F7F7F5] text-[#718096] text-[11px] uppercase tracking-wide">
-              <tr><th className="text-left px-4 py-2.5 font-semibold">Objet</th><th className="text-left px-4 py-2.5 font-semibold">Type</th><th className="text-left px-4 py-2.5 font-semibold">Priorité</th><th className="text-left px-4 py-2.5 font-semibold">Statut</th><th className="text-left px-4 py-2.5 font-semibold">Demandeur</th><th className="text-left px-4 py-2.5 font-semibold">Échéance</th><th className="text-left px-4 py-2.5 font-semibold">Origine</th><th className="text-center px-4 py-2.5 font-semibold">Actions</th></tr>
+              <tr><th className="text-left px-4 py-2.5 font-semibold">Objet</th><th className="text-left px-4 py-2.5 font-semibold">Type</th><th className="text-left px-4 py-2.5 font-semibold">Priorité</th><th className="text-left px-4 py-2.5 font-semibold">Statut</th><th className="text-left px-4 py-2.5 font-semibold">Direction</th><th className="text-left px-4 py-2.5 font-semibold">Demandeur</th><th className="text-left px-4 py-2.5 font-semibold">Échéance</th><th className="text-left px-4 py-2.5 font-semibold">Origine</th><th className="text-center px-4 py-2.5 font-semibold">Actions</th></tr>
             </thead>
             <tbody>
-              {!rows ? <tr><td colSpan={8} className="p-3"><Skeleton className="h-20" /></td></tr> :
-                rows.length === 0 ? <tr><td colSpan={8} className="p-8 text-center text-sm text-[#A0AEC0] italic" data-testid="empty-state">Aucune décision enregistrée. Créez-en une pour commencer.</td></tr> :
+              {!rows ? <tr><td colSpan={9} className="p-3"><Skeleton className="h-20" /></td></tr> :
+                rows.length === 0 ? <tr><td colSpan={9} className="p-8 text-center text-sm text-[#A0AEC0] italic" data-testid="empty-state">Aucune décision enregistrée. Créez-en une pour commencer.</td></tr> :
                 rows.map((d) => (
                   <tr key={d.id} data-testid={`decision-row-${d.id}`} className="border-t border-[#E2E8F0] hover:bg-[#F7F7F5]">
                     <td className="px-4 py-2.5 max-w-[280px]"><div className="font-medium text-[#1A202C]">{d.title}</div>{d.description && <div className="text-[11px] text-[#718096] truncate">{d.description}</div>}</td>
                     <td className="px-4 py-2.5 text-xs">{d.decision_type}</td>
                     <td className="px-4 py-2.5"><Pill label={d.priority} color={PRIO_COLOR[d.priority]} /></td>
                     <td className="px-4 py-2.5"><Pill label={d.status} color={STATUS_COLOR[d.status]} /></td>
+                    <td className="px-4 py-2.5 text-xs">{d.direction || "—"}</td>
                     <td className="px-4 py-2.5 text-xs">{d.requested_by || "—"}</td>
                     <td className="px-4 py-2.5 text-xs">{d.due_date ? d.due_date.slice(0, 10) : "—"}</td>
                     <td className="px-4 py-2.5"><OriginBadge origin={d.data_origin} status={d.validation_status} /></td>
                     <td className="px-4 py-2.5 text-center whitespace-nowrap">
-                      {editor ? <>
+                      {canMutate(d) ? <>
                         <button data-testid={`edit-decision-${d.id}`} onClick={() => setEdit({ ...EMPTY, ...d, due_date: (d.due_date || "").slice(0, 10), decision_date: (d.decision_date || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C89A2B]/10 hover:text-[#C89A2B] inline-flex items-center justify-center"><Pencil size={14} /></button>
                         <button data-testid={`delete-decision-${d.id}`} onClick={() => setDel(d)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>
-                      </> : <span className="text-[11px] text-[#A0AEC0]">Lecture</span>}
+                      </> : <span className="text-[11px] text-[#A0AEC0]" title={editor ? "Hors de votre direction" : "Lecture seule"}>Lecture</span>}
                     </td>
                   </tr>
                 ))}

@@ -18,12 +18,6 @@ import BudgetConsolide from "@/pages/BudgetConsolide";
 import AdminUsers from "@/pages/AdminUsers";
 import ImportsDryRun from "@/pages/ImportsDryRun";
 import AuditLog from "@/pages/AuditLog";
-import Dashboard from "@/pages/Dashboard";
-import TreeView from "@/pages/TreeView";
-import ActionsTable from "@/pages/ActionsTable";
-import Analytics from "@/pages/Analytics";
-import Alerts from "@/pages/Alerts";
-import Ministries from "@/pages/Ministries";
 import { Loader2, ShieldX } from "lucide-react";
 
 function ProtectedRoute({ children }) {
@@ -83,12 +77,9 @@ function AppRoutes() {
         <Route path="/admin-users" element={<RoleRoute roles={["admin"]}><AdminUsers /></RoleRoute>} />
         <Route path="/audit-log" element={<RoleRoute roles={["me_validator", "admin"]}><AuditLog /></RoleRoute>} />
         <Route path="/imports" element={<RoleRoute roles={["me_validator", "admin"]}><ImportsDryRun /></RoleRoute>} />
-        <Route path="/legacy-pnd" element={<Dashboard />} />
-        <Route path="/arborescence" element={<TreeView />} />
-        <Route path="/actions" element={<ActionsTable />} />
-        <Route path="/ministeres" element={<Ministries />} />
-        <Route path="/budget" element={<Analytics />} />
-        <Route path="/alertes" element={<Alerts />} />
+        {/* Legacy PND routes removed: their API (lib/api.js, jeton "pnd_token")
+            is never authenticated by the METFPA login flow and the backend
+            routes are gated behind LEGACY_PND_ENABLED. Page files kept on disk. */}
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
