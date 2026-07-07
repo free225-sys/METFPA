@@ -262,14 +262,17 @@ class TestRegression:
         d = r.json()
         assert d["activities"] > 0 and d["pnd_nodes"] > 0
 
-    def test_pnd_politique_digital(self):
+    def test_pnd_politique_digital(self, tokens):
+        # gated by get_identity since S4: 401 without a token, 200 with one
         for ep in ("/api/metfpa/pnd", "/api/metfpa/politique", "/api/metfpa/digital"):
-            r = requests.get(f"{BASE}{ep}")
+            assert requests.get(f"{BASE}{ep}").status_code == 401, ep
+            r = requests.get(f"{BASE}{ep}", headers=_h(tokens["reader"]))
             assert r.status_code == 200, ep
 
     def test_cabinet_data(self, tokens):
-        # cabinet endpoint isn't gated in router.py (no Depends)
-        r = requests.get(f"{BASE}/api/metfpa/cabinet")
+        # gated by get_identity since S4 (stale pre-S4 expectation fixed)
+        assert requests.get(f"{BASE}/api/metfpa/cabinet").status_code == 401
+        r = requests.get(f"{BASE}/api/metfpa/cabinet", headers=_h(tokens["reader"]))
         assert r.status_code == 200
         d = r.json()
         assert "kpis" in d and "decisions_required" in d and "alerts" in d

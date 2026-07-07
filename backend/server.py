@@ -630,6 +630,7 @@ from metfpa.auth import auth_router as metfpa_auth_router, admin_router as metfp
 from metfpa.alerts import alerts_router
 from metfpa.pdf import pdf_router
 from metfpa.imports import imports_router
+from metfpa.validation import validation_router
 from metfpa.seed_loader import import_seed
 from metfpa.db import mdb as metfpa_mdb
 app.include_router(metfpa_auth_router)
@@ -639,6 +640,7 @@ app.include_router(registers_router)
 app.include_router(alerts_router)
 app.include_router(pdf_router)
 app.include_router(imports_router)
+app.include_router(validation_router)
 
 
 @app.on_event("startup")

@@ -4,9 +4,16 @@ delete+insert (read-only, pending validation); demo activities are
 insert-if-absent so operational edits are preserved across re-runs."""
 import os
 import json
+import uuid
 from datetime import datetime, timezone
 
 from .db import mdb, audit, FRAMEWORK_META
+
+
+def indicator_id(bucket: str, niveau: str, libelle: str) -> str:
+    """Deterministic, restart-stable id. The bucket ("cascade" | "dig")
+    disambiguates the two indicators present in both seed lists."""
+    return uuid.uuid5(uuid.NAMESPACE_URL, f"metfpa-indicator|{bucket}|{niveau}|{libelle}").hex
 
 ACTIVITY_MISSING = ["budget_engage", "source_financement", "baseline", "cible",
                     "valeur_actuelle", "niveau_risque", "decision_requise",
@@ -97,18 +104,36 @@ async def import_seed(reset_activities: bool = False, user: str = "système") ->
                                       "pol_ancre": dig.get("pol_ancre"), **REF})
 
     # ---- Indicators (cascade + digital KPI) ----
+    # Insert-if-absent with a deterministic id (like activities): indicators
+    # became mutable in Phase 2 (validation status/comments), so re-seeding
+    # must never wipe them. Pre-existing docs without an id are backfilled.
     indicators = []
     for k in seed.get("kpi_cascade", []):
-        indicators.append({"niveau": k["niveau"], "libelle": k["libelle"], "base": k.get("base"),
+        indicators.append({"id": indicator_id("cascade", k["niveau"], k["libelle"]),
+                           "niveau": k["niveau"], "libelle": k["libelle"], "base": k.get("base"),
                            "cible": k.get("cible"), "valeur_actuelle": None, "source": k.get("src"),
                            "axe": None, **REF})
     for k in dig.get("kpi", []):
-        indicators.append({"niveau": "Stratégie digitale", "libelle": k["n"], "base": k.get("base"),
+        indicators.append({"id": indicator_id("dig", "Stratégie digitale", k["n"]),
+                           "niveau": "Stratégie digitale", "libelle": k["n"], "base": k.get("base"),
                            "cible": k.get("cible"), "valeur_actuelle": None, "source": "Stratégie digitale",
                            "axe": k.get("axe"), **REF})
-    await mdb.indicators.delete_many({})
-    await mdb.indicators.insert_many(indicators)
-    summary["indicators"] = len(indicators)
+    # Backfill ids on documents created before Phase 2 (matched by libelle+niveau;
+    # duplicates from the old double-insert take the cascade/dig ids in seed order).
+    seen_backfill = set()
+    for ind in indicators:
+        legacy = await mdb.indicators.find_one(
+            {"libelle": ind["libelle"], "niveau": ind["niveau"], "id": {"$exists": False}})
+        if legacy and legacy["_id"] not in seen_backfill:
+            seen_backfill.add(legacy["_id"])
+            await mdb.indicators.update_one({"_id": legacy["_id"]}, {"$set": {"id": ind["id"]}})
+    inserted_ind = 0
+    for ind in indicators:
+        if await mdb.indicators.find_one({"id": ind["id"]}) is None:
+            await mdb.indicators.insert_one(dict(ind))
+            inserted_ind += 1
+    summary["indicators_inserted"] = inserted_ind
+    summary["indicators"] = await mdb.indicators.count_documents({})
 
     # ---- Alignments (POL axis -> PND effet, with digital anchor) ----
     alignments = []
@@ -158,6 +183,7 @@ async def import_seed(reset_activities: bool = False, user: str = "système") ->
     await mdb.pol_nodes.create_index("pnd_effet")
     await mdb.dig_nodes.create_index("code")
     await mdb.indicators.create_index("niveau")
+    await mdb.indicators.create_index("id", unique=True)
     await mdb.activities.create_index("id", unique=True)
     await mdb.activities.create_index("axe_pol")
     await mdb.activities.create_index("direction")
