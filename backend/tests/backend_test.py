@@ -4,6 +4,11 @@ import pytest
 import requests
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/") if os.environ.get("REACT_APP_BACKEND_URL") else "https://etat-progression.preview.emergentagent.com"
+
+# The legacy PND API is gated behind LEGACY_PND_ENABLED (Phase 0 security);
+# these tests only apply when the legacy routes are mounted.
+if os.environ.get("LEGACY_PND_ENABLED", "false").strip().lower() != "true":
+    pytest.skip("API PND legacy désactivée (LEGACY_PND_ENABLED != true)", allow_module_level=True)
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "ministre@pnd.ci")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "PND2030!")
 DIRECTOR_EMAIL = os.getenv("PND_DIRECTOR_EMAIL", "koffi.kouassi@pnd.ci")

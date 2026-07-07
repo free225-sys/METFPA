@@ -74,17 +74,17 @@ class DecisionIn(BaseModel):
 
 
 @registers_router.get("/decisions")
-async def list_decisions():
+async def list_decisions(identity: dict = Depends(get_identity)):
     return await mdb.decisions.find({}, {"_id": 0}).sort("created_at", -1).to_list(2000)
 
 
 @registers_router.get("/decisions/meta")
-async def decisions_meta():
+async def decisions_meta(identity: dict = Depends(get_identity)):
     return {"statuses": DECISION_STATUSES, "types": DECISION_TYPES, "priorities": PRIORITIES}
 
 
 @registers_router.get("/decisions/{did}")
-async def get_decision(did: str):
+async def get_decision(did: str, identity: dict = Depends(get_identity)):
     d = await mdb.decisions.find_one({"id": did}, {"_id": 0})
     if not d:
         raise HTTPException(404, "Décision introuvable")
@@ -169,18 +169,18 @@ def _risk_computed(p: int, i: int, rp, ri):
 
 
 @registers_router.get("/risks")
-async def list_risks():
+async def list_risks(identity: dict = Depends(get_identity)):
     return await mdb.risks.find({}, {"_id": 0}).sort("risk_score", -1).to_list(2000)
 
 
 @registers_router.get("/risks/meta")
-async def risks_meta():
+async def risks_meta(identity: dict = Depends(get_identity)):
     return {"statuses": RISK_STATUSES, "categories": RISK_CATEGORIES, "scale": "1-5",
             "severity_rule": {"critique": ">=15", "eleve": ">=10", "modere": ">=5", "faible": "<5"}}
 
 
 @registers_router.get("/risks/{rid}")
-async def get_risk(rid: str):
+async def get_risk(rid: str, identity: dict = Depends(get_identity)):
     r = await mdb.risks.find_one({"id": rid}, {"_id": 0})
     if not r:
         raise HTTPException(404, "Risque introuvable")

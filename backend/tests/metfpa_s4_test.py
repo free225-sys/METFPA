@@ -7,7 +7,9 @@ from datetime import datetime, timezone, timedelta
 
 BASE = os.environ.get("REACT_APP_BACKEND_URL", "https://etat-progression.preview.emergentagent.com").rstrip("/")
 PWD = "Metfpa@2026Demo"
-SECRET = os.environ.get("JWT_SECRET", "9f3c7a1e8b246d05f7e9a1c4d6b8203e5f7a9c1b3d5e7f9018263544a6b8c0d2")
+# No hardcoded fallback: forged-token tests are skipped unless the deployment's
+# JWT_SECRET is provided via the environment.
+SECRET = os.environ.get("JWT_SECRET")
 
 ACCOUNTS = {
     "admin": "admin@metfpa.ci",
@@ -73,6 +75,8 @@ class TestAuth:
         assert r.status_code == 401
 
     def test_expired_token_401(self):
+        if not SECRET:
+            pytest.skip("JWT_SECRET non fourni : test de jeton forgé ignoré")
         payload = {"sub": "fake", "email": "x@x", "role": "admin", "type": "metfpa_access",
                    "exp": datetime.now(timezone.utc) - timedelta(minutes=5)}
         tok = jwt.encode(payload, SECRET, algorithm="HS256")
@@ -80,6 +84,8 @@ class TestAuth:
         assert r.status_code == 401
 
     def test_wrong_type_token_401(self):
+        if not SECRET:
+            pytest.skip("JWT_SECRET non fourni : test de jeton forgé ignoré")
         payload = {"sub": "fake", "email": "x@x", "role": "admin", "type": "OTHER",
                    "exp": datetime.now(timezone.utc) + timedelta(hours=1)}
         tok = jwt.encode(payload, SECRET, algorithm="HS256")

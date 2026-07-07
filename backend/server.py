@@ -611,7 +611,17 @@ async def root():
     return {"message": "Cockpit PND 2026-2030 API"}
 
 
-app.include_router(api_router)
+# Legacy PND demo API: exposed without RBAC and unused by the METFPA frontend
+# (its token key "pnd_token" is never set by the login flow). Disabled by
+# default; set LEGACY_PND_ENABLED=true to restore the legacy routes.
+LEGACY_PND_ENABLED = os.environ.get("LEGACY_PND_ENABLED", "false").strip().lower() == "true"
+
+if LEGACY_PND_ENABLED:
+    app.include_router(api_router)
+else:
+    @app.get("/api/")
+    async def api_root_minimal():
+        return {"message": "Cockpit PND 2026-2030 API"}
 
 # --- METFPA module (Phase 1 / Sprint S1-S4) — additive, isolated DB ---
 from metfpa.router import metfpa_router
