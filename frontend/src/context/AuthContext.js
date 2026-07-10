@@ -58,13 +58,11 @@ export const ROLE_LABELS = {
   admin: "Administrateur système",
   me_validator: "Validateur Suivi-Évaluation",
   direction_editor: "Point focal Direction",
-  cabinet_reader: "Lecteur Cabinet",
   dircab: "DIRCAB / Cabinet décisionnel",
 };
 
 // Role-specific operational landing page
 export const ROLE_HOME = {
-  cabinet_reader: "/pilotage-directeur",
   direction_editor: "/plan-action",
   me_validator: "/kpi-cascade",
   admin: "/admin-users",

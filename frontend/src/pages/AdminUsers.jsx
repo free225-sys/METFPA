@@ -7,7 +7,7 @@ import { Breadcrumb } from "@/components/Breadcrumb";
 import { toast } from "sonner";
 import { ShieldCheck, Check, X, Users, BadgeCheck } from "lucide-react";
 
-const ROLES = ["cabinet_reader", "direction_editor", "me_validator", "dircab", "admin"];
+const ROLES = ["direction_editor", "me_validator", "dircab", "admin"];
 
 // Read-only mirror of the server-side permission model
 // (backend/metfpa/auth.py : EDIT_ROLES, VALIDATE_ROLES, DECISION_ROLES).

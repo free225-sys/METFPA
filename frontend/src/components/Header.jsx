@@ -20,7 +20,7 @@ const TITLES = {
   "/declinaison": "Déclinaison périodique",
   "/vue-directions": "Vue par Direction",
   "/reporting": "Reporting",
-  "/scenario-formation": "Scénario formation DIRCAB",
+  "/_internal/scenario-formation": "Guide interne équipe projet",
   "/decisions": "Registre des décisions",
   "/risks": "Registre des risques",
   "/budget-consolide": "Budget consolidé",

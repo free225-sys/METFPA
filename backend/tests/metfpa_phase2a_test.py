@@ -17,7 +17,7 @@ ACCOUNTS = {
     "admin": "admin@metfpa.ci",
     "validator": "validateur@metfpa.ci",
     "editor": "direction.daf@metfpa.ci",
-    "reader": "cabinet@metfpa.ci",
+    "dircab": "dircab@metfpa.ci",
 }
 
 
@@ -59,8 +59,8 @@ class TestAuthGating:
 
     @pytest.mark.parametrize("path", GATED_GETS)
     def test_auth_returns_200(self, path, tokens):
-        r = requests.get(f"{API}{path}", headers=_h(tokens["reader"]), timeout=20)
-        assert r.status_code == 200, f"{path} reader got {r.status_code} {r.text[:200]}"
+        r = requests.get(f"{API}{path}", headers=_h(tokens["dircab"]), timeout=20)
+        assert r.status_code == 200, f"{path} dircab got {r.status_code} {r.text[:200]}"
 
 
 # -------- 2A-0 AUDIT-LOG RBAC --------
@@ -78,8 +78,8 @@ class TestAuditLog:
         r = requests.get(f"{API}/audit-log", headers=_h(tokens["admin"]), timeout=20)
         assert r.status_code == 200
 
-    def test_reader_403(self, tokens):
-        r = requests.get(f"{API}/audit-log", headers=_h(tokens["reader"]), timeout=20)
+    def test_dircab_403(self, tokens):
+        r = requests.get(f"{API}/audit-log", headers=_h(tokens["dircab"]), timeout=20)
         assert r.status_code == 403
 
     def test_editor_403(self, tokens):
@@ -98,12 +98,12 @@ def _find_activities(tokens):
 
 
 class TestActivityHistoryScope:
-    def test_reader_any(self, tokens):
+    def test_dircab_any(self, tokens):
         daf, non_daf, _ = _find_activities(tokens)
         for a in (daf, non_daf):
             if a:
-                r = requests.get(f"{API}/activities/{a['id']}/history", headers=_h(tokens["reader"]), timeout=20)
-                assert r.status_code == 200, f"reader on {a['id']}: {r.status_code}"
+                r = requests.get(f"{API}/activities/{a['id']}/history", headers=_h(tokens["dircab"]), timeout=20)
+                assert r.status_code == 200, f"dircab on {a['id']}: {r.status_code}"
 
     def test_editor_daf_only(self, tokens):
         daf, non_daf, _ = _find_activities(tokens)
@@ -153,20 +153,20 @@ class TestDirectionClearing:
                          headers=_h(tokens["admin"]), timeout=20)
         assert r.status_code == 422
 
-    def test_clear_reader_direction_ok(self, tokens):
+    def test_clear_dircab_direction_ok(self, tokens):
         users = self._users(tokens)
-        reader = next(u for u in users if u["email"] == ACCOUNTS["reader"])
-        original_dir = reader.get("direction")
-        r = requests.put(f"{API}/admin/users/{reader['id']}",
+        dircab = next(u for u in users if u["email"] == ACCOUNTS["dircab"])
+        original_dir = dircab.get("direction")
+        r = requests.put(f"{API}/admin/users/{dircab['id']}",
                          json={"direction": None},
                          headers=_h(tokens["admin"]), timeout=20)
         assert r.status_code == 200
         users2 = self._users(tokens)
-        r2 = next(u for u in users2 if u["id"] == reader["id"])
+        r2 = next(u for u in users2 if u["id"] == dircab["id"])
         assert r2.get("direction") in (None, "", None)
         # restore
         if original_dir:
-            requests.put(f"{API}/admin/users/{reader['id']}",
+            requests.put(f"{API}/admin/users/{dircab['id']}",
                          json={"direction": original_dir},
                          headers=_h(tokens["admin"]), timeout=20)
 
@@ -196,8 +196,8 @@ class TestImportRBAC:
         r = _upload("/tmp/imp/valid.xlsx")
         assert r.status_code == 401
 
-    def test_reader_403(self, tokens):
-        r = _upload("/tmp/imp/valid.xlsx", tokens["reader"])
+    def test_dircab_403(self, tokens):
+        r = _upload("/tmp/imp/valid.xlsx", tokens["dircab"])
         assert r.status_code == 403
 
     def test_editor_403(self, tokens):
@@ -281,8 +281,8 @@ class TestImportJobs:
             assert r.status_code == 200
             assert isinstance(r.json(), list)
 
-    def test_list_reader_403(self, tokens):
-        r = requests.get(f"{API}/imports", headers=_h(tokens["reader"]), timeout=20)
+    def test_list_dircab_403(self, tokens):
+        r = requests.get(f"{API}/imports", headers=_h(tokens["dircab"]), timeout=20)
         assert r.status_code == 403
 
     def test_get_and_delete_job(self, tokens):
@@ -313,9 +313,9 @@ class TestValidationRBAC:
         r = requests.post(f"{API}/admin/validate", json={"framework": "ZZZ"}, timeout=20)
         assert r.status_code == 401
 
-    def test_reader_403(self, tokens):
+    def test_dircab_403(self, tokens):
         r = requests.post(f"{API}/admin/validate", json={"framework": "ZZZ"},
-                          headers=_h(tokens["reader"]), timeout=20)
+                          headers=_h(tokens["dircab"]), timeout=20)
         assert r.status_code == 403
 
     def test_editor_403(self, tokens):
