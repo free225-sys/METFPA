@@ -44,7 +44,7 @@ const NAV_ADMIN = [
   { to: "/audit-log", label: "Journal d'audit", icon: History, testid: "nav-audit" },
 ];
 const NAV_FORMATION = [
-  { to: "/scenario-formation", label: "Scénario formation", icon: GraduationCap, testid: "nav-scenario" },
+  { to: "/_internal/scenario-formation", label: "Guide interne équipe projet", icon: GraduationCap, testid: "nav-scenario" },
 ];
 
 const COMMON_GROUPS = [
@@ -59,7 +59,7 @@ function navConfig(role) {
   if (role === "admin") return [
     ...COMMON_GROUPS,
     { title: "Administration", items: NAV_ADMIN },
-    { title: "Formation", items: NAV_FORMATION },
+    { title: "Ressources internes", items: NAV_FORMATION },
   ];
 
   if (role === "me_validator") return [

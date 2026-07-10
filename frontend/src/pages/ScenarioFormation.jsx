@@ -24,11 +24,11 @@ const ACCOUNTS = [
 export default function ScenarioFormation() {
   return (
     <div className="space-y-6 animate-slide-up" data-testid="page-scenario">
-      <Breadcrumb items={[{ label: "Scénario formation DIRCAB" }]} />
+      <Breadcrumb items={[{ label: "Guide interne équipe projet" }]} />
 
       <div className="rounded-[8px] border border-[#7C3AED]/25 bg-gradient-to-br from-[#7C3AED]/[0.06] to-white p-6">
         <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#7C3AED]"><GraduationCap size={13} className="inline mr-1" /> Guide d'animation</div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Scénario de formation DIRCAB</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Guide interne équipe projet</h1>
         <p className="text-sm text-[#4A5568] mt-2 max-w-3xl">Déroulé recommandé de la démonstration : du constat (alerte, blocage) à la décision (arbitrage, relance, note). Compte conseillé pour l'animation : <strong>dircab@metfpa.ci</strong>.</p>
       </div>
 
