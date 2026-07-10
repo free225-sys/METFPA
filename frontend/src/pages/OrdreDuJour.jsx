@@ -58,7 +58,7 @@ export default function OrdreDuJour() {
       `Points inscrits : ${agenda.length}`, "",
       ...agenda.map((x, i) => `${i + 1}. [${(x.priorite || "moyenne").toUpperCase()}] ${x.sujet} (${x.direction || "—"}) — ` +
         `décision attendue : ${x.decision_attendue || "—"} — statut : ${x.statut}${x.blocage ? ` — blocage : ${x.blocage}` : ""}`),
-      "", "Document généré à des fins de démonstration (formation DIRCAB).",
+      "", "Document généré à partir du Cockpit METFPA — démonstration institutionnelle.",
     ];
     const text = lines.join("\n");
     addMeetingNote(`Synthèse générée le ${date} (${agenda.length} points)`);

@@ -9,7 +9,7 @@ import {
 import { InstitutionalBrand } from "@/components/Institutional";
 import { useAuth, ROLE_LABELS } from "@/context/AuthContext";
 
-// Ordre recommandé DIRCAB (formation) : Vue Directeur → référentiels →
+// Ordre recommandé DIRCAB : Vue Directeur → référentiels →
 // alignement → plan/déclinaison/suivi → directions → budget & KPI →
 // décisions & risques → reporting → administration.
 const NAV_PILOTAGE = [
@@ -44,7 +44,7 @@ const NAV_ADMIN = [
   { to: "/audit-log", label: "Journal d'audit", icon: History, testid: "nav-audit" },
 ];
 const NAV_FORMATION = [
-  { to: "/scenario-formation", label: "Scénario formation", icon: GraduationCap, testid: "nav-scenario" },
+  { to: "/_internal/scenario-formation", label: "Guide interne (équipe projet)", icon: GraduationCap, testid: "nav-scenario" },
 ];
 
 const COMMON_GROUPS = [
@@ -59,7 +59,7 @@ function navConfig(role) {
   if (role === "admin") return [
     ...COMMON_GROUPS,
     { title: "Administration", items: NAV_ADMIN },
-    { title: "Formation", items: NAV_FORMATION },
+    { title: "Ressources internes", items: NAV_FORMATION },
   ];
 
   if (role === "me_validator") return [
@@ -75,7 +75,6 @@ function navConfig(role) {
       { to: "/imports", label: "Qualité des données", icon: FileSpreadsheet, testid: "nav-imports" },
       { to: "/audit-log", label: "Historique d'audit", icon: History, testid: "nav-audit" },
     ]},
-    { title: "Formation", items: NAV_FORMATION },
   ];
 
   if (role === "direction_editor") return [
@@ -87,15 +86,12 @@ function navConfig(role) {
       { to: "/kpi-cascade", label: "Mes indicateurs", icon: Gauge, testid: "nav-kpi" },
     ]},
     { title: "Référentiels stratégiques", items: NAV_REFERENTIELS },
-    { title: "Formation", items: NAV_FORMATION },
   ];
 
-  // cabinet_reader et dircab : parcours complet en ordre recommandé
-  // (le DIRCAB dispose en plus des actions de décision/arbitrage dans les pages)
-  if (role === "cabinet_reader" || role === "dircab") return [
-    ...COMMON_GROUPS,
-    { title: "Formation", items: NAV_FORMATION },
-  ];
+  // cabinet_reader et dircab : parcours institutionnel complet.
+  // Aucune référence à la formation ni au guide interne côté DIRCAB —
+  // le cockpit doit apparaître comme un outil de pilotage prêt à l'emploi.
+  if (role === "cabinet_reader" || role === "dircab") return COMMON_GROUPS;
 
   return [{ title: "Navigation", items: NAV_PILOTAGE }];
 }

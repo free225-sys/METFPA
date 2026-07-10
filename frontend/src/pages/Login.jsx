@@ -6,7 +6,7 @@ import { Loader2, Lock } from "lucide-react";
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("admin@metfpa.ci");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -48,7 +48,7 @@ export default function Login() {
                 data-testid="login-email-input"
                 type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
                 className="w-full h-11 px-3.5 rounded-[8px] border border-[#E2E8F0] focus:border-[#FF8200] focus:ring-2 focus:ring-[#FF8200]/15 outline-none text-sm transition-all"
-                placeholder="admin@metfpa.ci"
+                placeholder="prenom.nom@metfpa.ci"
               />
             </div>
             <div>

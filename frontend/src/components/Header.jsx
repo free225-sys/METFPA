@@ -20,7 +20,7 @@ const TITLES = {
   "/declinaison": "Déclinaison périodique",
   "/vue-directions": "Vue par Direction",
   "/reporting": "Reporting",
-  "/scenario-formation": "Scénario formation DIRCAB",
+  "/_internal/scenario-formation": "Guide interne · équipe projet",
   "/decisions": "Registre des décisions",
   "/risks": "Registre des risques",
   "/budget-consolide": "Budget consolidé",
@@ -50,6 +50,14 @@ export function Header({ onToggleSidebar, onOpenDrawer, isMobile }) {
           </button>
         )}
         <h1 className="text-[17px] font-bold tracking-tight text-[var(--ink-900)] truncate" data-testid="header-title">{title}</h1>
+        <span
+          data-testid="preview-badge"
+          title="Environnement de prévisualisation — non officiel"
+          className="hidden sm:inline-flex items-center gap-1.5 h-6 px-2 rounded-full border border-[var(--ci-gold-600)]/40 bg-[var(--ci-gold-600)]/8 text-[10.5px] font-semibold tracking-[0.08em] uppercase text-[var(--ci-gold-600)]"
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--ci-gold-600)]" />
+          Preview DIRCAB
+        </span>
       </div>
 
       <div className="flex items-center gap-3">

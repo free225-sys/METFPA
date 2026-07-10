@@ -85,7 +85,7 @@ function AppRoutes() {
         <Route path="/declinaison" element={<DeclinaisonPeriodique />} />
         <Route path="/vue-directions" element={<VueDirections />} />
         <Route path="/reporting" element={<Reporting />} />
-        <Route path="/scenario-formation" element={<ScenarioFormation />} />
+        <Route path="/_internal/scenario-formation" element={<RoleRoute roles={["admin"]}><ScenarioFormation /></RoleRoute>} />
         <Route path="/admin-users" element={<RoleRoute roles={["admin"]}><AdminUsers /></RoleRoute>} />
         <Route path="/audit-log" element={<RoleRoute roles={["me_validator", "admin"]}><AuditLog /></RoleRoute>} />
         <Route path="/imports" element={<RoleRoute roles={["me_validator", "admin"]}><ImportsDryRun /></RoleRoute>} />
