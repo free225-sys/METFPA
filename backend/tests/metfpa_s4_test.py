@@ -15,7 +15,7 @@ ACCOUNTS = {
     "admin": "admin@metfpa.ci",
     "validator": "validateur@metfpa.ci",
     "editor": "direction.daf@metfpa.ci",
-    "reader": "cabinet@metfpa.ci",
+    "dircab": "dircab@metfpa.ci",
 }
 
 
@@ -95,28 +95,21 @@ class TestAuth:
 
 # ---- RBAC backend enforcement ----
 class TestRBAC:
-    def test_reader_cannot_post_decision(self, tokens):
-        r = requests.post(f"{BASE}/api/metfpa/decisions",
-                          json={"title": "TEST_S4 reader", "decision_type": "autre",
-                                "priority": "moyenne", "status": "draft"},
-                          headers=_h(tokens["reader"]))
-        assert r.status_code == 403
-
-    def test_reader_cannot_post_risk(self, tokens):
+    def test_dircab_cannot_post_risk(self, tokens):
         r = requests.post(f"{BASE}/api/metfpa/risks",
-                          json={"title": "TEST_S4 risk reader", "probability": 2, "impact": 2},
-                          headers=_h(tokens["reader"]))
+                          json={"title": "TEST_S4 risk dircab", "probability": 2, "impact": 2},
+                          headers=_h(tokens["dircab"]))
         assert r.status_code == 403
 
-    def test_reader_cannot_put_activity(self, tokens):
+    def test_dircab_cannot_put_activity(self, tokens):
         r = requests.put(f"{BASE}/api/metfpa/activities/ACT001",
-                         json={"avancement": 50}, headers=_h(tokens["reader"]))
+                         json={"avancement": 50}, headers=_h(tokens["dircab"]))
         assert r.status_code == 403
 
-    def test_reader_cannot_validate(self, tokens):
+    def test_dircab_cannot_validate(self, tokens):
         r = requests.post(f"{BASE}/api/metfpa/admin/validate",
                           json={"framework": "PND", "validated_by": "x", "validation_note": "t"},
-                          headers=_h(tokens["reader"]))
+                          headers=_h(tokens["dircab"]))
         assert r.status_code == 403
 
     def test_editor_cannot_validate(self, tokens):
@@ -173,13 +166,13 @@ class TestAdminUsers:
             assert v in emails
 
     def test_list_users_forbidden_for_others(self, tokens):
-        for role in ("reader", "editor", "validator"):
+        for role in ("dircab", "editor", "validator"):
             r = requests.get(f"{BASE}/api/metfpa/admin/users", headers=_h(tokens[role]))
             assert r.status_code == 403, f"{role} should be 403"
 
     def test_patch_user_role(self, tokens):
         users = requests.get(f"{BASE}/api/metfpa/admin/users", headers=_h(tokens["admin"])).json()
-        target = next(u for u in users if u["email"] == ACCOUNTS["reader"])
+        target = next(u for u in users if u["email"] == ACCOUNTS["dircab"])
         # toggle direction value
         r = requests.put(f"{BASE}/api/metfpa/admin/users/{target['id']}",
                          json={"direction": "TEST_SCOPE"}, headers=_h(tokens["admin"]))
@@ -197,7 +190,7 @@ class TestAdminUsers:
         admin_user = next(u for u in users if u["role"] == "admin" and u["active"])
         # try to demote
         r = requests.put(f"{BASE}/api/metfpa/admin/users/{admin_user['id']}",
-                         json={"role": "cabinet_reader"}, headers=_h(tokens["admin"]))
+                         json={"role": "dircab"}, headers=_h(tokens["admin"]))
         assert r.status_code == 409
         # try to deactivate
         r2 = requests.put(f"{BASE}/api/metfpa/admin/users/{admin_user['id']}",
@@ -212,7 +205,7 @@ class TestAlerts:
         assert r.status_code == 401
 
     def test_alerts_structure_and_sorted(self, tokens):
-        r = requests.get(f"{BASE}/api/metfpa/cabinet/alerts", headers=_h(tokens["reader"]))
+        r = requests.get(f"{BASE}/api/metfpa/cabinet/alerts", headers=_h(tokens["dircab"]))
         assert r.status_code == 200
         d = r.json()
         assert "alerts" in d and "counts" in d and "by_category" in d
@@ -237,7 +230,7 @@ class TestPDF:
 
     def test_pdf_returned_for_authed(self, tokens):
         r = requests.get(f"{BASE}/api/metfpa/cabinet/export/pdf",
-                         headers=_h(tokens["reader"]), timeout=60)
+                         headers=_h(tokens["dircab"]), timeout=60)
         assert r.status_code == 200
         assert r.headers.get("content-type", "").startswith("application/pdf")
         cd = r.headers.get("content-disposition", "")
@@ -266,13 +259,13 @@ class TestRegression:
         # gated by get_identity since S4: 401 without a token, 200 with one
         for ep in ("/api/metfpa/pnd", "/api/metfpa/politique", "/api/metfpa/digital"):
             assert requests.get(f"{BASE}{ep}").status_code == 401, ep
-            r = requests.get(f"{BASE}{ep}", headers=_h(tokens["reader"]))
+            r = requests.get(f"{BASE}{ep}", headers=_h(tokens["dircab"]))
             assert r.status_code == 200, ep
 
     def test_cabinet_data(self, tokens):
         # gated by get_identity since S4 (stale pre-S4 expectation fixed)
         assert requests.get(f"{BASE}/api/metfpa/cabinet").status_code == 401
-        r = requests.get(f"{BASE}/api/metfpa/cabinet", headers=_h(tokens["reader"]))
+        r = requests.get(f"{BASE}/api/metfpa/cabinet", headers=_h(tokens["dircab"]))
         assert r.status_code == 200
         d = r.json()
         assert "kpis" in d and "decisions_required" in d and "alerts" in d

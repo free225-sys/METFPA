@@ -19,7 +19,6 @@ const ACCOUNTS = [
   { role: "Administrateur système", email: "admin@metfpa.ci", note: "accès total + administration" },
   { role: "Validateur Suivi-Évaluation", email: "validateur@metfpa.ci", note: "validation des alignements et des données" },
   { role: "Point focal Direction (DAF)", email: "direction.daf@metfpa.ci", note: "met à jour uniquement ses actions" },
-  { role: "Lecteur Cabinet", email: "cabinet@metfpa.ci", note: "lecture seule + export PDF" },
 ];
 
 export default function ScenarioFormation() {
