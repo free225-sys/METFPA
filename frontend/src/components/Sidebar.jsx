@@ -88,10 +88,9 @@ function navConfig(role) {
     { title: "Référentiels stratégiques", items: NAV_REFERENTIELS },
   ];
 
-  // cabinet_reader et dircab : parcours institutionnel complet.
-  // Aucune référence à la formation ni au guide interne côté DIRCAB —
-  // le cockpit doit apparaître comme un outil de pilotage prêt à l'emploi.
-  if (role === "cabinet_reader" || role === "dircab") return COMMON_GROUPS;
+  // dircab : parcours institutionnel complet, sans référence à la formation.
+  // Le cockpit doit apparaître comme un outil de pilotage prêt à l'emploi.
+  if (role === "dircab") return COMMON_GROUPS;
 
   return [{ title: "Navigation", items: NAV_PILOTAGE }];
 }
