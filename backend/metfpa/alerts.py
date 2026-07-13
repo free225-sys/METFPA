@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends
 
 from .db import mdb
-from .auth import get_identity
+from .auth import require_role
 
 alerts_router = APIRouter(prefix="/api/metfpa")
 
@@ -144,7 +144,7 @@ async def build_alerts():
 
 
 @alerts_router.get("/cabinet/alerts")
-async def cabinet_alerts(identity: dict = Depends(get_identity)):
+async def cabinet_alerts(identity: dict = Depends(require_role("dircab", "coordination", "me_validator", "admin"))):
     alerts = await build_alerts()
     by_cat = {}
     counts = {"critique": 0, "eleve": 0, "modere": 0, "faible": 0}

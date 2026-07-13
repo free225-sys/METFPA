@@ -12,7 +12,7 @@ from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table, Tab
 from reportlab.lib.enums import TA_CENTER
 
 from .db import mdb, audit
-from .auth import get_identity
+from .auth import require_role
 from .router import cabinet, budget_consolidated
 from .alerts import build_alerts
 
@@ -178,7 +178,8 @@ async def _build_pdf(note: str, identity: dict) -> tuple[bytes, bool]:
 
 
 @pdf_router.get("/cabinet/export/pdf")
-async def export_cabinet_pdf(note: str = Query(default=""), identity: dict = Depends(get_identity)):
+async def export_cabinet_pdf(note: str = Query(default=""),
+                             identity: dict = Depends(require_role("dircab", "coordination", "admin"))):
     pdf_bytes, provisional = await _build_pdf(note, identity)
     await audit("export_cabinet_pdf", "cabinet_brief", None,
                 apres={"provisional": provisional, "bytes": len(pdf_bytes)}, user=identity["email"])

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from .db import mdb, audit, FRAMEWORK_META, OVERLAP
 from .auth import get_identity, require_role, assert_direction_scope, EDIT_ROLES, VALIDATE_ROLES
+from .mission_rules import canonical_status
 
 metfpa_router = APIRouter(prefix="/api/metfpa")
 
@@ -67,7 +68,8 @@ async def alignments(identity: dict = Depends(get_identity)):
 
 @metfpa_router.get("/activities")
 async def activities(identity: dict = Depends(get_identity)):
-    return await _list("activities", sort="code_action")
+    query = {"direction": identity.get("direction")} if identity["role"] == "direction_editor" else None
+    return await _list("activities", q=query, sort="code_action")
 
 
 @metfpa_router.get("/budget/consolidated")
@@ -102,7 +104,7 @@ def _quarter_end(echeance):
 
 
 @metfpa_router.get("/cabinet")
-async def cabinet(identity: dict = Depends(get_identity)):
+async def cabinet(identity: dict = Depends(require_role("dircab", "coordination", "me_validator", "admin"))):
     acts = await _list("activities")
     decisions = await _list("decisions")
     risks = await _list("risks")
@@ -211,7 +213,15 @@ async def update_activity(aid: str, payload: ActivityUpdate, identity: dict = De
     data = {k: v for k, v in payload.model_dump().items() if v is not None}
     if not data:
         return a
+    # Keep the additive mission contract in sync with the legacy activity API.
+    if "avancement" in data:
+        data["progress"] = data["avancement"]
+    if "statut" in data:
+        data["status"] = canonical_status(data["statut"])
+    if "alerte" in data:
+        data["blocker"] = data["alerte"]
     data["derniere_maj"] = datetime.now(timezone.utc).isoformat()
+    data["last_update"] = data["derniere_maj"]
     await mdb.activities.update_one({"id": aid}, {"$set": data})
     await audit("update_activity", "activity", aid,
                 avant={k: a.get(k) for k in data}, apres=data, user=x_user)

@@ -12,6 +12,7 @@ const TITLES = {
   "/politique-eftp": "Politique EFTP 2026-2035",
   "/strategie-digitale": "Stratégie digitale 2026-2031",
   "/plan-action": "Plan d'action annuel",
+  "/ma-direction": "Ma Direction",
   "/alignement": "Matrice d'alignement",
   "/kpi-cascade": "KPI en cascade",
   "/pilotage-directeur": "Vue Directeur",

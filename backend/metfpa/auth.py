@@ -19,12 +19,12 @@ JWT_ALGORITHM = "HS256"
 TOKEN_TYPE = "metfpa_access"
 TOKEN_TTL_HOURS = 8
 
-ROLES = ["direction_editor", "me_validator", "admin", "dircab"]
+ROLES = ["direction_editor", "me_validator", "admin", "dircab", "coordination"]
 EDIT_ROLES = {"direction_editor", "me_validator", "admin"}
 VALIDATE_ROLES = {"me_validator", "admin"}
 # DIRCAB (cabinet décisionnel) : lecture globale + gestion des décisions
 # (création / mise à jour / clôture / arbitrage), sans administration.
-DECISION_ROLES = EDIT_ROLES | {"dircab"}
+DECISION_ROLES = EDIT_ROLES | {"dircab", "coordination"}
 
 
 def _hash(pw: str) -> str:
@@ -60,6 +60,7 @@ async def seed_users():
         {"email": "validateur@metfpa.ci", "name": "Validateur M&E", "role": "me_validator", "direction": None},
         {"email": "direction.daf@metfpa.ci", "name": "Point focal DAF", "role": "direction_editor", "direction": "DAF"},
         {"email": "dircab@metfpa.ci", "name": "DIRCAB — Cabinet décisionnel", "role": "dircab", "direction": None},
+        {"email": "coordination@metfpa.ci", "name": "Chef de cabinet — Coordination", "role": "coordination", "direction": None},
     ]
     n = 0
     for u in demo:

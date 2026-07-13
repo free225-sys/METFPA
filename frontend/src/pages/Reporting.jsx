@@ -1,76 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import metfpaApi from "@/lib/metfpaApi";
+import { apiError, pct } from "@/lib/operational";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { DemoBanner } from "@/components/DemoBanner";
 import { toast } from "sonner";
-import { FileText, FileDown, Files, CalendarDays, Building2, Gavel, Clock, Wallet, Gauge, Loader2 } from "lucide-react";
-
-const REPORTS = [
-  { key: "note-dircab", title: "Note hebdomadaire DIRCAB", desc: "Synthèse décisionnelle : décisions, alertes, échéances, risques, budget, avancement.", icon: FileText, color: "#1A202C", live: true },
-  { key: "synthese-reunion", title: "Synthèse de réunion", desc: "Compte rendu des points inscrits à l'ordre du jour (module Ordre du jour).", icon: Files, color: "#C89A2B", link: "/ordre-du-jour" },
-  { key: "mensuel", title: "Reporting mensuel", desc: "État d'exécution mensuel consolidé par direction.", icon: CalendarDays, color: "#1F6FEB" },
-  { key: "tutelle", title: "Reporting tutelle", desc: "Rapport institutionnel à destination de la tutelle et des partenaires.", icon: Building2, color: "#008751" },
-  { key: "decisions", title: "État des décisions", desc: "Registre des décisions : statuts, arbitrages, relances.", icon: Gavel, color: "#7C3AED" },
-  { key: "retards", title: "Actions en retard", desc: "Liste des actions en retard ou bloquées, par direction.", icon: Clock, color: "#FF8200" },
-  { key: "budget", title: "État budgétaire", desc: "Prévu / engagé / exécuté par cadre et par direction.", icon: Wallet, color: "#009E49" },
-  { key: "kpi", title: "État des KPI", desc: "Indicateurs par niveau : valeurs, cibles, données manquantes.", icon: Gauge, color: "#C53030" },
-];
+import { AlertTriangle, Building2, Download, FileText, Gavel, Loader2 } from "lucide-react";
 
 export default function Reporting() {
-  const [busy, setBusy] = useState(null);
-
-  const run = async (r) => {
-    if (r.live) {
-      setBusy(r.key);
-      try {
-        const resp = await metfpaApi.get("/cabinet/export/pdf?note=Note%20DIRCAB%20hebdomadaire", { responseType: "blob" });
-        const url = URL.createObjectURL(new Blob([resp.data], { type: "application/pdf" }));
-        const a = document.createElement("a");
-        a.href = url; a.download = `Note_DIRCAB_${new Date().toISOString().slice(0, 10)}.pdf`;
-        a.click(); URL.revokeObjectURL(url);
-        toast.success("Note DIRCAB générée (PDF)");
-      } catch (e) {
-        toast.error("Échec de la génération", { description: e?.response?.status === 403 ? "Accès refusé" : "Erreur serveur" });
-      } finally { setBusy(null); }
-    } else if (r.link) {
-      window.location.assign(r.link);
-    } else {
-      toast.info(`« ${r.title} » — à finaliser`, { description: "Rapport en cours de construction (version de démonstration)." });
-    }
-  };
-
-  return (
-    <div className="space-y-6 animate-slide-up" data-testid="page-reporting">
-      <Breadcrumb items={[{ label: "Reporting" }]} />
-      <DemoBanner />
-      <div className="rounded-[8px] border border-[#E2E8F0] bg-white p-6">
-        <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#008751]"><FileDown size={13} className="inline mr-1" /> Production documentaire</div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Reporting</h1>
-        <p className="text-sm text-[#4A5568] mt-2 max-w-3xl">Rapports du cockpit. La <strong>Note hebdomadaire DIRCAB</strong> est générée en PDF réel ; les autres formats sont <strong>à finaliser (démonstration)</strong>.</p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" data-testid="reporting-cards">
-        {REPORTS.map((r) => (
-          <div key={r.key} data-testid={`report-${r.key}`} className="bg-white rounded-[8px] border border-[#E2E8F0] p-4 flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="w-9 h-9 rounded-[8px] flex items-center justify-center" style={{ background: `${r.color}12` }}><r.icon size={17} style={{ color: r.color }} /></span>
-              {r.live
-                ? <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-[3px] bg-[#009E49]/10 text-[#006B3F]">DISPONIBLE</span>
-                : r.link
-                  ? <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-[3px] bg-[#C89A2B]/10 text-[#8A6D1B]">VIA ORDRE DU JOUR</span>
-                  : <span className="ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-[3px] bg-[#718096]/10 text-[#52667A]">À FINALISER · DÉMO</span>}
-            </div>
-            <h2 className="text-sm font-semibold text-[#1A202C] mt-3">{r.title}</h2>
-            <p className="text-xs text-[#718096] mt-1 flex-1">{r.desc}</p>
-            <button data-testid={`report-btn-${r.key}`} onClick={() => run(r)} disabled={busy === r.key}
-              className={`mt-3 inline-flex items-center justify-center gap-1.5 rounded-[6px] px-3 py-2 text-xs font-medium transition-colors ${
-                r.live ? "bg-[#1A202C] text-white hover:bg-black" : "border border-[#E2E8F0] text-[#4A5568] hover:bg-[#F7F7F5]"}`}>
-              {busy === r.key ? <Loader2 size={13} className="animate-spin" /> : <FileDown size={13} />}
-              {r.live ? "Générer le PDF" : r.link ? "Ouvrir le module" : "Aperçu (démo)"}
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  const [data, setData] = useState(null); const [busy, setBusy] = useState(false); const [error, setError] = useState("");
+  useEffect(() => { metfpaApi.get("/director-dashboard").then((r) => setData(r.data)).catch((e) => setError(apiError(e))); }, []);
+  const pdf = async () => { setBusy(true); try { const r = await metfpaApi.get("/cabinet/export/pdf?note=Reporting%20hebdomadaire%20DIRCAB", { responseType: "blob" }); const url = URL.createObjectURL(new Blob([r.data], { type: "application/pdf" })); const a = document.createElement("a"); a.href = url; a.download = `Reporting_DIRCAB_${new Date().toISOString().slice(0,10)}.pdf`; a.click(); URL.revokeObjectURL(url); toast.success("Reporting PDF généré"); } catch (e) { toast.error(apiError(e)); } finally { setBusy(false); } };
+  return <div className="space-y-6 animate-slide-up" data-testid="page-reporting"><Breadcrumb items={[{ label: "Reporting" }]} /><DemoBanner />
+    <div className="bg-white border rounded-[8px] p-6 flex justify-between gap-4"><div><div className="text-[11px] uppercase tracking-[0.12em] font-semibold text-[var(--ci-green-700)]"><FileText size={13} className="inline mr-1" /> Sortie hebdomadaire</div><h1 className="text-2xl font-bold mt-1">Reporting DIRCAB</h1><p className="text-sm text-[var(--ink-700)] mt-2">Prévisualisation structurée à partir des mêmes données que la Vue Directeur.</p></div><button onClick={pdf} disabled={busy} className="self-start px-3.5 py-2 rounded-[6px] bg-[var(--ink-900)] text-white text-sm font-semibold inline-flex gap-1.5">{busy ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}Générer le PDF</button></div>
+    {error ? <div className="p-5 bg-white border rounded-[8px] text-[#C93C37]">{error}</div> : !data ? <Loader2 className="animate-spin mx-auto" /> : <><div className="grid grid-cols-2 lg:grid-cols-4 gap-3"><Card label="Exécution globale" value={pct(data.summary.execution_rate)} icon={FileText} /><Card label="Retards" value={data.summary.missions_overdue} icon={AlertTriangle} danger /><Card label="Décisions en attente" value={data.summary.decisions_pending} icon={Gavel} /><Card label="Directions à relancer" value={data.summary.directions_stale} icon={Building2} danger /></div><div className="grid grid-cols-1 lg:grid-cols-2 gap-5"><ReportSection title="Résumé exécutif"><p className="text-sm leading-relaxed">{data.summary.missions_total} missions suivies, avec un taux d'exécution global de {pct(data.summary.execution_rate)}. {data.summary.missions_overdue} mission(s) sont en retard et {data.summary.critical_blockers} blocage(s) critiques nécessitent une attention du Cabinet.</p></ReportSection><ReportSection title="Décisions"><List items={[...data.decisions_this_week, ...data.decisions_this_month].slice(0,8)} render={(x) => x.title} /></ReportSection><ReportSection title="Points à arbitrer"><List items={data.what_blocks} render={(x) => `${x.code} · ${x.blocker || x.action_title}`} /></ReportSection><ReportSection title="Directions à relancer"><List items={data.directions_to_follow_up} render={(x) => `${x.direction} · score de mise à jour ${x.update_score}/100`} /></ReportSection><ReportSection title="Actions de la semaine"><List items={data.top_priority_missions} render={(x) => `${x.code} · ${x.action_title} · ${x.progress}%`} /></ReportSection><ReportSection title="Prochaine réunion"><p className="text-sm">{data.next_meeting.title}</p><p className="text-xs text-[var(--ink-500)] mt-1">{data.proposed_agenda.length} point(s) proposés automatiquement.</p></ReportSection></div></>}
+  </div>;
 }
+function Card({ label, value, icon: Icon, danger }) { return <div className="bg-white border rounded-[8px] p-4"><Icon size={16} className={danger ? "text-[#C93C37]" : "text-[var(--ci-green-700)]"} /><div className="text-2xl font-bold mt-2">{value}</div><div className="text-xs text-[var(--ink-500)]">{label}</div></div>; }
+function ReportSection({ title, children }) { return <section className="bg-white border rounded-[8px] p-5"><h2 className="font-semibold text-sm mb-3">{title}</h2>{children}</section>; }
+function List({ items, render }) { return items.length ? <ul className="space-y-2">{items.map((x, i) => <li key={x.id || x.direction || i} className="text-sm border-b last:border-0 pb-2">{render(x)}</li>)}</ul> : <p className="text-sm text-[var(--ink-500)] italic">Aucun élément.</p>; }

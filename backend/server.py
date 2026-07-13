@@ -631,6 +631,7 @@ from metfpa.alerts import alerts_router
 from metfpa.pdf import pdf_router
 from metfpa.imports import imports_router
 from metfpa.validation import validation_router
+from metfpa.operations import operations_router, ensure_operational_schema
 from metfpa.seed_loader import import_seed
 from metfpa.db import mdb as metfpa_mdb
 app.include_router(metfpa_auth_router)
@@ -641,6 +642,7 @@ app.include_router(alerts_router)
 app.include_router(pdf_router)
 app.include_router(imports_router)
 app.include_router(validation_router)
+app.include_router(operations_router)
 
 
 @app.on_event("startup")
@@ -650,6 +652,8 @@ async def metfpa_startup():
         logger.info(f"METFPA seed imported: {s}")
         u = await seed_users()
         logger.info(f"METFPA users seeded: {u}")
+        op = await ensure_operational_schema()
+        logger.info(f"METFPA operational schema ready: {op}")
         # S3B register indexes (idempotent)
         await metfpa_mdb.decisions.create_index("id", unique=True)
         await metfpa_mdb.decisions.create_index("status")

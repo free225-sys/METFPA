@@ -74,17 +74,18 @@ function AppRoutes() {
         <Route path="/politique-eftp" element={<PolitiqueEFTP />} />
         <Route path="/strategie-digitale" element={<StrategieDigitale />} />
         <Route path="/plan-action" element={<PlanAction />} />
+        <Route path="/ma-direction" element={<RoleRoute roles={["direction_editor"]}><PlanAction /></RoleRoute>} />
         <Route path="/alignement" element={<Alignement />} />
         <Route path="/kpi-cascade" element={<KpiCascade />} />
-        <Route path="/pilotage-directeur" element={<CabinetView />} />
+        <Route path="/pilotage-directeur" element={<RoleRoute roles={["dircab", "coordination", "admin"]}><CabinetView /></RoleRoute>} />
         <Route path="/decisions" element={<DecisionRegister />} />
         <Route path="/risks" element={<RiskRegister />} />
         <Route path="/budget-consolide" element={<BudgetConsolide />} />
-        <Route path="/suivi-hebdo" element={<SuiviHebdo />} />
-        <Route path="/ordre-du-jour" element={<OrdreDuJour />} />
+        <Route path="/suivi-hebdo" element={<RoleRoute roles={["dircab", "coordination", "me_validator", "admin"]}><SuiviHebdo /></RoleRoute>} />
+        <Route path="/ordre-du-jour" element={<RoleRoute roles={["dircab", "coordination", "admin"]}><OrdreDuJour /></RoleRoute>} />
         <Route path="/declinaison" element={<DeclinaisonPeriodique />} />
-        <Route path="/vue-directions" element={<VueDirections />} />
-        <Route path="/reporting" element={<Reporting />} />
+        <Route path="/vue-directions" element={<RoleRoute roles={["dircab", "coordination", "me_validator", "admin"]}><VueDirections /></RoleRoute>} />
+        <Route path="/reporting" element={<RoleRoute roles={["dircab", "coordination", "admin"]}><Reporting /></RoleRoute>} />
         <Route path="/_internal/scenario-formation" element={<RoleRoute roles={["admin"]}><ScenarioFormation /></RoleRoute>} />
         <Route path="/admin-users" element={<RoleRoute roles={["admin"]}><AdminUsers /></RoleRoute>} />
         <Route path="/audit-log" element={<RoleRoute roles={["me_validator", "admin"]}><AuditLog /></RoleRoute>} />

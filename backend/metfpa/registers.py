@@ -85,9 +85,61 @@ class DecisionIn(BaseModel):
         return v
 
 
+class DecisionPatch(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    decision_type: Optional[str] = None
+    priority: Optional[str] = None
+    status: Optional[str] = None
+    requested_by: Optional[str] = None
+    assigned_to: Optional[str] = None
+    related_activity_id: Optional[str] = None
+    related_framework: Optional[str] = None
+    due_date: Optional[str] = None
+    decision_date: Optional[str] = None
+    resolution: Optional[str] = None
+    arbitrage: Optional[str] = None
+    relance_direction: Optional[str] = None
+
+    @field_validator("arbitrage")
+    @classmethod
+    def _arbitrage(cls, v):
+        if v is not None and v != "" and v not in ARBITRAGE_STATUSES:
+            raise ValueError(f"arbitrage invalide (attendu: {ARBITRAGE_STATUSES})")
+        return v or None
+
+    @field_validator("status")
+    @classmethod
+    def _status(cls, v):
+        if v is not None and v not in DECISION_STATUSES:
+            raise ValueError(f"status invalide (attendu: {DECISION_STATUSES})")
+        return v
+
+    @field_validator("decision_type")
+    @classmethod
+    def _type(cls, v):
+        if v is not None and v not in DECISION_TYPES:
+            raise ValueError(f"decision_type invalide (attendu: {DECISION_TYPES})")
+        return v
+
+    @field_validator("priority")
+    @classmethod
+    def _prio(cls, v):
+        if v is not None and v not in PRIORITIES:
+            raise ValueError(f"priority invalide (attendu: {PRIORITIES})")
+        return v
+
+
+def _assert_arbitration_role(identity: dict, data: dict):
+    if "arbitrage" in data or "relance_direction" in data:
+        if identity["role"] not in {"dircab", "coordination", "admin"}:
+            raise HTTPException(status_code=403, detail="Arbitrage réservé au DIRCAB, à la Coordination et à l'administrateur")
+
+
 @registers_router.get("/decisions")
 async def list_decisions(identity: dict = Depends(get_identity)):
-    return await mdb.decisions.find({}, {"_id": 0}).sort("created_at", -1).to_list(2000)
+    query = {"direction": identity.get("direction")} if identity["role"] == "direction_editor" else {}
+    return await mdb.decisions.find(query, {"_id": 0}).sort("created_at", -1).to_list(2000)
 
 
 @registers_router.get("/decisions/meta")
@@ -101,6 +153,8 @@ async def get_decision(did: str, identity: dict = Depends(get_identity)):
     d = await mdb.decisions.find_one({"id": did}, {"_id": 0})
     if not d:
         raise HTTPException(404, "Décision introuvable")
+    if identity["role"] == "direction_editor":
+        assert_direction_scope(identity, d.get("direction"))
     return d
 
 
@@ -123,10 +177,33 @@ async def update_decision(did: str, payload: DecisionIn, identity: dict = Depend
         raise HTTPException(404, "Décision introuvable")
     assert_direction_scope(identity, cur.get("direction"))
     x_user = identity["email"]
-    data = {**payload.model_dump(), "updated_at": _now(), "updated_by": x_user}
+    payload_data = payload.model_dump()
+    current_arbitration = {"arbitrage": cur.get("arbitrage"), "relance_direction": cur.get("relance_direction")}
+    proposed_arbitration = {"arbitrage": payload_data.get("arbitrage"), "relance_direction": payload_data.get("relance_direction")}
+    if proposed_arbitration != current_arbitration:
+        _assert_arbitration_role(identity, proposed_arbitration)
+    data = {**payload_data, "updated_at": _now(), "updated_by": x_user}
     await mdb.decisions.update_one({"id": did}, {"$set": data})
     await audit("update_decision", "decision", did,
                 avant={k: cur.get(k) for k in payload.model_dump()}, apres=payload.model_dump(), user=x_user)
+    return await mdb.decisions.find_one({"id": did}, {"_id": 0})
+
+
+@registers_router.patch("/decisions/{did}")
+async def patch_decision(did: str, payload: DecisionPatch,
+                         identity: dict = Depends(require_role(*DECISION_ROLES))):
+    cur = await mdb.decisions.find_one({"id": did}, {"_id": 0})
+    if not cur:
+        raise HTTPException(404, "Décision introuvable")
+    assert_direction_scope(identity, cur.get("direction"))
+    data = payload.model_dump(exclude_unset=True)
+    if not data:
+        return cur
+    _assert_arbitration_role(identity, data)
+    data.update({"updated_at": _now(), "updated_by": identity["email"]})
+    await mdb.decisions.update_one({"id": did}, {"$set": data})
+    await audit("patch_decision", "decision", did,
+                avant={k: cur.get(k) for k in data}, apres=data, user=identity["email"])
     return await mdb.decisions.find_one({"id": did}, {"_id": 0})
 
 
@@ -183,7 +260,8 @@ def _risk_computed(p: int, i: int, rp, ri):
 
 @registers_router.get("/risks")
 async def list_risks(identity: dict = Depends(get_identity)):
-    return await mdb.risks.find({}, {"_id": 0}).sort("risk_score", -1).to_list(2000)
+    query = {"direction": identity.get("direction")} if identity["role"] == "direction_editor" else {}
+    return await mdb.risks.find(query, {"_id": 0}).sort("risk_score", -1).to_list(2000)
 
 
 @registers_router.get("/risks/meta")
@@ -197,6 +275,8 @@ async def get_risk(rid: str, identity: dict = Depends(get_identity)):
     r = await mdb.risks.find_one({"id": rid}, {"_id": 0})
     if not r:
         raise HTTPException(404, "Risque introuvable")
+    if identity["role"] == "direction_editor":
+        assert_direction_scope(identity, r.get("direction"))
     return r
 
 

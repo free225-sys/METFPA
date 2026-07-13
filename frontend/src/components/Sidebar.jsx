@@ -79,10 +79,9 @@ function navConfig(role) {
 
   if (role === "direction_editor") return [
     { title: "Ma Direction", items: [
-      { to: "/plan-action", label: "Mon portefeuille", icon: Briefcase, testid: "nav-plan-action" },
-      { to: "/plan-action?vue=updates", label: "Mises à jour requises", icon: Clock, testid: "nav-updates" },
-      { to: "/plan-action?vue=delayed", label: "Activités en retard", icon: AlertTriangle, testid: "nav-delayed" },
-      { to: "/suivi-hebdo", label: "Suivi hebdomadaire", icon: CalendarClock, testid: "nav-suivi-hebdo" },
+      { to: "/ma-direction", label: "Mon espace", icon: Briefcase, testid: "nav-my-direction" },
+      { to: "/ma-direction?vue=updates", label: "Mises à jour requises", icon: Clock, testid: "nav-updates" },
+      { to: "/ma-direction?vue=delayed", label: "Missions en retard", icon: AlertTriangle, testid: "nav-delayed" },
       { to: "/kpi-cascade", label: "Mes indicateurs", icon: Gauge, testid: "nav-kpi" },
     ]},
     { title: "Référentiels stratégiques", items: NAV_REFERENTIELS },
@@ -90,7 +89,7 @@ function navConfig(role) {
 
   // dircab : parcours institutionnel complet, sans référence à la formation.
   // Le cockpit doit apparaître comme un outil de pilotage prêt à l'emploi.
-  if (role === "dircab") return COMMON_GROUPS;
+  if (role === "dircab" || role === "coordination") return COMMON_GROUPS;
 
   return [{ title: "Navigation", items: NAV_PILOTAGE }];
 }

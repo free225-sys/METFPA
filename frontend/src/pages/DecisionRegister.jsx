@@ -4,7 +4,7 @@ import { OriginBadge } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { useAuth, canEdit, canManageDecisions, isDircab, isAdmin } from "@/context/AuthContext";
+import { useAuth, canEdit, canManageDecisions, isDircab, isAdmin, isCoordination } from "@/context/AuthContext";
 import { ValidationActions } from "@/components/ValidationActions";
 import { VALIDATION_OUTCOMES } from "@/lib/metfpaTheme";
 import { addRelance } from "@/lib/demoStore";
@@ -31,7 +31,7 @@ export default function DecisionRegister() {
   // delete stays restricted to EDIT_ROLES (mirrors the backend guards).
   const editor = canManageDecisions(user?.role);
   const deleter = canEdit(user?.role);
-  const arbitre = isDircab(user?.role) || isAdmin(user?.role);
+  const arbitre = isDircab(user?.role) || isCoordination(user?.role) || isAdmin(user?.role);
   // Mirror of assert_direction_scope (backend) : un direction_editor ne peut
   // modifier que les enregistrements rattachés à sa propre direction.
   const canMutate = (row) => editor && (user?.role !== "direction_editor" || row.direction === user?.direction);

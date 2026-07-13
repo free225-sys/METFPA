@@ -371,3 +371,129 @@ Claude analyse ce handoff et pousse :
 `docs/agent-handoff/CLAUDE_TO_CODEX.md`
 
 Codex utilisera ensuite ce fichier comme spécification d’implémentation, signalera les éventuels conflits avec les contrats techniques et mettra à jour le présent handoff si une décision d’architecture modifie le périmètre UX.
+
+## 15. Mise à jour Codex — MVP Dashboard Directeur implémenté
+
+Cette section décrit l’état réel de la branche `codex/dashboard-director-mvp`. Elle prime sur les formulations prospectives des sections précédentes.
+
+### 15.1 Source de vérité et modèle
+
+La collection MongoDB existante `metfpa_activities` reste la source de vérité des missions opérationnelles. Aucun second registre concurrent n’a été créé.
+
+Un contrat « mission » additif normalise les champs existants et conserve les alias historiques afin de ne pas casser `/activities` ni les pages secondaires :
+
+- `id`, `code` ;
+- `pnd_pillar`, `pnd_axis` ;
+- `strategic_objective`, `budget_program`, `ministry_mission` ;
+- `mission_title`, `action_title`, `activity_title` ;
+- `direction`, `responsible_person` ;
+- `due_date`, `status`, `progress` ;
+- `expected_deliverable`, `deliverable_link` ;
+- `blocker`, `decision_required`, `next_step` ;
+- `priority`, `risk_level`, `needs_arbitration` ;
+- `last_update`, `submission_status` ;
+- `data_origin`, `validation_status` ;
+- `comments`, `supporting_documents`, `completeness_score`.
+
+Les statuts opérationnels sont :
+
+- `non_demarre` ;
+- `en_cours` ;
+- `acheve` ;
+- `en_retard` ;
+- `suspendu` ;
+- `en_attente_arbitrage`.
+
+Les statuts de soumission directionnelle sont :
+
+- `brouillon` ;
+- `soumis` ;
+- `valide` ;
+- `correction_demandee`.
+
+### 15.2 Endpoints MVP disponibles
+
+| Méthode | Endpoint | Usage |
+|---|---|---|
+| GET | `/api/metfpa/director-dashboard` | Synthèse Directeur consolidée |
+| GET | `/api/metfpa/pnd-alignment` | Chaîne PND → mission → direction |
+| GET | `/api/metfpa/missions` | Liste normalisée, filtrée par rôle |
+| GET | `/api/metfpa/missions/{id}` | Détail d’une mission |
+| PATCH | `/api/metfpa/missions/{id}` | Mise à jour Coordination/Admin ou Direction scopée |
+| GET | `/api/metfpa/directions-performance` | Performance et fraîcheur par direction |
+| GET | `/api/metfpa/my-direction` | Synthèse de la direction connectée |
+| GET | `/api/metfpa/my-direction/missions` | Missions de la direction connectée |
+| PATCH | `/api/metfpa/my-direction/missions/{id}` | Mise à jour limitée à sa direction |
+| POST | `/api/metfpa/my-direction/missions/{id}/updates` | Soumission hebdomadaire commentée |
+| GET | `/api/metfpa/weekly-meetings` | Réunions et ordre du jour proposé |
+| POST | `/api/metfpa/weekly-meetings` | Création d’une réunion partagée |
+| PATCH | `/api/metfpa/weekly-meetings/{id}` | Mise à jour de la réunion et de l’agenda |
+| GET | `/api/metfpa/alerts` | Alertes opérationnelles calculées |
+| PATCH | `/api/metfpa/decisions/{id}` | Mise à jour partielle d’une décision |
+| GET | `/api/metfpa/update-log` | Journal structuré des mises à jour |
+
+Les anciennes routes restent disponibles. `/activities`, `/decisions` et `/risks` sont désormais automatiquement limités à la direction de l’utilisateur `direction_editor`.
+
+### 15.3 Rôles réellement appliqués
+
+- `direction_editor` : voit et modifie uniquement les missions, décisions et risques de sa direction ; ses mises à jour passent à `soumis` et `to_validate`.
+- `dircab` : accès aux synthèses globales, décisions, arbitrages, réunions et reporting ; pas de modification directe des missions.
+- `coordination` : nouveau rôle Chef de cabinet/Coordination ; accès global, consolidation des missions, préparation des réunions, relances et arbitrages.
+- `me_validator` : contrôle qualité, validation M&E, alertes et performance globale ; ne peut pas arbitrer une décision.
+- `admin` : accès complet et gestion des comptes.
+
+Les modifications de mission créent deux traces :
+
+1. une entrée détaillée dans `metfpa_mission_updates` avec utilisateur, rôle, direction, avant, après, commentaire et date ;
+2. une entrée dans le journal d’audit existant.
+
+### 15.4 Règles métier disponibles
+
+- échéance dépassée + mission non achevée → statut effectif `en_retard` ;
+- retard + priorité haute/critique → alerte critique ;
+- décision non exécutée après échéance → alerte critique ;
+- direction sans mise à jour depuis 14 jours par défaut → « À relancer » ;
+- mission sans responsable ou échéance → donnée incomplète ;
+- blocage ou besoin d’arbitrage → point proposé pour la réunion ;
+- points critiques → proposition automatique d’ordre du jour ;
+- mises à jour Direction → recalcul immédiat de la Vue Directeur ;
+- calcul des taux d’exécution global, par axe et par direction ;
+- calcul de la complétude et du score de mise à jour par direction ;
+- calcul du taux d’exécution des décisions et de l’écart physique/budgétaire lorsque les données existent.
+
+### 15.5 Pages React consolidées
+
+- `CabinetView.jsx` : Vue Directeur centrée sur avance, blocages, décisions, réunion et directions à relancer.
+- `PlanAction.jsx` : tableau missions/actions et formulaire complet ; devient aussi l’espace `/ma-direction`.
+- `Alignement.jsx` : chaîne PND complète avec filtres opérationnels.
+- `VueDirections.jsx` : performance, complétude et fraîcheur par direction.
+- `SuiviHebdo.jsx` : alertes, points proposés et engagements précédents.
+- `OrdreDuJour.jsx` : sélection des points automatiques, persistance serveur et création de décision.
+- `Reporting.jsx` : prévisualisation hebdomadaire et export PDF existant.
+
+Les routes d’accès globales sont protégées côté React et côté FastAPI. La page `/ma-direction` est réservée à `direction_editor`.
+
+### 15.6 Zones réservées à Claude
+
+Claude peut améliorer sans nouvel endpoint :
+
+- hiérarchie visuelle de la Vue Directeur ;
+- densité et ordre des blocs ;
+- wording des alertes et décisions ;
+- présentation de la fiche mission ;
+- ergonomie du formulaire Direction ;
+- filtres et lisibilité des tableaux ;
+- représentation des statuts, priorités, risques et niveaux de fiabilité ;
+- responsive et accessibilité ;
+- parcours de sélection de l’ordre du jour.
+
+Claude ne doit pas modifier les noms de champs ou supposer de nouvelles écritures sans les signaler. Toute proposition de pièces jointes binaires, notifications, relances multicanales, commentaires de réunion structurés ou workflow d’approbation supplémentaire nécessite un besoin backend explicite dans `CLAUDE_TO_CODEX.md`.
+
+### 15.7 Validation technique exécutée
+
+- analyse AST : 23 fichiers Python valides ;
+- import FastAPI : 59 routes montées ;
+- contrôle des endpoints MVP : aucun manquant ;
+- tests unitaires : 8 passés ;
+- build React production : réussi ;
+- tests d’intégration historiques sur preview : non exécutés, car ils écrivent sur un service distant et ne valideraient pas la branche locale.

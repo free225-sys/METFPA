@@ -7,14 +7,15 @@ import { Breadcrumb } from "@/components/Breadcrumb";
 import { toast } from "sonner";
 import { ShieldCheck, Check, X, Users, BadgeCheck } from "lucide-react";
 
-const ROLES = ["direction_editor", "me_validator", "dircab", "admin"];
+const ROLES = ["direction_editor", "me_validator", "dircab", "coordination", "admin"];
 
 // Read-only mirror of the server-side permission model
 // (backend/metfpa/auth.py : EDIT_ROLES, VALIDATE_ROLES, DECISION_ROLES).
 const ROLE_MATRIX = [
   { cap: "Consultation (pages, registres, référentiels, PDF)", roles: ROLES },
-  { cap: "Édition des activités (avancement, statut, alerte)", roles: ["direction_editor", "me_validator", "admin"], note: "direction_editor : sa direction uniquement" },
-  { cap: "Créer / éditer / clôturer des décisions (arbitrage, relances)", roles: ["direction_editor", "me_validator", "dircab", "admin"], note: "direction_editor : sa direction uniquement · suppression hors DIRCAB" },
+  { cap: "Mise à jour des missions et activités", roles: ["direction_editor", "me_validator", "coordination", "admin"], note: "direction_editor : sa direction uniquement · coordination : consolidation globale" },
+  { cap: "Créer / éditer / clôturer des décisions", roles: ["direction_editor", "me_validator", "dircab", "coordination", "admin"], note: "arbitrage : DIRCAB, Coordination ou admin · direction_editor : sa direction uniquement" },
+  { cap: "Préparer les réunions et relancer les directions", roles: ["dircab", "coordination", "admin"] },
   { cap: "Créer / éditer / supprimer des risques", roles: ["direction_editor", "me_validator", "admin"], note: "direction_editor : sa direction uniquement" },
   { cap: "Validation des données (indicateurs, activités, registres)", roles: ["me_validator", "admin"] },
   { cap: "Promotion des référentiels (PND / POL / DIG)", roles: ["me_validator", "admin"] },

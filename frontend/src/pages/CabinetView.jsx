@@ -1,273 +1,117 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import metfpaApi from "@/lib/metfpaApi";
-import { fmtMillions } from "@/lib/format";
-import { OriginBadge, MissingValue } from "@/components/OriginBadge";
-import { DemoBanner } from "@/components/DemoBanner";
+import { apiError, dateTime, pct, Pill, PRIORITY_COLORS, shortDate, statusLabel, STATUS_COLORS } from "@/lib/operational";
 import { Breadcrumb } from "@/components/Breadcrumb";
-import { Gavel, AlertTriangle, CalendarClock, ShieldAlert, Wallet, BarChart3, StickyNote, ArrowRight, CheckCircle2, Siren, FileDown } from "lucide-react";
+import { DemoBanner } from "@/components/DemoBanner";
 import { toast } from "sonner";
+import { Activity, AlertTriangle, Building2, CalendarDays, CheckCircle2, Download, Gavel, Loader2, RefreshCw } from "lucide-react";
 
-function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
-const SEV_COLOR = { critique: "#C53030", eleve: "#FF8200", modere: "#C5A028", faible: "#718096" };
-const STATUT_COLOR = { "Non démarré": "#718096", "À l'heure": "#1F6FEB", "En cours": "#C5A028", "En retard": "#FF8200", "Bloqué": "#C53030", "Achevé": "#009E49" };
+const KPI = [
+  ["missions_total", "Missions suivies", Activity],
+  ["execution_rate", "Exécution globale", CheckCircle2, true],
+  ["missions_overdue", "Missions en retard", AlertTriangle],
+  ["critical_blockers", "Blocages critiques", AlertTriangle],
+  ["decisions_pending", "Décisions en attente", Gavel],
+  ["directions_stale", "Directions à relancer", Building2],
+];
 
 export default function CabinetView() {
-  const [c, setC] = useState(null);
-  const [budget, setBudget] = useState(null);
-  const [alerts, setAlerts] = useState(null);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
   const [exporting, setExporting] = useState(false);
-  const [note, setNote] = useState(() => localStorage.getItem("metfpa_director_note") || "");
-  const nav = useNavigate();
 
-  useEffect(() => {
-    metfpaApi.get("/cabinet").then((r) => setC(r.data));
-    metfpaApi.get("/budget/consolidated").then((r) => setBudget(r.data));
-    metfpaApi.get("/cabinet/alerts").then((r) => setAlerts(r.data));
-  }, []);
-
-  const saveNote = (v) => { setNote(v); localStorage.setItem("metfpa_director_note", v); };
+  const load = () => {
+    setError("");
+    metfpaApi.get("/director-dashboard").then((r) => setData(r.data)).catch((e) => setError(apiError(e)));
+  };
+  useEffect(load, []);
 
   const exportPdf = async () => {
     setExporting(true);
     try {
-      const r = await metfpaApi.get(`/cabinet/export/pdf?note=${encodeURIComponent(note)}`, { responseType: "blob" });
+      const r = await metfpaApi.get("/cabinet/export/pdf?note=Synthèse%20hebdomadaire%20DIRCAB", { responseType: "blob" });
       const url = URL.createObjectURL(new Blob([r.data], { type: "application/pdf" }));
       const a = document.createElement("a");
-      a.href = url;
-      a.download = `METFPA_Cabinet_Brief_${new Date().toISOString().slice(0, 10)}.pdf`;
-      document.body.appendChild(a); a.click(); a.remove();
+      a.href = url; a.download = `Note_DIRCAB_${new Date().toISOString().slice(0, 10)}.pdf`; a.click();
       URL.revokeObjectURL(url);
-      toast.success("Note de Cabinet exportée (PDF)");
-    } catch (e) {
-      toast.error("Échec de l'export PDF", { description: e?.response?.status === 403 ? "Accès refusé" : "Erreur" });
-    } finally { setExporting(false); }
+      toast.success("Note DIRCAB générée");
+    } catch (e) { toast.error(apiError(e, "Échec de l'export PDF")); }
+    finally { setExporting(false); }
   };
+
+  if (error) return <ErrorState message={error} onRetry={load} />;
+  if (!data) return <div className="p-10 flex justify-center"><Loader2 className="animate-spin text-[#F47C20]" /></div>;
+  const s = data.summary;
 
   return (
     <div className="space-y-6 animate-slide-up" data-testid="page-cabinet">
       <Breadcrumb items={[{ label: "Pilotage Directeur" }]} />
       <DemoBanner />
-
-      <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#FF8200]">Cockpit décisionnel · Cabinet</div>
-            <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Pilotage Directeur — Secteur 4.02</h1>
-            <p className="text-sm text-[#4A5568] mt-2 max-w-3xl">Synthèse décisionnelle en moins de deux minutes : décisions, alertes, échéances, risques, budget, avancement.</p>
-          </div>
-          <button data-testid="export-pdf-btn" onClick={exportPdf} disabled={exporting}
-            className="shrink-0 inline-flex items-center gap-2 rounded-[6px] bg-[#1A202C] text-white px-4 py-2.5 text-sm font-medium hover:bg-black transition-colors disabled:opacity-60">
-            <FileDown size={16} /> {exporting ? "Génération…" : "Exporter la note (PDF)"}
+      <div className="rounded-[8px] border border-[var(--border)] bg-white p-6 flex flex-col lg:flex-row lg:items-start justify-between gap-4">
+        <div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--ci-green-700)]">Cockpit opérationnel</div>
+          <h1 className="text-2xl font-bold tracking-tight text-[var(--ink-900)] mt-1">Ce qui avance · Ce qui bloque · Ce qui doit être décidé</h1>
+          <p className="text-sm text-[var(--ink-700)] mt-2">Synthèse consolidée automatiquement à partir des mises à jour des directions.</p>
+        </div>
+        <div className="flex gap-2">
+          <Link to="/ordre-du-jour" className="px-3.5 py-2 rounded-[6px] bg-[var(--ci-gold-600)] text-white text-sm font-semibold">Préparer la réunion</Link>
+          <button onClick={exportPdf} disabled={exporting} className="px-3.5 py-2 rounded-[6px] border border-[var(--border)] text-sm font-semibold inline-flex items-center gap-1.5">
+            {exporting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} Exporter
           </button>
         </div>
-        <p className="text-[11px] text-[#A0AEC0] mt-3 flex items-center gap-1"><OriginBadge origin="demo_tracking" /> indicateurs opérationnels non officiels — synthèse décisionnelle ci-dessous.</p>
       </div>
 
-      {/* ① Decisions requiring action */}
-      <Section icon={Gavel} color="#C89A2B" title="① Décisions requises" testid="cabinet-decisions"
-        action={<LinkBtn onClick={() => nav("/decisions")}>Registre des décisions</LinkBtn>}>
-        {!c ? <Skeleton className="h-16" /> : c.decisions_required.length === 0 ? <Empty label="Aucune décision en attente." /> : (
-          <div className="space-y-2">
-            {c.decisions_required.map((d) => (
-              <div key={d.id} data-testid={`cabinet-decision-${d.id}`} className="flex items-center justify-between gap-3 rounded-[6px] border border-[#E2E8F0] px-3 py-2.5 hover:bg-[#F7F7F5] cursor-pointer" onClick={() => nav("/decisions")}>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-[#1A202C] truncate">{d.title}</div>
-                  <div className="text-[11px] text-[#718096]">{d.decision_type} · demandé par {d.requested_by || "—"} {d.due_date && `· échéance ${d.due_date.slice(0, 10)}`}</div>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <StatusPill label={d.status} color="#C89A2B" />
-                  <OriginBadge origin={d.data_origin} status={d.validation_status} />
-                  <ArrowRight size={15} className="text-[#CBD5E0]" />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {/* Executive alerts (deterministic, rule-based) */}
-      <Section icon={Siren} color="#C53030" title="Alertes exécutives (règles déterministes)" testid="cabinet-exec-alerts"
-        action={alerts && <span className="text-xs text-[#718096]">{alerts.counts.critique} critiques · {alerts.counts.eleve} élevées · {alerts.total} au total</span>}>
-        {!alerts ? <Skeleton className="h-16" /> : alerts.alerts.length === 0 ? <Empty label="Aucune alerte déclenchée." /> : (
-          <div className="space-y-2">
-            {alerts.alerts.slice(0, 12).map((a) => (
-              <div key={a.alert_id} data-testid={`exec-alert-${a.rule_id}`} className="flex items-start justify-between gap-3 rounded-[6px] border border-[#E2E8F0] px-3 py-2.5">
-                <div className="min-w-0 flex items-start gap-2">
-                  <SevPill sev={a.severity} />
-                  <div className="min-w-0">
-                    <div className="text-sm font-medium text-[#1A202C]">{a.title} <span className="text-[10px] text-[#A0AEC0] font-normal">· {a.category}</span></div>
-                    <div className="text-[11px] text-[#718096]">{a.description}</div>
-                  </div>
-                </div>
-                <OriginBadge origin={a.data_origin} status={a.validation_status} />
-              </div>
-            ))}
-            <p className="text-[11px] text-[#A0AEC0] mt-1">{alerts.rules_note}</p>
-          </div>
-        )}
-      </Section>
-
-      {/* ② Alerts & blockers */}
-      <Section icon={AlertTriangle} color="#C53030" title="② Alertes & blocages" testid="cabinet-alerts">
-        {!c ? <Skeleton className="h-16" /> : c.alerts.length === 0 ? <Empty label="Aucune alerte active." /> : (
-          <div className="space-y-2">
-            {c.alerts.slice(0, 8).map((a) => (
-              <div key={a.id} className="flex items-center justify-between gap-3 rounded-[6px] border border-[#E2E8F0] px-3 py-2">
-                <div className="min-w-0"><span className="font-mono text-[11px] text-[#718096]">{a.code_action}</span> <span className="text-sm text-[#1A202C]">{a.intitule}</span>
-                  {a.alerte && <div className="text-[11px] text-[#C53030] flex items-center gap-1 mt-0.5"><AlertTriangle size={10} />{a.alerte}</div>}
-                </div>
-                <StatusPill label={a.statut} color={STATUT_COLOR[a.statut]} />
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {/* ③ Deadlines */}
-      <Section icon={CalendarClock} color="#FF8200" title="③ Échéances (≤ 30 j) & retards" testid="cabinet-deadlines">
-        {!c ? <Skeleton className="h-16" /> : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <DeadlineList title="Échéances proches" rows={c.deadlines_upcoming} empty="Aucune échéance dans les 30 jours." />
-            <DeadlineList title="En retard" rows={c.deadlines_overdue} empty="Aucune activité en retard d'échéance." danger />
-          </div>
-        )}
-      </Section>
-
-      {/* ④ Risk exposure */}
-      <Section icon={ShieldAlert} color="#C53030" title="④ Exposition aux risques" testid="cabinet-risks"
-        action={<LinkBtn onClick={() => nav("/risks")}>Registre des risques</LinkBtn>}>
-        {!c ? <Skeleton className="h-16" /> : c.risks_critical_high.length === 0 ? <Empty label="Aucun risque critique ou élevé enregistré." /> : (
-          <div className="space-y-2">
-            {c.risks_critical_high.map((r) => (
-              <div key={r.id} data-testid={`cabinet-risk-${r.id}`} className="flex items-center justify-between gap-3 rounded-[6px] border border-[#E2E8F0] px-3 py-2.5">
-                <div className="min-w-0"><div className="text-sm font-medium text-[#1A202C] truncate">{r.title}</div>
-                  <div className="text-[11px] text-[#718096]">{r.category} · P{r.probability}×I{r.impact} = {r.risk_score} · {r.owner || "—"}</div></div>
-                <div className="flex items-center gap-2 shrink-0"><SevPill sev={r.severity} /><OriginBadge origin={r.data_origin} status={r.validation_status} /></div>
-              </div>
-            ))}
-          </div>
-        )}
-      </Section>
-
-      {/* ⑤ Budget situation */}
-      <Section icon={Wallet} color="#009E49" title="⑤ Situation budgétaire" testid="cabinet-budget"
-        action={<LinkBtn onClick={() => nav("/budget-consolide")}>Budget consolidé</LinkBtn>}>
-        {!budget ? <Skeleton className="h-16" /> : (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              {budget.items.map((f) => (
-                <div key={f.framework} className="rounded-[6px] border border-[#E2E8F0] p-3">
-                  <div className="text-[10px] font-bold uppercase text-[#718096]">{f.label}</div>
-                  <div className="text-lg font-bold tabular-nums text-[#1A202C] mt-1">{fmtMillions(f.total)}</div>
-                  <div className="text-[11px] text-[#718096]">{f.period} · moy/an {fmtMillions(f.annual_average)}</div>
-                  <div className="mt-1.5"><OriginBadge status={f.validation_status} /></div>
-                </div>
-              ))}
-            </div>
-            <p className="text-[11px] text-[#A0AEC0] mt-2">Engagé / exécuté par activité : <MissingValue label="donnée absente" /> · {budget.annotation}</p>
-          </>
-        )}
-      </Section>
-
-      {/* ⑥ Progress analytics */}
-      <Section icon={BarChart3} color="#1F6FEB" title="⑥ Avancement, KPI & fiabilité des données" testid="cabinet-progress">
-        {!c ? <Skeleton className="h-16" /> : (
-          <>
-            <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-5" data-testid="cabinet-kpis">
-              <Kpi label="Décisions en attente" value={c.kpis.decisions_en_attente} color="#C89A2B" />
-              <Kpi label="Risques critiques" value={c.kpis.risques_critiques} color="#C53030" pulse={c.kpis.risques_critiques > 0} />
-              <Kpi label="Activités bloquées" value={c.kpis.bloques} color="#C53030" pulse={c.kpis.bloques > 0} />
-              <Kpi label="En retard" value={c.kpis.en_retard} color="#FF8200" />
-              <Kpi label="Alertes" value={c.kpis.alertes} color="#C5A028" />
-              <Kpi label="Avancement moyen" value={`${c.kpis.avancement_moyen}%`} color="#009E49" />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <div className="text-xs font-semibold text-[#4A5568] mb-2">Répartition par statut ({c.progress_summary.total} activités)</div>
-              <div className="space-y-1.5">
-                {Object.entries(c.progress_summary.by_statut).map(([s, n]) => (
-                  <div key={s} className="flex items-center gap-2">
-                    <span className="text-xs w-24 text-[#718096]">{s}</span>
-                    <div className="flex-1 h-3 rounded-[3px] bg-[#F1F1EF] overflow-hidden"><div className="h-full" style={{ width: `${(n / c.progress_summary.total) * 100}%`, background: STATUT_COLOR[s] || "#718096" }} /></div>
-                    <span className="text-xs tabular-nums w-6 text-right">{n}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs font-semibold text-[#4A5568] mb-2">Fiabilité des données financières</div>
-              <ul className="space-y-1.5 text-xs">
-                <RelRow label="Budget prévu renseigné (démo)" value={`${c.financial_reliability.budget_prevu_present}/62`} ok />
-                <RelRow label="Budget engagé" value="manquant" miss n={c.financial_reliability.budget_engage_missing} />
-                <RelRow label="Source de financement" value="manquant" miss n={c.financial_reliability.source_financement_missing} />
-                <RelRow label="Directions" value="à valider" warn n={c.financial_reliability.directions_to_validate} />
-              </ul>
-            </div>
-          </div>
-          </>
-        )}
-      </Section>
-
-      {/* ⑦ Director note */}
-      <Section icon={StickyNote} color="#C5A028" title="⑦ Note du Directeur" testid="cabinet-note">
-        <textarea data-testid="director-note" value={note} onChange={(e) => saveNote(e.target.value)} rows={4}
-          placeholder="Synthèse, décisions à arbitrer, instructions…"
-          className="w-full rounded-[6px] border border-[#E2E8F0] px-3 py-2 text-sm focus:outline-none focus:border-[#C5A028]" />
-        <p className="text-[11px] text-[#A0AEC0] mt-1">Note enregistrée localement (démonstration). Utilisez « Exporter la note (PDF) » en haut de page pour générer la note de Cabinet.</p>
-      </Section>
-    </div>
-  );
-}
-
-function Section({ icon: Icon, color, title, children, action, testid }) {
-  return (
-    <div data-testid={testid} className="bg-white rounded-[4px] border border-[#E2E8F0] p-5">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-base font-semibold tracking-tight text-[#1A202C] flex items-center gap-2"><Icon size={17} style={{ color }} /> {title}</h2>
-        {action}
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-3" data-testid="director-kpis">
+        {KPI.map(([key, label, Icon, percent]) => <Kpi key={key} label={label} value={percent ? pct(s[key]) : s[key]} icon={Icon} danger={["missions_overdue", "critical_blockers", "directions_stale"].includes(key) && s[key] > 0} />)}
       </div>
-      {children}
-    </div>
-  );
-}
-function Kpi({ label, value, color, pulse }) {
-  return (
-    <div className="rounded-[6px] border border-[#E2E8F0] p-3">
-      <div className="text-[10px] font-semibold uppercase tracking-wide text-[#718096]">{label}</div>
-      <div className={`text-xl font-bold tabular-nums mt-0.5 ${pulse ? "pulse-red" : ""}`} style={{ color }}>{value}</div>
-    </div>
-  );
-}
-function DeadlineList({ title, rows, empty, danger }) {
-  return (
-    <div>
-      <div className="text-xs font-semibold text-[#4A5568] mb-2">{title}</div>
-      {rows.length === 0 ? <Empty label={empty} /> : (
-        <div className="space-y-1.5">
-          {rows.map((a) => (
-            <div key={a.id} className="flex items-center justify-between gap-2 rounded-[6px] border border-[#E2E8F0] px-3 py-2 text-sm">
-              <span className="truncate"><span className="font-mono text-[11px] text-[#718096]">{a.code_action}</span> {a.intitule}</span>
-              <span className={`text-xs font-semibold shrink-0 ${danger ? "text-[#C53030]" : "text-[#FF8200]"}`}>{a.echeance}</span>
-            </div>
-          ))}
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <MissionList title="Qu'est-ce qui avance ?" items={data.what_advances} color="#16794A" empty="Aucune progression enregistrée." />
+        <MissionList title="Qu'est-ce qui bloque ?" items={data.what_blocks} color="#C93C37" empty="Aucun blocage signalé." showBlocker />
+        <div className="space-y-5">
+          <DecisionList title="Décisions cette semaine" items={data.decisions_this_week} color="#C93C37" />
+          <DecisionList title="Décisions à anticiper ce mois" items={data.decisions_this_month} color="#D97706" />
         </div>
-      )}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+        <Section title="Top 5 des missions prioritaires">
+          <MissionRows items={data.top_priority_missions} />
+        </Section>
+        <Section title="Prochaine réunion de suivi" action={<Link to="/ordre-du-jour" className="text-xs font-semibold text-[#8A6D1B]">Ouvrir l'ordre du jour</Link>}>
+          <div className="rounded-[6px] bg-[var(--surface-soft)] p-3 mb-3">
+            <div className="font-semibold text-sm">{data.next_meeting?.title}</div>
+            <div className="text-xs text-[var(--ink-500)] mt-1"><CalendarDays size={13} className="inline mr-1" />{dateTime(data.next_meeting?.meeting_date)}</div>
+          </div>
+          <div className="space-y-2">
+            {data.proposed_agenda.slice(0, 5).map((p) => <div key={p.id} className="text-sm border-l-2 border-[#C89A2B] pl-3"><span className="font-medium">{p.subject}</span><div className="text-xs text-[var(--ink-500)]">{p.direction || "Direction non renseignée"}</div></div>)}
+          </div>
+        </Section>
+      </div>
+
+      <Section title="Performance par direction" action={<Link to="/vue-directions" className="text-xs font-semibold text-[#1F6FEB]">Voir le détail</Link>}>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm" data-testid="director-directions-table">
+            <thead className="text-[11px] uppercase text-[var(--ink-500)] bg-[var(--surface-soft)]"><tr><Th>Direction</Th><Th>Exécution</Th><Th>Retards</Th><Th>Blocages</Th><Th>Dernière mise à jour</Th><Th>Suivi</Th></tr></thead>
+            <tbody>{data.directions_performance.map((d) => <tr key={d.direction} className="border-t border-[var(--border)]"><Td strong>{d.direction}</Td><Td>{pct(d.execution_rate)}</Td><Td>{d.missions_overdue}</Td><Td>{d.blockers}</Td><Td>{dateTime(d.last_update)}</Td><Td>{d.needs_follow_up ? <Pill label="À relancer" color="#C93C37" /> : <Pill label="À jour" color="#16794A" />}</Td></tr>)}</tbody>
+          </table>
+        </div>
+      </Section>
+      <Section title="Exécution par axe PND" action={<Link to="/alignement" className="text-xs font-semibold text-[#1F6FEB]">Voir l'alignement</Link>}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {data.execution_by_pnd_axis.map((axis) => <div key={axis.pnd_axis} className="rounded-[6px] border border-[var(--border)] p-3"><div className="text-xs font-semibold text-[var(--ink-700)]">{axis.pnd_axis}</div><div className="text-xl font-bold mt-1">{pct(axis.execution_rate)}</div><div className="text-[11px] text-[var(--ink-500)]">{axis.missions_total} missions · {axis.missions_overdue} en retard</div></div>)}
+        </div>
+      </Section>
     </div>
   );
 }
-function RelRow({ label, value, ok, miss, warn, n }) {
-  const color = ok ? "#009E49" : miss ? "#C53030" : warn ? "#C5A028" : "#718096";
-  return (
-    <li className="flex items-center justify-between">
-      <span className="text-[#4A5568]">{label}</span>
-      <span className="font-semibold inline-flex items-center gap-1" style={{ color }}>
-        {ok && <CheckCircle2 size={12} />}{value}{n != null && miss ? ` (${n})` : warn && n != null ? ` (${n})` : ""}
-      </span>
-    </li>
-  );
-}
-function StatusPill({ label, color }) { return <span className="text-[11px] font-semibold px-2 py-0.5 rounded-[4px]" style={{ color, background: `${color}14` }}>{label}</span>; }
-function SevPill({ sev }) { const c = SEV_COLOR[sev] || "#718096"; return <span className="text-[11px] font-semibold px-2 py-0.5 rounded-[4px] capitalize" style={{ color: c, background: `${c}14` }}>{sev}</span>; }
-function Empty({ label }) { return <div data-testid="empty-state" className="text-sm text-[#A0AEC0] italic py-3 text-center rounded-[6px] border border-dashed border-[#E2E8F0]">{label}</div>; }
-function LinkBtn({ onClick, children }) { return <button onClick={onClick} className="text-xs font-medium text-[#FF8200] hover:underline inline-flex items-center gap-1">{children} <ArrowRight size={12} /></button>; }
+
+function Kpi({ label, value, icon: Icon, danger }) { return <div className="bg-white border border-[var(--border)] rounded-[8px] p-4"><Icon size={16} className={danger ? "text-[#C93C37]" : "text-[var(--ci-green-700)]"} /><div className="text-2xl font-bold mt-2 tabular-nums">{value}</div><div className="text-[11px] text-[var(--ink-500)] mt-1">{label}</div></div>; }
+function Section({ title, action, children }) { return <section className="bg-white rounded-[8px] border border-[var(--border)] overflow-hidden"><div className="px-5 py-3 border-b border-[var(--border)] flex justify-between gap-3"><h2 className="font-semibold text-sm">{title}</h2>{action}</div><div className="p-4">{children}</div></section>; }
+function MissionList({ title, items, color, empty, showBlocker }) { return <Section title={title}><div className="space-y-2">{items.length ? items.map((m) => <div key={m.id} className="rounded-[6px] border border-[var(--border)] p-3" style={{ borderLeft: `3px solid ${color}` }}><div className="flex justify-between gap-2"><span className="font-medium text-sm">{m.code} · {m.action_title}</span><span className="text-xs font-semibold tabular-nums">{m.progress}%</span></div><div className="text-xs text-[var(--ink-500)] mt-1">{m.direction || "Direction manquante"} · {shortDate(m.due_date)}</div>{showBlocker && m.blocker && <div className="text-xs text-[#A33A32] mt-1">{m.blocker}</div>}</div>) : <p className="text-sm text-[var(--ink-500)] italic">{empty}</p>}</div></Section>; }
+function MissionRows({ items }) { return <div className="space-y-2">{items.map((m) => <div key={m.id} className="flex items-center justify-between gap-3 border-b border-[var(--border)] last:border-0 pb-2 last:pb-0"><div className="min-w-0"><div className="text-sm font-medium truncate">{m.code} · {m.action_title}</div><div className="text-xs text-[var(--ink-500)]">{m.direction} · {statusLabel(m.status)}</div></div><Pill label={m.priority} color={PRIORITY_COLORS[m.priority]} /></div>)}</div>; }
+function DecisionList({ title, items, color }) { return <Section title={title}><div className="space-y-2">{items.length ? items.slice(0, 5).map((d) => <div key={d.id} className="border-l-2 pl-3" style={{ borderColor: color }}><div className="text-sm font-medium">{d.title}</div><div className="text-xs text-[var(--ink-500)]">Échéance : {shortDate(d.due_date)} · {d.status}</div></div>) : <p className="text-sm text-[var(--ink-500)] italic">Aucune décision dans cette fenêtre.</p>}</div></Section>; }
+function ErrorState({ message, onRetry }) { return <div className="rounded-[8px] border border-[#C93C37]/30 bg-white p-8 text-center"><AlertTriangle className="mx-auto text-[#C93C37]" /><h1 className="font-bold mt-3">Vue Directeur indisponible</h1><p className="text-sm text-[var(--ink-500)] mt-1">{message}</p><button onClick={onRetry} className="mt-4 px-3 py-2 rounded-[6px] border text-sm inline-flex gap-1"><RefreshCw size={14} /> Réessayer</button></div>; }
+function Th({ children }) { return <th className="text-left px-3 py-2 font-semibold whitespace-nowrap">{children}</th>; }
+function Td({ children, strong }) { return <td className={`px-3 py-2.5 whitespace-nowrap ${strong ? "font-semibold" : ""}`}>{children}</td>; }
