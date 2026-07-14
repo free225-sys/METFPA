@@ -6,13 +6,15 @@ import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useAuth, canEdit, canManageDecisions, isDircab, isAdmin, isCoordination } from "@/context/AuthContext";
 import { ValidationActions } from "@/components/ValidationActions";
+import { EmptyState } from "@/components/EmptyState";
 import { VALIDATION_OUTCOMES } from "@/lib/metfpaTheme";
 import { addRelance } from "@/lib/demoStore";
 import { toast } from "sonner";
-import { Gavel, Plus, Pencil, Trash2 } from "lucide-react";
+import { AlertTriangle, Gavel, Plus, Pencil, RefreshCw, Trash2 } from "lucide-react";
 
 function Skeleton({ className }) { return <div className={`animate-pulse bg-[#E2E8F0] rounded-[4px] ${className}`} />; }
 const STATUS_COLOR = { draft: "#718096", pending: "#C5A028", approved: "#009E49", rejected: "#C53030", implemented: "#1F6FEB", closed: "#4A5568" };
+const STATUS_LABEL = { draft: "Brouillon", pending: "En attente", approved: "Approuvée", rejected: "Rejetée", implemented: "Mise en œuvre", closed: "Clôturée" };
 const PRIO_COLOR = { faible: "#718096", moyenne: "#1F6FEB", haute: "#FF8200", critique: "#C53030" };
 export const ARBITRAGE_META = {
   a_arbitrer: { label: "À arbitrer", color: "#7C3AED" },
@@ -24,6 +26,7 @@ const EMPTY = { title: "", description: "", decision_type: "autre", priority: "m
 export default function DecisionRegister() {
   const [rows, setRows] = useState(null);
   const [meta, setMeta] = useState(null);
+  const [error, setError] = useState("");
   const [edit, setEdit] = useState(null); // form object or null
   const [del, setDel] = useState(null);
   const { user } = useAuth();
@@ -49,7 +52,13 @@ export default function DecisionRegister() {
     } catch (e) { toast.error("Échec du marquage", { description: e?.response?.data?.detail || "Erreur" }); }
   };
 
-  const load = () => metfpaApi.get("/decisions").then((r) => setRows(r.data));
+  const load = () => {
+    setError("");
+    setRows(null);
+    return metfpaApi.get("/decisions")
+      .then((r) => setRows(r.data))
+      .catch((e) => setError(e?.response?.data?.detail || "Impossible de charger le registre des décisions."));
+  };
   useEffect(() => { load(); metfpaApi.get("/decisions/meta").then((r) => setMeta(r.data)); }, []);
 
   return (
@@ -65,7 +74,7 @@ export default function DecisionRegister() {
         <button data-testid="add-decision" disabled={!editor} onClick={() => setEdit({ ...EMPTY })} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#C89A2B] text-white px-3.5 py-2 text-sm font-medium hover:bg-[#A87F1E] disabled:opacity-40 disabled:cursor-not-allowed" title={editor ? "" : "Lecture seule"}><Plus size={15} /> Nouvelle décision</button>
       </div>
 
-      <div className="bg-white rounded-[4px] border border-[#E2E8F0] overflow-hidden">
+      {error ? <EmptyState icon={AlertTriangle} title="Chargement impossible" description={error} action={<button onClick={load} className="small-action"><RefreshCw size={14} /> Réessayer</button>} /> : <div className="bg-white rounded-[4px] border border-[#E2E8F0] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm" data-testid="decisions-table">
             <thead className="bg-[#F7F7F5] text-[#718096] text-[11px] uppercase tracking-wide">
@@ -79,7 +88,7 @@ export default function DecisionRegister() {
                     <td className="px-4 py-2.5 max-w-[280px]"><div className="font-medium text-[#1A202C]">{d.title}</div>{d.description && <div className="text-[11px] text-[#718096] truncate">{d.description}</div>}</td>
                     <td className="px-4 py-2.5 text-xs">{d.decision_type}</td>
                     <td className="px-4 py-2.5"><Pill label={d.priority} color={PRIO_COLOR[d.priority]} /></td>
-                    <td className="px-4 py-2.5"><Pill label={d.status} color={STATUS_COLOR[d.status]} /></td>
+                    <td className="px-4 py-2.5"><Pill label={STATUS_LABEL[d.status] || d.status} color={STATUS_COLOR[d.status]} /></td>
                     <td className="px-4 py-2.5">
                       {arbitre ? (
                         <select data-testid={`arbitrage-select-${d.id}`} value={d.arbitrage || ""} onChange={(e) => quickArbitrage(d, e.target.value)}
@@ -102,8 +111,8 @@ export default function DecisionRegister() {
                     </td>
                     <td className="px-4 py-2.5 text-center whitespace-nowrap">
                       {canMutate(d) ? <>
-                        <button data-testid={`edit-decision-${d.id}`} onClick={() => setEdit({ ...EMPTY, ...d, arbitrage: d.arbitrage || "", relance_direction: d.relance_direction || "", due_date: (d.due_date || "").slice(0, 10), decision_date: (d.decision_date || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C89A2B]/10 hover:text-[#C89A2B] inline-flex items-center justify-center"><Pencil size={14} /></button>
-                        {deleter && <button data-testid={`delete-decision-${d.id}`} onClick={() => setDel(d)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>}
+                        <button aria-label={`Modifier la décision ${d.title}`} data-testid={`edit-decision-${d.id}`} onClick={() => setEdit({ ...EMPTY, ...d, arbitrage: d.arbitrage || "", relance_direction: d.relance_direction || "", due_date: (d.due_date || "").slice(0, 10), decision_date: (d.decision_date || "").slice(0, 10) })} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C89A2B]/10 hover:text-[#C89A2B] inline-flex items-center justify-center"><Pencil size={14} /></button>
+                        {deleter && <button aria-label={`Supprimer la décision ${d.title}`} data-testid={`delete-decision-${d.id}`} onClick={() => setDel(d)} className="w-7 h-7 rounded-[4px] text-[#4A5568] hover:bg-[#C53030]/10 hover:text-[#C53030] inline-flex items-center justify-center"><Trash2 size={14} /></button>}
                       </> : <span className="text-[11px] text-[#A0AEC0]" title={editor ? "Hors de votre direction" : "Lecture seule"}>Lecture</span>}
                       <ValidationActions entityType="decisions" item={d} onStale={load}
                         onUpdated={(doc) => setRows((p) => p.map((x) => x.id === doc.id ? doc : x))} />
@@ -113,7 +122,7 @@ export default function DecisionRegister() {
             </tbody>
           </table>
         </div>
-      </div>
+      </div>}
 
       <EditDialog form={edit} meta={meta} canArbitrate={arbitre} canFollowUp={canFollowUp} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); load(); }} />
       <DeleteDialog item={del} onClose={() => setDel(null)} onDeleted={() => { setDel(null); load(); }} />
@@ -153,7 +162,7 @@ function EditDialog({ form, meta, canArbitrate, canFollowUp, onClose, onSaved })
           <div className="grid grid-cols-2 gap-3">
             <Field label="Type"><Select testid="decision-type" value={f.decision_type} onChange={(v) => set("decision_type", v)} options={meta?.types || []} /></Field>
             <Field label="Priorité"><Select testid="decision-priority" value={f.priority} onChange={(v) => set("priority", v)} options={meta?.priorities || []} /></Field>
-            <Field label="Statut"><Select testid="decision-status" value={f.status} onChange={(v) => set("status", v)} options={meta?.statuses || []} /></Field>
+            <Field label="Statut"><Select testid="decision-status" value={f.status} onChange={(v) => set("status", v)} options={meta?.statuses || []} labels={STATUS_LABEL} /></Field>
             <Field label="Cadre lié"><Select testid="decision-framework" value={f.related_framework || ""} onChange={(v) => set("related_framework", v)} options={["", "PND", "POL", "DIG"]} /></Field>
             <Field label="Demandeur"><input value={f.requested_by} onChange={(e) => set("requested_by", e.target.value)} className={inputCls} /></Field>
             <Field label="Assigné à"><input value={f.assigned_to} onChange={(e) => set("assigned_to", e.target.value)} className={inputCls} /></Field>
@@ -197,5 +206,5 @@ function DeleteDialog({ item, onClose, onDeleted }) {
 
 const inputCls = "w-full rounded-[6px] border border-[#E2E8F0] px-3 py-2 text-sm bg-white focus:outline-none focus:border-[#C89A2B]";
 function Field({ label, children }) { return <label className="block"><span className="text-xs font-semibold text-[#4A5568]">{label}</span><div className="mt-1">{children}</div></label>; }
-function Select({ value, onChange, options, testid }) { return <select data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} className={inputCls}>{options.map((o) => <option key={o} value={o}>{o || "—"}</option>)}</select>; }
+function Select({ value, onChange, options, testid, labels }) { return <select data-testid={testid} value={value} onChange={(e) => onChange(e.target.value)} className={inputCls}>{options.map((o) => <option key={o} value={o}>{labels?.[o] || o || "—"}</option>)}</select>; }
 function Pill({ label, color }) { return <span className="text-[11px] font-semibold px-2 py-0.5 rounded-[4px] capitalize" style={{ color, background: `${color}14` }}>{label}</span>; }

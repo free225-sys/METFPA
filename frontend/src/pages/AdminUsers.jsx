@@ -13,8 +13,8 @@ const ROLES = ["direction_editor", "me_validator", "dircab", "coordination", "ad
 // (backend/metfpa/auth.py : EDIT_ROLES, VALIDATE_ROLES, DECISION_ROLES).
 const ROLE_MATRIX = [
   { cap: "Consultation (pages, registres, référentiels, PDF)", roles: ROLES },
-  { cap: "Mise à jour des missions et activités", roles: ["direction_editor", "me_validator", "coordination", "admin"], note: "direction_editor : sa direction uniquement · coordination : consolidation globale" },
-  { cap: "Créer / éditer / clôturer des décisions", roles: ["direction_editor", "me_validator", "dircab", "coordination", "admin"], note: "arbitrage : DIRCAB, Coordination ou admin · direction_editor : sa direction uniquement" },
+  { cap: "Mise à jour des missions opérationnelles", roles: ["direction_editor", "coordination", "admin"], note: "direction_editor : sa direction uniquement · coordination : consolidation globale · me_validator : validation et contrôle qualité" },
+  { cap: "Créer / éditer / clôturer des décisions", roles: ["direction_editor", "me_validator", "dircab", "coordination", "admin"], note: "arbitrage final : DIRCAB uniquement · relance : DIRCAB, Coordination ou admin · direction_editor : sa direction uniquement" },
   { cap: "Préparer les réunions et relancer les directions", roles: ["dircab", "coordination", "admin"] },
   { cap: "Créer / éditer / supprimer des risques", roles: ["direction_editor", "me_validator", "admin"], note: "direction_editor : sa direction uniquement" },
   { cap: "Validation des données (indicateurs, activités, registres)", roles: ["me_validator", "admin"] },
