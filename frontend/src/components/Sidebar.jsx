@@ -4,7 +4,7 @@ import {
   Layers, Target, Activity, ListChecks, GitMerge, Gauge, Gavel,
   ShieldAlert, Wallet, Crown, FileSpreadsheet, Users, History, BadgeCheck, Clock,
   AlertTriangle, PanelLeftClose, PanelLeftOpen, Briefcase, CalendarClock,
-  ClipboardList, Layers3, Users2, FileDown, GraduationCap,
+  ClipboardList, Layers3, Users2, FileDown, GraduationCap, BellRing,
 } from "lucide-react";
 import { InstitutionalBrand } from "@/components/Institutional";
 import { useAuth, ROLE_LABELS } from "@/context/AuthContext";
@@ -33,6 +33,7 @@ const NAV_BUDGET_KPI = [
   { to: "/kpi-cascade", label: "KPI en cascade", icon: Gauge, testid: "nav-kpi" },
 ];
 const NAV_DECISION = [
+  { to: "/alertes-arbitrages", label: "Alertes & arbitrages", icon: BellRing, testid: "nav-alertes-arbitrages" },
   { to: "/decisions", label: "Décisions", icon: Gavel, testid: "nav-decisions" },
   { to: "/risks", label: "Risques", icon: ShieldAlert, testid: "nav-risks" },
   { to: "/reporting", label: "Reporting", icon: FileDown, testid: "nav-reporting" },

@@ -11,9 +11,30 @@ export const STATUS_COLORS = {
   non_demarre: "#667085",
   en_cours: "#1F6FEB",
   acheve: "#16794A",
-  en_retard: "#D97706",
+  en_retard: "#C93C37",
   suspendu: "#667085",
   en_attente_arbitrage: "#C93C37",
+};
+
+export const SUBMISSION_LABELS = {
+  brouillon: "Brouillon",
+  soumis: "Soumis au suivi-évaluation",
+  valide: "Validé",
+  correction_demandee: "Correction demandée",
+};
+
+export const SUBMISSION_COLORS = {
+  brouillon: "#667085",
+  soumis: "#1F6FEB",
+  valide: "#16794A",
+  correction_demandee: "#C93C37",
+};
+
+export const ALERT_COLORS = {
+  critique: "#C93C37",
+  eleve: "#D97706",
+  modere: "#667085",
+  faible: "#667085",
 };
 
 export const PRIORITY_COLORS = {
@@ -25,6 +46,29 @@ export const PRIORITY_COLORS = {
 
 export function statusLabel(status) {
   return STATUS_LABELS[status] || status || "Non renseigné";
+}
+
+export function submissionLabel(status) {
+  return SUBMISSION_LABELS[status] || status || "Non renseigné";
+}
+
+export function alertCategory(alert) {
+  if (alert?.rule_id === "MISSION_INCOMPLETE") return "incomplete";
+  if (alert?.severity === "critique") return "week";
+  if (alert?.severity === "eleve") return "month";
+  return "watch";
+}
+
+export function alertAction(alert) {
+  const actions = {
+    MISSION_OVERDUE: "Obtenir un plan de rattrapage et une nouvelle échéance.",
+    MISSION_BLOCKED: "Qualifier le blocage et préparer l’arbitrage attendu.",
+    MISSION_INCOMPLETE: "Compléter le responsable et l’échéance de la mission.",
+    MISSION_ARBITRATION: "Préparer la décision pour le Directeur de cabinet.",
+    DIRECTION_STALE: "Relancer la direction et demander une mise à jour cette semaine.",
+    DECISION_OVERDUE: "Vérifier l’exécution de la décision et fixer une relance.",
+  };
+  return actions[alert?.rule_id] || "Vérifier la situation et désigner la prochaine action.";
 }
 export function pct(value) {
   const n = Number(value || 0);

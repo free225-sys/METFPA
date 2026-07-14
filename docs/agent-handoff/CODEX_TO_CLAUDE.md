@@ -438,7 +438,7 @@ Les anciennes routes restent disponibles. `/activities`, `/decisions` et `/risks
 
 - `direction_editor` : voit et modifie uniquement les missions, décisions et risques de sa direction ; ses mises à jour passent à `soumis` et `to_validate`.
 - `dircab` : accès aux synthèses globales, décisions, arbitrages, réunions et reporting ; pas de modification directe des missions.
-- `coordination` : nouveau rôle Chef de cabinet/Coordination ; accès global, consolidation des missions, préparation des réunions, relances et arbitrages.
+- `coordination` : rôle Chef de cabinet/Coordination ; accès global, consolidation des missions, préparation des réunions, relances et préparation des décisions. L’arbitrage final est réservé au `dircab`.
 - `me_validator` : contrôle qualité, validation M&E, alertes et performance globale ; ne peut pas arbitrer une décision.
 - `admin` : accès complet et gestion des comptes.
 
@@ -497,3 +497,44 @@ Claude ne doit pas modifier les noms de champs ou supposer de nouvelles écritur
 - tests unitaires : 8 passés ;
 - build React production : réussi ;
 - tests d’intégration historiques sur preview : non exécutés, car ils écrivent sur un service distant et ne valideraient pas la branche locale.
+
+---
+
+## 16. Retour Codex — recommandations UX Claude appliquées
+
+Branche d’implémentation : `codex/apply-claude-ux-p0`, créée depuis `claude/dashboard-director-ux`.
+
+### 16.1 Socle UX consolidé
+
+- `MissionDrawer` : contexte mission, avancement, livrable, blocage, décision attendue et historique via les endpoints existants ;
+- `StatusBadge` : sémantique commune avec texte et icône ;
+- `ProgressBar` : progression accessible et couleur sémantique ;
+- `EmptyState` : états vides et erreurs homogènes ;
+- `MetricStrip` : verdict de la semaine et chiffres hiérarchisés ;
+- `en_retard` est désormais rouge (`#C93C37`) dans la source frontend unique.
+
+### 16.2 Parcours appliqués
+
+- Vue Directeur : blocages → décisions de la semaine → décisions du mois → directions à relancer → avancements → réunion → contexte PND ;
+- Ma Direction : vue « Mes missions à mettre à jour » par défaut, corrections demandées visibles, tableau complet secondaire, formulaire en trois sections ;
+- Alertes et arbitrages : nouvelle route `/alertes-arbitrages`, groupes « semaine / mois / surveillance / données incomplètes » ;
+- Performance directionnelle : cartes triées avec exécution, retards, blocages, décisions, fraîcheur et accès aux missions ;
+- Réunions : lecture Avant / Pendant / Après sur `/suivi-hebdo` et `/ordre-du-jour` ;
+- Alignement : regroupement opérationnel par axe PND et accès direct au contexte mission.
+
+### 16.3 Règle de décision clarifiée
+
+La Coordination peut préparer une décision, organiser la réunion, relancer et suivre. Le champ d’arbitrage final est contrôlé côté React et côté FastAPI et n’est modifiable que par `dircab`.
+
+### 16.4 Limites explicitement conservées
+
+Les contrats B1 à B5 non indispensables au P0 n’ont pas été simulés comme des fonctions partagées. Leur suivi détaillé se trouve dans `docs/agent-handoff/UX_P0_BACKEND_TODO.md`.
+
+### 16.5 Validation de l’intégration UX
+
+- build React de production : réussi ;
+- tests unitaires ciblés : 10 réussis ;
+- syntaxe Python : 24 fichiers valides ;
+- endpoints opérationnels indispensables : tous montés ;
+- vérification locale avec données simulées : `/pilotage-directeur`, `/ma-direction`, `/vue-directions`, `/suivi-hebdo`, `/ordre-du-jour`, `/alignement`, `/alertes-arbitrages` ;
+- contrôle visuel : drawer mission fonctionnel, formulaire Direction en trois sections et badge `en_retard` rendu en rouge.

@@ -16,6 +16,7 @@ const TITLES = {
   "/alignement": "Matrice d'alignement",
   "/kpi-cascade": "KPI en cascade",
   "/pilotage-directeur": "Vue Directeur",
+  "/alertes-arbitrages": "Alertes et arbitrages",
   "/suivi-hebdo": "Suivi hebdomadaire",
   "/ordre-du-jour": "Ordre du jour",
   "/declinaison": "Déclinaison périodique",

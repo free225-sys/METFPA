@@ -23,6 +23,7 @@ import OrdreDuJour from "@/pages/OrdreDuJour";
 import DeclinaisonPeriodique from "@/pages/DeclinaisonPeriodique";
 import VueDirections from "@/pages/VueDirections";
 import Reporting from "@/pages/Reporting";
+import AlertesArbitrages from "@/pages/AlertesArbitrages";
 import ScenarioFormation from "@/pages/ScenarioFormation";
 import { Loader2, ShieldX } from "lucide-react";
 
@@ -78,6 +79,7 @@ function AppRoutes() {
         <Route path="/alignement" element={<Alignement />} />
         <Route path="/kpi-cascade" element={<KpiCascade />} />
         <Route path="/pilotage-directeur" element={<RoleRoute roles={["dircab", "coordination", "admin"]}><CabinetView /></RoleRoute>} />
+        <Route path="/alertes-arbitrages" element={<RoleRoute roles={["dircab", "coordination", "me_validator", "admin"]}><AlertesArbitrages /></RoleRoute>} />
         <Route path="/decisions" element={<DecisionRegister />} />
         <Route path="/risks" element={<RiskRegister />} />
         <Route path="/budget-consolide" element={<BudgetConsolide />} />

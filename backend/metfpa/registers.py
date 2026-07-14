@@ -131,9 +131,10 @@ class DecisionPatch(BaseModel):
 
 
 def _assert_arbitration_role(identity: dict, data: dict):
-    if "arbitrage" in data or "relance_direction" in data:
-        if identity["role"] not in {"dircab", "coordination", "admin"}:
-            raise HTTPException(status_code=403, detail="Arbitrage réservé au DIRCAB, à la Coordination et à l'administrateur")
+    if "arbitrage" in data and identity["role"] != "dircab":
+        raise HTTPException(status_code=403, detail="Arbitrage final réservé au Directeur de cabinet")
+    if "relance_direction" in data and identity["role"] not in {"dircab", "coordination", "admin"}:
+        raise HTTPException(status_code=403, detail="Relance réservée au DIRCAB, à la Coordination et à l'administrateur")
 
 
 @registers_router.get("/decisions")
@@ -162,7 +163,11 @@ async def get_decision(did: str, identity: dict = Depends(get_identity)):
 async def create_decision(payload: DecisionIn, identity: dict = Depends(require_role(*DECISION_ROLES))):
     x_user = identity["email"]
     direction = identity.get("direction")
-    doc = {"id": uuid.uuid4().hex, **payload.model_dump(), "direction": direction, **DEFAULT_ORIGIN,
+    payload_data = payload.model_dump()
+    protected = {key: payload_data[key] for key in ("arbitrage", "relance_direction") if payload_data.get(key)}
+    if protected:
+        _assert_arbitration_role(identity, protected)
+    doc = {"id": uuid.uuid4().hex, **payload_data, "direction": direction, **DEFAULT_ORIGIN,
            "created_at": _now(), "updated_at": _now(), "created_by": x_user, "updated_by": x_user}
     await mdb.decisions.insert_one(dict(doc))
     doc.pop("_id", None)
@@ -180,8 +185,9 @@ async def update_decision(did: str, payload: DecisionIn, identity: dict = Depend
     payload_data = payload.model_dump()
     current_arbitration = {"arbitrage": cur.get("arbitrage"), "relance_direction": cur.get("relance_direction")}
     proposed_arbitration = {"arbitrage": payload_data.get("arbitrage"), "relance_direction": payload_data.get("relance_direction")}
-    if proposed_arbitration != current_arbitration:
-        _assert_arbitration_role(identity, proposed_arbitration)
+    changed_arbitration = {key: value for key, value in proposed_arbitration.items() if value != current_arbitration[key]}
+    if changed_arbitration:
+        _assert_arbitration_role(identity, changed_arbitration)
     data = {**payload_data, "updated_at": _now(), "updated_by": x_user}
     await mdb.decisions.update_one({"id": did}, {"$set": data})
     await audit("update_decision", "decision", did,

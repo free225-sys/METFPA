@@ -31,7 +31,8 @@ export default function DecisionRegister() {
   // delete stays restricted to EDIT_ROLES (mirrors the backend guards).
   const editor = canManageDecisions(user?.role);
   const deleter = canEdit(user?.role);
-  const arbitre = isDircab(user?.role) || isCoordination(user?.role) || isAdmin(user?.role);
+  const arbitre = isDircab(user?.role);
+  const canFollowUp = arbitre || isCoordination(user?.role) || isAdmin(user?.role);
   // Mirror of assert_direction_scope (backend) : un direction_editor ne peut
   // modifier que les enregistrements rattachés à sa propre direction.
   const canMutate = (row) => editor && (user?.role !== "direction_editor" || row.direction === user?.direction);
@@ -59,7 +60,7 @@ export default function DecisionRegister() {
         <div>
           <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#C89A2B]"><Gavel size={13} className="inline mr-1" /> Décisions & arbitrages</div>
           <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Registre des décisions</h1>
-          <p className="text-sm text-[#4A5568] mt-2">Suivi des décisions requises ; alimente le Pilotage Directeur. Données <strong>démo · à valider</strong>.</p>
+          <p className="text-sm text-[#4A5568] mt-2">La Coordination prépare et suit les décisions ; l’arbitrage final reste réservé au Directeur de cabinet.</p>
         </div>
         <button data-testid="add-decision" disabled={!editor} onClick={() => setEdit({ ...EMPTY })} className="inline-flex items-center gap-1.5 rounded-[6px] bg-[#C89A2B] text-white px-3.5 py-2 text-sm font-medium hover:bg-[#A87F1E] disabled:opacity-40 disabled:cursor-not-allowed" title={editor ? "" : "Lecture seule"}><Plus size={15} /> Nouvelle décision</button>
       </div>
@@ -114,13 +115,13 @@ export default function DecisionRegister() {
         </div>
       </div>
 
-      <EditDialog form={edit} meta={meta} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); load(); }} />
+      <EditDialog form={edit} meta={meta} canArbitrate={arbitre} canFollowUp={canFollowUp} onClose={() => setEdit(null)} onSaved={() => { setEdit(null); load(); }} />
       <DeleteDialog item={del} onClose={() => setDel(null)} onDeleted={() => { setDel(null); load(); }} />
     </div>
   );
 }
 
-function EditDialog({ form, meta, onClose, onSaved }) {
+function EditDialog({ form, meta, canArbitrate, canFollowUp, onClose, onSaved }) {
   const [f, setF] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   useEffect(() => { if (form) setF(form); }, [form]);
@@ -158,13 +159,13 @@ function EditDialog({ form, meta, onClose, onSaved }) {
             <Field label="Assigné à"><input value={f.assigned_to} onChange={(e) => set("assigned_to", e.target.value)} className={inputCls} /></Field>
             <Field label="Échéance"><input type="date" value={f.due_date} onChange={(e) => set("due_date", e.target.value)} className={inputCls} /></Field>
             <Field label="Date de décision"><input type="date" value={f.decision_date} onChange={(e) => set("decision_date", e.target.value)} className={inputCls} /></Field>
-            <Field label="Arbitrage (DIRCAB)">
+            {canArbitrate && <Field label="Arbitrage final (DIRCAB)">
               <select data-testid="decision-arbitrage" value={f.arbitrage || ""} onChange={(v) => set("arbitrage", v.target.value)} className={inputCls}>
                 <option value="">—</option>
                 {Object.entries(ARBITRAGE_META).map(([k, m]) => <option key={k} value={k}>{m.label}</option>)}
               </select>
-            </Field>
-            <Field label="Relance → direction"><input data-testid="decision-relance" value={f.relance_direction || ""} onChange={(e) => set("relance_direction", e.target.value)} placeholder="ex. DAF" className={inputCls} /></Field>
+            </Field>}
+            {canFollowUp && <Field label="Relance → direction"><input data-testid="decision-relance" value={f.relance_direction || ""} onChange={(e) => set("relance_direction", e.target.value)} placeholder="ex. DAF" className={inputCls} /></Field>}
           </div>
           <Field label="Résolution"><textarea value={f.resolution} onChange={(e) => set("resolution", e.target.value)} rows={2} className={inputCls} /></Field>
         </div>
