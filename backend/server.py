@@ -663,6 +663,15 @@ async def metfpa_startup():
     except Exception as e:
         logger.error(f"METFPA seed import failed: {e}")
 
+# CORS — explicit origins from CORS_ORIGINS (comma-separated, whitespace-tolerant)
+# plus a regex covering the METFPA Netlify site: production, branch deploys and
+# numbered deploy previews (https://deploy-preview-<n>--metfpa.netlify.app), so a
+# new preview number never breaks the login again — without opening arbitrary hosts.
+_cors_origins = [o.strip() for o in os.environ.get("CORS_ORIGINS", "").split(",") if o.strip()]
+if not _cors_origins:
+    _cors_origins = ["https://metfpa.netlify.app", "https://etat-progression.emergent.host"]
+_cors_origin_regex = os.environ.get(
+    "CORS_ORIGIN_REGEX", r"https://([a-z0-9-]+--)?metfpa\.netlify\.app")
 app.add_middleware(CORSMiddleware, allow_credentials=True,
-                   allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+                   allow_origins=_cors_origins, allow_origin_regex=_cors_origin_regex,
                    allow_methods=["*"], allow_headers=["*"])
