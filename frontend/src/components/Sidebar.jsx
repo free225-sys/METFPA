@@ -56,6 +56,28 @@ const COMMON_GROUPS = [
   { title: "Décisions & reporting", items: NAV_DECISION },
 ];
 
+// Single source of truth mirroring the RoleRoute guards in App.js. Any route not
+// listed here is open to every authenticated role. The sidebar filters its items
+// against this map so a role can never see a link that leads to « Accès refusé ».
+const ROUTE_ROLES = {
+  "/ma-direction": ["direction_editor"],
+  "/pilotage-directeur": ["dircab", "coordination", "admin"],
+  "/alertes-arbitrages": ["dircab", "coordination", "me_validator", "admin"],
+  "/suivi-hebdo": ["dircab", "coordination", "me_validator", "admin"],
+  "/ordre-du-jour": ["dircab", "coordination", "admin"],
+  "/vue-directions": ["dircab", "coordination", "me_validator", "admin"],
+  "/reporting": ["dircab", "coordination", "admin"],
+  "/_internal/scenario-formation": ["admin"],
+  "/admin-users": ["admin"],
+  "/audit-log": ["me_validator", "admin"],
+  "/imports": ["me_validator", "admin"],
+};
+export function canAccessRoute(role, to) {
+  const path = (to || "").split("?")[0];
+  const allowed = ROUTE_ROLES[path];
+  return !allowed || allowed.includes(role);
+}
+
 function navConfig(role) {
   if (role === "admin") return [
     ...COMMON_GROUPS,
@@ -115,7 +137,11 @@ function SidebarItem({ to, label, icon: Icon, testid, collapsed, onNavigate }) {
 
 export function Sidebar({ collapsed = false, onToggle, onNavigate }) {
   const { user } = useAuth();
-  const groups = navConfig(user?.role);
+  // Filter every item against the route-access map so the menu can never offer
+  // a link the current role cannot open; drop groups left empty.
+  const groups = navConfig(user?.role)
+    .map((g) => ({ ...g, items: g.items.filter((it) => canAccessRoute(user?.role, it.to)) }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <aside data-testid="sidebar" data-collapsed={collapsed}
