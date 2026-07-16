@@ -114,9 +114,11 @@ DIRECTION D'AGENCE (contributeur non expert)
 
 ### P2 — amélioration
 `[F8]` ~~Libellé de rôle collé à la direction~~ — **CONSTAT RETIRÉ (faux positif)**. Le `Header` utilise `flex flex-col` : le rôle et la direction sont sur **deux lignes empilées** et correctement stylés. Le « Direction d'agenceDAF » observé était un artefact de lecture DOM (`textContent` concatène les deux `<span>`). **Aucune correction à faire.**
-`[F9]` Le `DemoBanner` occupe le haut de chaque page, au-dessus du verdict. → Le réduire à une ligne discrète ou le déplacer sous le premier bloc.
-`[F10]` `/alignement` reste un tableau à 10 colonnes. → Regrouper par **Axe PND** (accordéons) avec taux d'exécution agrégé.
-`[F11]` Sur le cockpit, les libellés de statut restent en minuscules techniques par endroits (`pending`, `draft`). → Utiliser les libellés FR partout.
+`[F9]` Le `DemoBanner` occupait 3 lignes au-dessus du verdict. → **Corrigé** : ligne compacte (29 px), mention essentielle visible, disclosure complète dépliable — la mention de fiabilité n'est pas supprimée, seulement condensée.
+`[F10]` ~~`/alignement` est un tableau à 10 colonnes~~ — **CONSTAT RETIRÉ (obsolète)**. La page groupe déjà par **axe PND** (`AxisGroup`) avec exécution agrégée, cartes de missions, ouverture du drawer et badge « Donnée incomplète ». Mon constat s'appuyait sur une version antérieure du fichier, non rouverte pendant la revue. **Rien à faire.**
+`[F11]` ~~Libellés de statut techniques (`pending`, `draft`)~~ — **CONSTAT RETIRÉ (obsolète)**. `DecisionRegister` utilise `STATUS_LABEL` (Brouillon · En attente · Approuvée · Rejetée · Mise en œuvre · Clôturée) et aucun statut brut n'est rendu ailleurs. **Rien à faire.**
+
+> **Note de méthode.** Trois constats de cette revue (F8, F10, F11) se sont révélés faux ou obsolètes à la vérification et ont été retirés plutôt que « corrigés ». Deux venaient d'une lecture DOM trompeuse, un d'un fichier lu avant sa réécriture. Toute recommandation de ce document doit être reconfrontée au code réel avant implémentation.
 
 ---
 
@@ -199,9 +201,11 @@ Menu :  ADMINISTRATION  → Utilisateurs · Rôles et directions · Qualité des
 | F6 | `PlanAction.jsx` | Phrase de périmètre pour l'agence | Non | P1 | ✅ **fait** |
 | F7 | `PlanAction.jsx` | Sections repliables (ouverture auto si déjà renseignées) ; commentaire requis maintenu visible | Non | P1 | ✅ **fait** |
 | F8 | — | Faux positif, retiré | — | — | ❌ sans objet |
-| F9 | `DemoBanner.jsx` | Bandeau réduit à une ligne | Non | P2 | à faire |
-| F10 | `Alignement.jsx` | Regroupement par axe PND | Non | P2 | à faire |
-| F11 | pages registres | Libellés FR au lieu des valeurs techniques | Non | P2 | à faire |
+| F9 | `DemoBanner.jsx` | Bandeau condensé en une ligne (29 px), disclosure dépliable | Non | P2 | ✅ **fait** |
+| F10 | — | Déjà en place (groupement par axe PND) — constat obsolète retiré | — | — | ❌ sans objet |
+| F11 | — | Déjà en place (`STATUS_LABEL` FR) — constat obsolète retiré | — | — | ❌ sans objet |
+
+**Toutes les frictions réelles de cette revue sont traitées.** Il ne reste aucune action ouverte.
 
 ## 9. Besoin backend (unique)
 **`POST /api/metfpa/admin/users`** — email unique (409 sinon), rôle ∈ {admin, dircab, agency_director}, `direction` obligatoire si `agency_director`, mot de passe initial, audité. **C'est le seul verrou qui empêche le dashboard de fonctionner en conditions réelles** : sans lui, seule l'agence DAF existe.
