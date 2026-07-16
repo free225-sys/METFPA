@@ -8,7 +8,8 @@ from datetime import datetime, timezone, timedelta
 import bcrypt
 import jwt
 from fastapi import APIRouter, HTTPException, Request, Depends, Header
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field, field_validator
+from pymongo.errors import DuplicateKeyError
 
 from .db import mdb, audit
 
@@ -176,9 +177,89 @@ class UserPatch(BaseModel):
     active: bool | None = None
 
 
+class UserCreate(BaseModel):
+    email: EmailStr
+    name: str = Field(min_length=2, max_length=120)
+    role: str
+    direction: str | None = Field(default=None, max_length=120)
+    password: str = Field(min_length=10, max_length=128)
+
+    @field_validator("name")
+    @classmethod
+    def clean_name(cls, value: str) -> str:
+        value = value.strip()
+        if len(value) < 2:
+            raise ValueError("Le nom doit contenir au moins 2 caractères")
+        return value
+
+    @field_validator("direction")
+    @classmethod
+    def clean_direction(cls, value: str | None) -> str | None:
+        value = value.strip() if value else None
+        return value or None
+
+
+async def _known_directions() -> list[str]:
+    """Return the controlled agency catalogue already present in operational data."""
+    mission_directions = await mdb.activities.distinct("direction")
+    user_directions = await mdb.users.distinct("direction")
+    return sorted({
+        value.strip()
+        for value in [*mission_directions, *user_directions]
+        if isinstance(value, str) and value.strip()
+    }, key=str.casefold)
+
+
+async def _validate_user_scope(role: str, direction: str | None) -> str | None:
+    if role not in ROLES:
+        raise HTTPException(status_code=400, detail=f"Rôle invalide (attendu {ROLES})")
+    if role != "agency_director":
+        return direction
+    if not direction:
+        raise HTTPException(status_code=422, detail="Une direction d'agence doit avoir une direction assignée.")
+    if direction not in await _known_directions():
+        raise HTTPException(status_code=422, detail="Direction inconnue. Sélectionnez une direction existante.")
+    return direction
+
+
 @admin_router.get("/users")
 async def list_users(identity: dict = Depends(require_role("admin"))):
     return await mdb.users.find({}, {"_id": 0, "password_hash": 0}).sort("email", 1).to_list(500)
+
+
+@admin_router.get("/directions")
+async def list_directions(identity: dict = Depends(require_role("admin"))):
+    return {"items": await _known_directions()}
+
+
+@admin_router.post("/users", status_code=201)
+async def create_user(payload: UserCreate, identity: dict = Depends(require_role("admin"))):
+    email = str(payload.email).lower()
+    direction = await _validate_user_scope(payload.role, payload.direction)
+    if await mdb.users.find_one({"email": email}, {"_id": 1}):
+        raise HTTPException(status_code=409, detail="Un utilisateur possède déjà cette adresse e-mail")
+
+    now = datetime.now(timezone.utc).isoformat()
+    user = {
+        "id": uuid.uuid4().hex,
+        "email": email,
+        "name": payload.name,
+        "role": payload.role,
+        "direction": direction,
+        "active": True,
+        "password_hash": _hash(payload.password),
+        "created_at": now,
+        "created_by": identity["email"],
+    }
+    try:
+        # Insert a copy: insert_one() mutates its argument by adding the BSON _id,
+        # which would then leak into the response and break JSON serialization.
+        await mdb.users.insert_one(dict(user))
+    except DuplicateKeyError as error:
+        raise HTTPException(status_code=409, detail="Un utilisateur possède déjà cette adresse e-mail") from error
+    public_user = {key: value for key, value in user.items() if key != "password_hash"}
+    await audit("admin_create_user", "user", user["id"], apres=public_user, user=identity["email"])
+    return public_user
 
 
 @admin_router.put("/users/{uid}")
@@ -188,16 +269,10 @@ async def patch_user(uid: str, payload: UserPatch, identity: dict = Depends(requ
         raise HTTPException(status_code=404, detail="Utilisateur introuvable")
     # Explicit field-presence: only provided fields are changed (direction=null clears).
     data = payload.model_dump(exclude_unset=True)
-    if "role" in data and data["role"] not in ROLES:
-        raise HTTPException(status_code=400, detail=f"Rôle invalide (attendu {ROLES})")
-
     # Resolve resulting role + direction after this patch
     new_role = data.get("role", user.get("role"))
     new_direction = data["direction"] if "direction" in data else user.get("direction")
-    # An agency director must always have a valid agency/direction scope.
-    if new_role == "agency_director" and not new_direction:
-        raise HTTPException(status_code=422,
-                            detail="Une direction d'agence doit avoir une direction assignée.")
+    data["direction"] = await _validate_user_scope(new_role, new_direction)
 
     # Safeguard: never remove the last active admin (by demotion or deactivation)
     removing_admin = (user["role"] == "admin") and (
