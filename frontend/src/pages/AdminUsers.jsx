@@ -7,20 +7,20 @@ import { Breadcrumb } from "@/components/Breadcrumb";
 import { toast } from "sonner";
 import { ShieldCheck, Check, X, Users, BadgeCheck } from "lucide-react";
 
-const ROLES = ["direction_editor", "me_validator", "dircab", "coordination", "admin"];
+const ROLES = ["admin", "dircab", "agency_director"];
 
 // Read-only mirror of the server-side permission model
 // (backend/metfpa/auth.py : EDIT_ROLES, VALIDATE_ROLES, DECISION_ROLES).
 const ROLE_MATRIX = [
   { cap: "Consultation (pages, registres, référentiels, PDF)", roles: ROLES },
-  { cap: "Mise à jour des missions opérationnelles", roles: ["direction_editor", "coordination", "admin"], note: "direction_editor : sa direction uniquement · coordination : consolidation globale · me_validator : validation et contrôle qualité" },
-  { cap: "Créer / éditer / clôturer des décisions", roles: ["direction_editor", "me_validator", "dircab", "coordination", "admin"], note: "arbitrage final : DIRCAB uniquement · relance : DIRCAB, Coordination ou admin · direction_editor : sa direction uniquement" },
-  { cap: "Préparer les réunions et relancer les directions", roles: ["dircab", "coordination", "admin"] },
-  { cap: "Créer / éditer / supprimer des risques", roles: ["direction_editor", "me_validator", "admin"], note: "direction_editor : sa direction uniquement" },
-  { cap: "Validation des données (indicateurs, activités, registres)", roles: ["me_validator", "admin"] },
-  { cap: "Promotion des référentiels (PND / POL / DIG)", roles: ["me_validator", "admin"] },
-  { cap: "Imports Excel (dry-run)", roles: ["me_validator", "admin"] },
-  { cap: "Journal d'audit", roles: ["me_validator", "admin"] },
+  { cap: "Mise à jour des missions opérationnelles", roles: ROLES, note: "direction d'agence : son périmètre uniquement · DIRCAB et admin : consolidation globale" },
+  { cap: "Créer / éditer / clôturer des décisions", roles: ROLES, note: "arbitrage final : DIRCAB uniquement · direction d'agence : son périmètre uniquement" },
+  { cap: "Préparer les réunions et relancer les directions", roles: ["dircab", "admin"] },
+  { cap: "Créer / éditer / supprimer des risques", roles: ROLES, note: "direction d'agence : son périmètre uniquement" },
+  { cap: "Validation des données (indicateurs, activités, registres)", roles: ["dircab", "admin"] },
+  { cap: "Promotion des référentiels (PND / POL / DIG)", roles: ["dircab", "admin"] },
+  { cap: "Imports Excel (dry-run)", roles: ["dircab", "admin"] },
+  { cap: "Journal d'audit", roles: ["dircab", "admin"] },
   { cap: "Gestion des utilisateurs et des rôles", roles: ["admin"] },
 ];
 
@@ -53,7 +53,7 @@ export default function AdminUsers() {
       <div className="rounded-[6px] border border-[#E2E8F0] bg-white p-6">
         <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#1A202C]"><ShieldCheck size={13} className="inline mr-1" /> Administration</div>
         <h1 className="text-2xl font-bold tracking-tight text-[#1A202C] mt-1">Utilisateurs & rôles</h1>
-        <p className="text-sm text-[#4A5568] mt-2">Attribution des rôles et directions. Toute modification est auditée. Le dernier administrateur actif ne peut être retiré.</p>
+        <p className="text-sm text-[#4A5568] mt-2">Attribution des trois profils d'accès et des agences. Toute modification est auditée. Le dernier administrateur actif ne peut être retiré.</p>
         <div className="flex gap-2 mt-4" role="tablist" data-testid="admin-tabs">
           <TabBtn testid="tab-users" active={tab === "users"} icon={Users} onClick={() => setSearchParams({})}>Utilisateurs</TabBtn>
           <TabBtn testid="tab-roles" active={tab === "roles"} icon={BadgeCheck} onClick={() => setSearchParams({ tab: "roles" })}>Rôles et directions</TabBtn>
@@ -119,7 +119,7 @@ function RolesTab({ directions, loading }) {
     <div className="space-y-6" data-testid="roles-tab">
       <div className="bg-white rounded-[4px] border border-[#E2E8F0] overflow-hidden">
         <div className="px-5 py-3 border-b border-[#E2E8F0]">
-          <h2 className="text-base font-semibold text-[#1A202C]">Matrice des rôles (appliquée côté serveur)</h2>
+          <h2 className="text-base font-semibold text-[#1A202C]">Matrice des trois rôles (appliquée côté serveur)</h2>
           <p className="text-xs text-[#718096] mt-0.5">Lecture seule — reflet du modèle d'autorisation du backend.</p>
         </div>
         <div className="overflow-x-auto">
@@ -149,8 +149,8 @@ function RolesTab({ directions, loading }) {
       </div>
 
       <div className="bg-white rounded-[4px] border border-[#E2E8F0] p-5" data-testid="directions-list">
-        <h2 className="text-base font-semibold text-[#1A202C] mb-1">Directions en usage</h2>
-        <p className="text-xs text-[#718096] mb-3">Directions actuellement assignées à des utilisateurs (onglet Utilisateurs pour modifier).</p>
+        <h2 className="text-base font-semibold text-[#1A202C] mb-1">Agences en usage</h2>
+        <p className="text-xs text-[#718096] mb-3">Agences actuellement assignées aux comptes « Direction d'agence ».</p>
         {loading ? <Skeleton className="h-8" /> : directions.length === 0
           ? <p className="text-sm text-[#A0AEC0] italic">Aucune direction assignée.</p>
           : <div className="flex flex-wrap gap-2">{directions.map((d) => (

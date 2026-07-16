@@ -68,7 +68,7 @@ async def alignments(identity: dict = Depends(get_identity)):
 
 @metfpa_router.get("/activities")
 async def activities(identity: dict = Depends(get_identity)):
-    query = {"direction": identity.get("direction")} if identity["role"] == "direction_editor" else None
+    query = {"direction": identity.get("direction")} if identity["role"] == "agency_director" else None
     return await _list("activities", q=query, sort="code_action")
 
 
@@ -104,7 +104,7 @@ def _quarter_end(echeance):
 
 
 @metfpa_router.get("/cabinet")
-async def cabinet(identity: dict = Depends(require_role("dircab", "coordination", "me_validator", "admin"))):
+async def cabinet(identity: dict = Depends(require_role("dircab", "admin"))):
     acts = await _list("activities")
     decisions = await _list("decisions")
     risks = await _list("risks")
@@ -187,8 +187,8 @@ async def activity_history(aid: str, identity: dict = Depends(get_identity)):
     a = await mdb.activities.find_one({"id": aid}, {"_id": 0, "id": 1, "direction": 1})
     if not a:
         raise HTTPException(status_code=404, detail="Activité introuvable")
-    # direction_editor may only read history of their own direction's activities
-    if identity["role"] == "direction_editor":
+    # agency_director may only read history of their own agency's activities
+    if identity["role"] == "agency_director":
         assert_direction_scope(identity, a.get("direction"))
     entries = await mdb.audit_log.find(
         {"entite": "activity", "entite_id": aid}, {"_id": 0}
@@ -255,5 +255,5 @@ async def promote_framework(payload: PromoteInput, identity: dict = Depends(requ
 
 
 @metfpa_router.get("/audit-log")
-async def audit_log(identity: dict = Depends(require_role("me_validator", "admin"))):
+async def audit_log(identity: dict = Depends(require_role("dircab", "admin"))):
     return await _list("audit_log")

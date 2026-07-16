@@ -25,8 +25,8 @@ function needsWeeklyUpdate(mission) {
 export default function PlanAction() {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const isDirection = user?.role === "direction_editor";
-  const canUpdate = isDirection || ["coordination", "admin"].includes(user?.role);
+  const isDirection = user?.role === "agency_director";
+  const canUpdate = isDirection || ["dircab", "admin"].includes(user?.role);
   const [missions, setMissions] = useState(null);
   const [updates, setUpdates] = useState([]);
   const [filters, setFilters] = useState(() => ({ ...EMPTY_FILTERS, direction: searchParams.get("direction") || "" }));
@@ -116,7 +116,7 @@ function DirectionMissionCard({ mission, onUpdate, onBlock, onArbitrate }) {
 
 function CorrectionCard({ mission, onOpen }) {
   const comments = mission.comments || [];
-  const reason = mission.correction_reason || mission.validation_comment || [...comments].reverse().find((c) => c.role === "me_validator")?.text;
+  const reason = mission.correction_reason || mission.validation_comment || [...comments].reverse().find((c) => ["dircab", "me_validator"].includes(c.role))?.text;
   return <button onClick={onOpen} className="rounded-[7px] border border-[#C93C37]/25 bg-white p-3 text-left hover:border-[#C93C37] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C93C37]"><div className="font-semibold text-sm">{mission.code} · {mission.action_title}</div><p className="text-xs text-[#A33A32] mt-2">{reason || "Correction demandée. Le motif détaillé n’est pas encore exposé par le backend."}</p><span className="text-[11px] font-semibold text-[#C93C37] mt-2 inline-block">Corriger la mise à jour</span></button>;
 }
 

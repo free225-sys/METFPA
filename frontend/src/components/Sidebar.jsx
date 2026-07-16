@@ -60,17 +60,17 @@ const COMMON_GROUPS = [
 // listed here is open to every authenticated role. The sidebar filters its items
 // against this map so a role can never see a link that leads to « Accès refusé ».
 const ROUTE_ROLES = {
-  "/ma-direction": ["direction_editor"],
-  "/pilotage-directeur": ["dircab", "coordination", "admin"],
-  "/alertes-arbitrages": ["dircab", "coordination", "me_validator", "admin"],
-  "/suivi-hebdo": ["dircab", "coordination", "me_validator", "admin"],
-  "/ordre-du-jour": ["dircab", "coordination", "admin"],
-  "/vue-directions": ["dircab", "coordination", "me_validator", "admin"],
-  "/reporting": ["dircab", "coordination", "admin"],
+  "/ma-direction": ["agency_director"],
+  "/pilotage-directeur": ["dircab", "admin"],
+  "/alertes-arbitrages": ["dircab", "admin"],
+  "/suivi-hebdo": ["dircab", "admin"],
+  "/ordre-du-jour": ["dircab", "admin"],
+  "/vue-directions": ["dircab", "admin"],
+  "/reporting": ["dircab", "admin"],
   "/_internal/scenario-formation": ["admin"],
   "/admin-users": ["admin"],
-  "/audit-log": ["me_validator", "admin"],
-  "/imports": ["me_validator", "admin"],
+  "/audit-log": ["dircab", "admin"],
+  "/imports": ["dircab", "admin"],
 };
 export function canAccessRoute(role, to) {
   const path = (to || "").split("?")[0];
@@ -85,23 +85,8 @@ function navConfig(role) {
     { title: "Ressources internes", items: NAV_FORMATION },
   ];
 
-  if (role === "me_validator") return [
-    { title: "Pilotage", items: NAV_PILOTAGE },
-    { title: "Référentiels stratégiques", items: NAV_REFERENTIELS },
-    { title: "Plan & suivi", items: [
-      { to: "/kpi-cascade", label: "Espace de validation", icon: BadgeCheck, testid: "nav-validation" },
-      ...NAV_PLAN,
-    ]},
-    { title: "Budget & KPI", items: NAV_BUDGET_KPI },
-    { title: "Décisions & reporting", items: NAV_DECISION },
-    { title: "Qualité & audit", items: [
-      { to: "/imports", label: "Qualité des données", icon: FileSpreadsheet, testid: "nav-imports" },
-      { to: "/audit-log", label: "Historique d'audit", icon: History, testid: "nav-audit" },
-    ]},
-  ];
-
-  if (role === "direction_editor") return [
-    { title: "Ma Direction", items: [
+  if (role === "agency_director") return [
+    { title: "Mon agence", items: [
       { to: "/ma-direction", label: "Mon espace", icon: Briefcase, testid: "nav-my-direction" },
       { to: "/ma-direction?vue=updates", label: "Mises à jour requises", icon: Clock, testid: "nav-updates" },
       { to: "/ma-direction?vue=delayed", label: "Missions en retard", icon: AlertTriangle, testid: "nav-delayed" },
@@ -110,9 +95,14 @@ function navConfig(role) {
     { title: "Référentiels stratégiques", items: NAV_REFERENTIELS },
   ];
 
-  // dircab : parcours institutionnel complet, sans référence à la formation.
-  // Le cockpit doit apparaître comme un outil de pilotage prêt à l'emploi.
-  if (role === "dircab" || role === "coordination") return COMMON_GROUPS;
+  // DIRCAB consolidates the former coordination and M&E validation workflows.
+  if (role === "dircab") return [
+    ...COMMON_GROUPS,
+    { title: "Qualité & audit", items: [
+      { to: "/imports", label: "Qualité des données", icon: FileSpreadsheet, testid: "nav-imports" },
+      { to: "/audit-log", label: "Historique d'audit", icon: History, testid: "nav-audit" },
+    ]},
+  ];
 
   return [{ title: "Navigation", items: NAV_PILOTAGE }];
 }

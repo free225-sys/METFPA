@@ -13,7 +13,7 @@ SECRET = os.environ.get("JWT_SECRET")
 
 ACCOUNTS = {
     "admin": "admin@metfpa.ci",
-    "validator": "validateur@metfpa.ci",
+    "validator": "dircab@metfpa.ci",
     "editor": "direction.daf@metfpa.ci",
     "dircab": "dircab@metfpa.ci",
 }
@@ -45,7 +45,7 @@ class TestAuth:
         assert r.status_code == 200
         d = r.json()
         assert d["token_type"] == "bearer"
-        assert d["user"]["role"] == "direction_editor"
+        assert d["user"]["role"] == "agency_director"
         assert d["user"]["direction"] == "DAF"
         assert isinstance(d["access_token"], str) and len(d["access_token"]) > 20
 
@@ -95,22 +95,22 @@ class TestAuth:
 
 # ---- RBAC backend enforcement ----
 class TestRBAC:
-    def test_dircab_cannot_post_risk(self, tokens):
+    def test_dircab_can_post_risk(self, tokens):
         r = requests.post(f"{BASE}/api/metfpa/risks",
                           json={"title": "TEST_S4 risk dircab", "probability": 2, "impact": 2},
                           headers=_h(tokens["dircab"]))
-        assert r.status_code == 403
+        assert r.status_code == 200
 
-    def test_dircab_cannot_put_activity(self, tokens):
-        r = requests.put(f"{BASE}/api/metfpa/activities/ACT001",
+    def test_dircab_passes_activity_rbac(self, tokens):
+        r = requests.put(f"{BASE}/api/metfpa/activities/DOES_NOT_EXIST",
                          json={"avancement": 50}, headers=_h(tokens["dircab"]))
-        assert r.status_code == 403
+        assert r.status_code == 404
 
-    def test_dircab_cannot_validate(self, tokens):
+    def test_dircab_can_validate(self, tokens):
         r = requests.post(f"{BASE}/api/metfpa/admin/validate",
-                          json={"framework": "PND", "validated_by": "x", "validation_note": "t"},
+                          json={"framework": "INVALID", "validated_by": "x", "validation_note": "t"},
                           headers=_h(tokens["dircab"]))
-        assert r.status_code == 403
+        assert r.status_code == 400
 
     def test_editor_cannot_validate(self, tokens):
         r = requests.post(f"{BASE}/api/metfpa/admin/validate",
@@ -132,7 +132,7 @@ class TestRBAC:
                           headers=_h(tokens["admin"]))
         assert r.status_code == 400  # passed RBAC
 
-    def test_direction_editor_scope(self, tokens):
+    def test_agency_director_scope(self, tokens):
         # Get activities -> find one with direction=DAF and one not
         r = requests.get(f"{BASE}/api/metfpa/activities", headers=_h(tokens["admin"]))
         assert r.status_code == 200
@@ -160,7 +160,7 @@ class TestAdminUsers:
         r = requests.get(f"{BASE}/api/metfpa/admin/users", headers=_h(tokens["admin"]))
         assert r.status_code == 200
         users = r.json()
-        assert len(users) >= 4
+        assert len(users) >= 3
         emails = [u["email"] for u in users]
         for v in ACCOUNTS.values():
             assert v in emails

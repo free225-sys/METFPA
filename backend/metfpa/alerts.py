@@ -144,7 +144,7 @@ async def build_alerts():
 
 
 @alerts_router.get("/cabinet/alerts")
-async def cabinet_alerts(identity: dict = Depends(require_role("dircab", "coordination", "me_validator", "admin"))):
+async def cabinet_alerts(identity: dict = Depends(require_role("dircab", "admin"))):
     alerts = await build_alerts()
     by_cat = {}
     counts = {"critique": 0, "eleve": 0, "modere": 0, "faible": 0}

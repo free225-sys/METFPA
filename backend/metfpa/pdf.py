@@ -179,7 +179,7 @@ async def _build_pdf(note: str, identity: dict) -> tuple[bytes, bool]:
 
 @pdf_router.get("/cabinet/export/pdf")
 async def export_cabinet_pdf(note: str = Query(default=""),
-                             identity: dict = Depends(require_role("dircab", "coordination", "admin"))):
+                             identity: dict = Depends(require_role("dircab", "admin"))):
     pdf_bytes, provisional = await _build_pdf(note, identity)
     await audit("export_cabinet_pdf", "cabinet_brief", None,
                 apres={"provisional": provisional, "bytes": len(pdf_bytes)}, user=identity["email"])

@@ -17,8 +17,7 @@ const STEPS = [
 const ACCOUNTS = [
   { role: "DIRCAB / Cabinet décisionnel", email: "dircab@metfpa.ci", note: "déroule le scénario complet" },
   { role: "Administrateur système", email: "admin@metfpa.ci", note: "accès total + administration" },
-  { role: "Validateur Suivi-Évaluation", email: "validateur@metfpa.ci", note: "validation des alignements et des données" },
-  { role: "Point focal Direction (DAF)", email: "direction.daf@metfpa.ci", note: "met à jour uniquement ses actions" },
+  { role: "Direction d'agence (DAF)", email: "direction.daf@metfpa.ci", note: "met à jour uniquement le périmètre de son agence" },
 ];
 
 export default function ScenarioFormation() {

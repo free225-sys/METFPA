@@ -33,10 +33,10 @@ from .mission_rules import (
 
 operations_router = APIRouter(prefix="/api/metfpa")
 
-GLOBAL_ROLES = ("dircab", "coordination", "me_validator", "admin")
-MISSION_EDIT_ROLES = ("direction_editor", "coordination", "admin")
-MEETING_READ_ROLES = ("dircab", "coordination", "me_validator", "admin")
-MEETING_EDIT_ROLES = ("dircab", "coordination", "admin")
+GLOBAL_ROLES = ("dircab", "admin")
+MISSION_EDIT_ROLES = ("agency_director", "dircab", "admin")
+MEETING_READ_ROLES = ("dircab", "admin")
+MEETING_EDIT_ROLES = ("dircab", "admin")
 STALE_DAYS = int(os.environ.get("METFPA_STALE_UPDATE_DAYS", "14"))
 
 
@@ -110,7 +110,7 @@ class MeetingPatch(BaseModel):
 
 
 def _scope_query(identity: dict) -> dict:
-    return {"direction": identity.get("direction")} if identity.get("role") == "direction_editor" else {}
+    return {"direction": identity.get("direction")} if identity.get("role") == "agency_director" else {}
 
 
 async def _raw_missions(identity: dict, query: Optional[dict] = None) -> list[dict]:
@@ -130,7 +130,7 @@ async def _find_mission(mid: str, identity: dict) -> dict:
     raw = await mdb.activities.find_one({"id": mid}, {"_id": 0})
     if not raw:
         raise HTTPException(status_code=404, detail="Mission introuvable")
-    if identity.get("role") == "direction_editor":
+    if identity.get("role") == "agency_director":
         assert_direction_scope(identity, raw.get("direction"))
     return raw
 
@@ -147,7 +147,7 @@ def _persistence_patch(payload: MissionPatch, identity: dict) -> tuple[dict, str
         data["alerte"] = data["blocker"]
     if "due_date" in data:
         data["echeance"] = data["due_date"]
-    if identity.get("role") == "direction_editor":
+    if identity.get("role") == "agency_director":
         data["submission_status"] = "soumis"
         data["validation_status"] = "to_validate"
     data.update({
@@ -237,7 +237,7 @@ async def list_missions(
     rows = [normalise_mission(x) for x in await _raw_missions(identity)]
     rows = _filters(rows, direction=direction, status=status, pnd_axis=pnd_axis,
                     budget_program=budget_program, priority=priority, risk_level=risk_level)
-    return {"items": rows, "total": len(rows), "scope_direction": identity.get("direction") if identity["role"] == "direction_editor" else None}
+    return {"items": rows, "total": len(rows), "scope_direction": identity.get("direction") if identity["role"] == "agency_director" else None}
 
 
 @operations_router.get("/missions/{mid}")
@@ -252,7 +252,7 @@ async def patch_mission(mid: str, payload: MissionPatch,
 
 
 @operations_router.get("/my-direction")
-async def my_direction(identity: dict = Depends(require_role("direction_editor"))):
+async def my_direction(identity: dict = Depends(require_role("agency_director"))):
     rows = [normalise_mission(x) for x in await _raw_missions(identity)]
     perf = direction_performance(rows, stale_days=STALE_DAYS)
     return {"direction": identity.get("direction"), "user": identity,
@@ -260,20 +260,20 @@ async def my_direction(identity: dict = Depends(require_role("direction_editor")
 
 
 @operations_router.get("/my-direction/missions")
-async def my_direction_missions(identity: dict = Depends(require_role("direction_editor"))):
+async def my_direction_missions(identity: dict = Depends(require_role("agency_director"))):
     rows = [normalise_mission(x) for x in await _raw_missions(identity)]
     return {"items": rows, "total": len(rows), "scope_direction": identity.get("direction")}
 
 
 @operations_router.patch("/my-direction/missions/{mid}")
 async def patch_my_direction_mission(mid: str, payload: MissionPatch,
-                                     identity: dict = Depends(require_role("direction_editor"))):
+                                     identity: dict = Depends(require_role("agency_director"))):
     return await _apply_patch(mid, payload, identity)
 
 
 @operations_router.post("/my-direction/missions/{mid}/updates")
 async def submit_direction_update(mid: str, payload: MissionUpdateIn,
-                                  identity: dict = Depends(require_role("direction_editor"))):
+                                  identity: dict = Depends(require_role("agency_director"))):
     return await _apply_patch(mid, payload, identity)
 
 
@@ -388,7 +388,7 @@ async def update_log(mission_id: Optional[str] = Query(default=None), identity: 
     query: dict[str, Any] = {}
     if mission_id:
         query["mission_id"] = mission_id
-    if identity["role"] == "direction_editor":
+    if identity["role"] == "agency_director":
         query["direction"] = identity.get("direction")
     elif identity["role"] not in GLOBAL_ROLES:
         raise HTTPException(status_code=403, detail="Accès refusé pour ce rôle")
@@ -397,7 +397,7 @@ async def update_log(mission_id: Optional[str] = Query(default=None), identity: 
 
 
 @operations_router.get("/director-dashboard")
-async def director_dashboard(identity: dict = Depends(require_role("dircab", "coordination", "admin"))):
+async def director_dashboard(identity: dict = Depends(require_role("dircab", "admin"))):
     missions, decisions, alerts, performance = await _operational_context()
     this_week, this_month = decision_windows(decisions)
     completed = sum(x["status"] == "acheve" for x in missions)

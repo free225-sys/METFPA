@@ -31,21 +31,19 @@ async def test_validation_workflow_dig():
 
     async with httpx.AsyncClient(timeout=30) as client:
         admin = await _token(client, "admin@metfpa.ci")
-        validator = await _token(client, "validateur@metfpa.ci")
         dircab = await _token(client, "dircab@metfpa.ci")
         editor = await _token(client, "direction.daf@metfpa.ci")
 
         h = lambda t: {"Authorization": f"Bearer {t}"}
         body = {"framework": "DIG", "validated_by": "Test M&E", "validation_note": "validation test"}
 
-        # unauthorized roles -> 403
-        assert (await client.post(f"{API}/admin/validate", json=body, headers=h(dircab))).status_code == 403
+        # Agency-scoped and unauthenticated users cannot validate.
         assert (await client.post(f"{API}/admin/validate", json=body, headers=h(editor))).status_code == 403
         # unauthenticated -> 401
         assert (await client.post(f"{API}/admin/validate", json=body)).status_code == 401
 
-        # validator -> 200 + status validated
-        r = await client.post(f"{API}/admin/validate", json=body, headers=h(validator))
+        # DIRCAB now owns business validation.
+        r = await client.post(f"{API}/admin/validate", json=body, headers=h(dircab))
         assert r.status_code == 200, r.text
         assert r.json()["validation_status"] == "validated"
 

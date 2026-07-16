@@ -56,26 +56,20 @@ export const useAuth = () => useContext(AuthContext);
 // Role helpers
 export const ROLE_LABELS = {
   admin: "Administrateur système",
-  me_validator: "Validateur Suivi-Évaluation",
-  direction_editor: "Point focal Direction",
   dircab: "DIRCAB / Cabinet décisionnel",
-  coordination: "Chef de cabinet / Coordination",
+  agency_director: "Direction d'agence",
 };
 
 // Role-specific operational landing page
 export const ROLE_HOME = {
-  direction_editor: "/ma-direction",
-  me_validator: "/kpi-cascade",
+  agency_director: "/ma-direction",
   admin: "/admin-users",
   dircab: "/pilotage-directeur",
-  coordination: "/pilotage-directeur",
 };
 export const roleHome = (role) => ROLE_HOME[role] || "/pilotage-directeur";
 
-export const canEdit = (role) => ["direction_editor", "me_validator", "admin"].includes(role);
-export const canValidate = (role) => ["me_validator", "admin"].includes(role);
+export const canEdit = (role) => ["agency_director", "dircab", "admin"].includes(role);
+export const canValidate = (role) => ["dircab", "admin"].includes(role);
 export const isAdmin = (role) => role === "admin";
-// DIRCAB workflow: decision management (create/update/close, arbitration, relances)
-export const canManageDecisions = (role) => ["direction_editor", "me_validator", "admin", "dircab", "coordination"].includes(role);
+export const canManageDecisions = (role) => ["agency_director", "dircab", "admin"].includes(role);
 export const isDircab = (role) => role === "dircab";
-export const isCoordination = (role) => role === "coordination";

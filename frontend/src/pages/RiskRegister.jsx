@@ -24,9 +24,9 @@ export default function RiskRegister() {
   const [del, setDel] = useState(null);
   const { user } = useAuth();
   const editor = canEdit(user?.role);
-  // Mirror of assert_direction_scope (backend) : un direction_editor ne peut
+  // Mirror of assert_direction_scope (backend): an agency director can only
   // modifier que les enregistrements rattachés à sa propre direction.
-  const canMutate = (row) => editor && (user?.role !== "direction_editor" || row.direction === user?.direction);
+  const canMutate = (row) => editor && (user?.role !== "agency_director" || row.direction === user?.direction);
 
   const load = () => metfpaApi.get("/risks").then((r) => setRows(r.data));
   useEffect(() => { load(); metfpaApi.get("/risks/meta").then((r) => setMeta(r.data)); }, []);

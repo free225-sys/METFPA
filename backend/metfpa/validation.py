@@ -1,7 +1,7 @@
 """METFPA Phase 2A — M&E validation workflow (backend only).
 
 Generic, server-enforced validation state machine over indicators, activities,
-decisions and risks. Every action requires VALIDATE_ROLES (me_validator, admin);
+decisions and risks. Every action requires VALIDATE_ROLES (dircab, admin);
 `reopen` is admin-only. All actions are written to the audit log. Transitions
 use conditional (atomic) updates so concurrent validations resolve to one
 winner and one 409."""

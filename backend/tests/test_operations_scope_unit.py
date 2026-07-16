@@ -50,17 +50,17 @@ class FakeDB:
         self.mission_updates = FakeCollection()
 
 
-EDITOR = {"email": "daf@metfpa.ci", "role": "direction_editor", "direction": "DAF"}
-COORDINATION = {"email": "coordination@metfpa.ci", "role": "coordination", "direction": None}
+AGENCY_DIRECTOR = {"email": "direction.daf@metfpa.ci", "role": "agency_director", "direction": "DAF"}
+DIRCAB = {"email": "dircab@metfpa.ci", "role": "dircab", "direction": None}
 
 
-def test_direction_editor_cannot_read_another_direction(monkeypatch):
+def test_agency_director_cannot_read_another_agency(monkeypatch):
     async def scenario():
         monkeypatch.setattr(operations, "mdb", FakeDB())
-        own = await operations._find_mission("DAF-1", EDITOR)
+        own = await operations._find_mission("DAF-1", AGENCY_DIRECTOR)
         assert own["direction"] == "DAF"
         with pytest.raises(HTTPException) as exc:
-            await operations._find_mission("DGE-1", EDITOR)
+            await operations._find_mission("DGE-1", AGENCY_DIRECTOR)
         assert exc.value.status_code == 403
     asyncio.run(scenario())
 
@@ -79,20 +79,20 @@ def test_direction_update_is_submitted_logged_and_visible(monkeypatch):
             "DAF-1",
             operations.MissionPatch(progress=65, blocker="Validation budgétaire attendue", needs_arbitration=True,
                                     comment="Point hebdomadaire transmis"),
-            EDITOR,
+            AGENCY_DIRECTOR,
         )
         stored = await fake.activities.find_one({"id": "DAF-1"})
         assert result["progress"] == stored["avancement"] == 65
         assert stored["submission_status"] == "soumis"
         assert stored["validation_status"] == "to_validate"
-        assert stored["comments"][0]["author"] == EDITOR["email"]
+        assert stored["comments"][0]["author"] == AGENCY_DIRECTOR["email"]
         assert fake.mission_updates.docs[0]["direction"] == "DAF"
         assert fake.mission_updates.docs[0]["after"]["needs_arbitration"] is True
         assert audit_calls
     asyncio.run(scenario())
 
 
-def test_coordination_can_update_any_direction(monkeypatch):
+def test_dircab_can_update_any_agency(monkeypatch):
     async def scenario():
         fake = FakeDB()
 
@@ -102,7 +102,7 @@ def test_coordination_can_update_any_direction(monkeypatch):
         monkeypatch.setattr(operations, "mdb", fake)
         monkeypatch.setattr(operations, "audit", fake_audit)
         result = await operations._apply_patch(
-            "DGE-1", operations.MissionPatch(submission_status="valide", comment="Mise à jour contrôlée"), COORDINATION)
+            "DGE-1", operations.MissionPatch(submission_status="valide", comment="Mise à jour contrôlée"), DIRCAB)
         assert result["submission_status"] == "valide"
         assert result["direction"] == "DGE"
     asyncio.run(scenario())

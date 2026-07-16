@@ -133,13 +133,13 @@ class DecisionPatch(BaseModel):
 def _assert_arbitration_role(identity: dict, data: dict):
     if "arbitrage" in data and identity["role"] != "dircab":
         raise HTTPException(status_code=403, detail="Arbitrage final réservé au Directeur de cabinet")
-    if "relance_direction" in data and identity["role"] not in {"dircab", "coordination", "admin"}:
-        raise HTTPException(status_code=403, detail="Relance réservée au DIRCAB, à la Coordination et à l'administrateur")
+    if "relance_direction" in data and identity["role"] not in {"dircab", "admin"}:
+        raise HTTPException(status_code=403, detail="Relance réservée au DIRCAB et à l'administrateur")
 
 
 @registers_router.get("/decisions")
 async def list_decisions(identity: dict = Depends(get_identity)):
-    query = {"direction": identity.get("direction")} if identity["role"] == "direction_editor" else {}
+    query = {"direction": identity.get("direction")} if identity["role"] == "agency_director" else {}
     return await mdb.decisions.find(query, {"_id": 0}).sort("created_at", -1).to_list(2000)
 
 
@@ -154,7 +154,7 @@ async def get_decision(did: str, identity: dict = Depends(get_identity)):
     d = await mdb.decisions.find_one({"id": did}, {"_id": 0})
     if not d:
         raise HTTPException(404, "Décision introuvable")
-    if identity["role"] == "direction_editor":
+    if identity["role"] == "agency_director":
         assert_direction_scope(identity, d.get("direction"))
     return d
 
@@ -266,7 +266,7 @@ def _risk_computed(p: int, i: int, rp, ri):
 
 @registers_router.get("/risks")
 async def list_risks(identity: dict = Depends(get_identity)):
-    query = {"direction": identity.get("direction")} if identity["role"] == "direction_editor" else {}
+    query = {"direction": identity.get("direction")} if identity["role"] == "agency_director" else {}
     return await mdb.risks.find(query, {"_id": 0}).sort("risk_score", -1).to_list(2000)
 
 
@@ -281,7 +281,7 @@ async def get_risk(rid: str, identity: dict = Depends(get_identity)):
     r = await mdb.risks.find_one({"id": rid}, {"_id": 0})
     if not r:
         raise HTTPException(404, "Risque introuvable")
-    if identity["role"] == "direction_editor":
+    if identity["role"] == "agency_director":
         assert_direction_scope(identity, r.get("direction"))
     return r
 

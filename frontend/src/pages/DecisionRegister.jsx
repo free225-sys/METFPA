@@ -4,7 +4,7 @@ import { OriginBadge } from "@/components/OriginBadge";
 import { DemoBanner } from "@/components/DemoBanner";
 import { Breadcrumb } from "@/components/Breadcrumb";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { useAuth, canEdit, canManageDecisions, isDircab, isAdmin, isCoordination } from "@/context/AuthContext";
+import { useAuth, canEdit, canManageDecisions, isDircab, isAdmin } from "@/context/AuthContext";
 import { ValidationActions } from "@/components/ValidationActions";
 import { EmptyState } from "@/components/EmptyState";
 import { VALIDATION_OUTCOMES } from "@/lib/metfpaTheme";
@@ -35,10 +35,10 @@ export default function DecisionRegister() {
   const editor = canManageDecisions(user?.role);
   const deleter = canEdit(user?.role);
   const arbitre = isDircab(user?.role);
-  const canFollowUp = arbitre || isCoordination(user?.role) || isAdmin(user?.role);
-  // Mirror of assert_direction_scope (backend) : un direction_editor ne peut
+  const canFollowUp = arbitre || isAdmin(user?.role);
+  // Mirror of assert_direction_scope (backend): an agency director can only
   // modifier que les enregistrements rattachés à sa propre direction.
-  const canMutate = (row) => editor && (user?.role !== "direction_editor" || row.direction === user?.direction);
+  const canMutate = (row) => editor && (user?.role !== "agency_director" || row.direction === user?.direction);
 
   const quickArbitrage = async (d, value) => {
     try {

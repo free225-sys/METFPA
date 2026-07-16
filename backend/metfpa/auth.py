@@ -19,12 +19,24 @@ JWT_ALGORITHM = "HS256"
 TOKEN_TYPE = "metfpa_access"
 TOKEN_TTL_HOURS = 8
 
-ROLES = ["direction_editor", "me_validator", "admin", "dircab", "coordination"]
-EDIT_ROLES = {"direction_editor", "me_validator", "admin"}
-VALIDATE_ROLES = {"me_validator", "admin"}
-# DIRCAB (cabinet décisionnel) : lecture globale + gestion des décisions
-# (création / mise à jour / clôture / arbitrage), sans administration.
-DECISION_ROLES = EDIT_ROLES | {"dircab", "coordination"}
+ROLES = ["admin", "dircab", "agency_director"]
+LEGACY_ROLE_MAP = {
+    "direction_editor": "agency_director",
+    "coordination": "dircab",
+    "me_validator": "dircab",
+}
+
+
+def normalize_role(role: str | None) -> str | None:
+    """Map pre-MVP roles to one of the three canonical access profiles."""
+    return LEGACY_ROLE_MAP.get(role, role)
+
+
+# The three roles may update data, but agency_director remains direction-scoped.
+EDIT_ROLES = set(ROLES)
+# Business validation is consolidated into DIRCAB; admin keeps support access.
+VALIDATE_ROLES = {"dircab", "admin"}
+DECISION_ROLES = set(ROLES)
 
 
 def _hash(pw: str) -> str:
@@ -50,17 +62,19 @@ def _make_token(user) -> str:
 
 
 async def seed_users():
-    """Idempotent: create/repair the 4 demo role accounts in metfpa_dev.
+    """Idempotent: migrate legacy roles and create the three demo profiles.
     Uses METFPA_SEED_PASSWORD when set (recommended for hardening); otherwise
     falls back to the documented demo password so test access works on any
     deployment (cockpit is demonstration-grade, not cleared for official data)."""
     pw = os.environ.get("METFPA_SEED_PASSWORD") or "Metfpa@2026Demo"
+    migrated = 0
+    for legacy, canonical in LEGACY_ROLE_MAP.items():
+        result = await mdb.users.update_many({"role": legacy}, {"$set": {"role": canonical}})
+        migrated += result.modified_count
     demo = [
         {"email": "admin@metfpa.ci", "name": "Administrateur METFPA", "role": "admin", "direction": None},
-        {"email": "validateur@metfpa.ci", "name": "Validateur M&E", "role": "me_validator", "direction": None},
-        {"email": "direction.daf@metfpa.ci", "name": "Point focal DAF", "role": "direction_editor", "direction": "DAF"},
         {"email": "dircab@metfpa.ci", "name": "DIRCAB — Cabinet décisionnel", "role": "dircab", "direction": None},
-        {"email": "coordination@metfpa.ci", "name": "Chef de cabinet — Coordination", "role": "coordination", "direction": None},
+        {"email": "direction.daf@metfpa.ci", "name": "Direction d'agence DAF", "role": "agency_director", "direction": "DAF"},
     ]
     n = 0
     for u in demo:
@@ -73,7 +87,7 @@ async def seed_users():
             await mdb.users.update_one({"email": u["email"]}, {"$set": {"password_hash": _hash(pw)}})
     await mdb.users.create_index("email", unique=True)
     await mdb.users.create_index("id", unique=True)
-    return {"seeded": n, "total": await mdb.users.count_documents({})}
+    return {"seeded": n, "migrated": migrated, "total": await mdb.users.count_documents({})}
 
 
 async def get_identity(request: Request) -> dict:
@@ -93,8 +107,13 @@ async def get_identity(request: Request) -> dict:
     user = await mdb.users.find_one({"id": payload.get("sub")}, {"_id": 0, "password_hash": 0})
     if not user or not user.get("active", False):
         raise HTTPException(status_code=401, detail="Utilisateur introuvable ou désactivé")
-    if user.get("role") not in ROLES:
+    stored_role = user.get("role")
+    role = normalize_role(stored_role)
+    if role not in ROLES:
         raise HTTPException(status_code=401, detail="Rôle invalide")
+    if role != stored_role:
+        await mdb.users.update_one({"id": user["id"]}, {"$set": {"role": role}})
+        user["role"] = role
     return user
 
 
@@ -107,8 +126,8 @@ def require_role(*roles):
 
 
 def assert_direction_scope(identity: dict, resource_direction):
-    """direction_editor may only mutate resources of their own direction."""
-    if identity["role"] == "direction_editor":
+    """agency_director may only read or mutate resources of their agency."""
+    if identity["role"] == "agency_director":
         if not resource_direction or resource_direction != identity.get("direction"):
             raise HTTPException(status_code=403, detail="Accès limité à votre direction")
 
@@ -126,6 +145,13 @@ async def login(payload: LoginIn):
     if not user or not user.get("active", False) or not _verify(payload.password, user.get("password_hash", "")):
         await audit("login_failed", "auth", email, apres={"ok": False}, user=email)
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")
+    stored_role = user.get("role")
+    role = normalize_role(stored_role)
+    if role not in ROLES:
+        raise HTTPException(status_code=401, detail="Rôle invalide")
+    if role != stored_role:
+        await mdb.users.update_one({"id": user["id"]}, {"$set": {"role": role}})
+        user["role"] = role
     token = _make_token(user)
     await audit("login_success", "auth", user["id"], apres={"role": user["role"]}, user=email)
     return {"access_token": token, "token_type": "bearer",
@@ -168,10 +194,10 @@ async def patch_user(uid: str, payload: UserPatch, identity: dict = Depends(requ
     # Resolve resulting role + direction after this patch
     new_role = data.get("role", user.get("role"))
     new_direction = data["direction"] if "direction" in data else user.get("direction")
-    # A direction_editor must always have a valid direction
-    if new_role == "direction_editor" and not new_direction:
+    # An agency director must always have a valid agency/direction scope.
+    if new_role == "agency_director" and not new_direction:
         raise HTTPException(status_code=422,
-                            detail="Un direction_editor doit avoir une direction assignée (changez aussi le rôle pour l'effacer).")
+                            detail="Une direction d'agence doit avoir une direction assignée.")
 
     # Safeguard: never remove the last active admin (by demotion or deactivation)
     removing_admin = (user["role"] == "admin") and (

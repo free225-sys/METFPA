@@ -15,7 +15,7 @@ PWD = os.environ.get("METFPA_SEED_PASSWORD", "Metfpa@2026Demo")
 
 ACCOUNTS = {
     "admin": "admin@metfpa.ci",
-    "validator": "validateur@metfpa.ci",
+    "validator": "dircab@metfpa.ci",
     "editor": "direction.daf@metfpa.ci",
     "dircab": "dircab@metfpa.ci",
 }
@@ -79,12 +79,12 @@ class TestGuards:
                           json={"action": "validate"}, headers=_h(tokens["editor"]))
         assert r.status_code == 403
 
-    def test_403_dircab_cannot_validate(self, tokens):
-        did = _mk_decision(tokens, "P2 403 dircab")
-        for action in ["validate", "reject", "request_correction", "comment"]:
-            r = requests.post(f"{BASE}{V}/decisions/{did}",
-                              json={"action": action, "comment": "x"}, headers=_h(tokens["dircab"]))
-            assert r.status_code == 403, f"{action}: {r.status_code}"
+    def test_dircab_can_validate(self, tokens):
+        did = _mk_decision(tokens, "P2 dircab validation")
+        r = requests.post(f"{BASE}{V}/decisions/{did}",
+                          json={"action": "validate", "comment": "conforme"},
+                          headers=_h(tokens["dircab"]))
+        assert r.status_code == 200
 
     def test_403_validator_cannot_reopen(self, tokens):
         did = _mk_decision(tokens, "P2 reopen guard")
@@ -151,7 +151,7 @@ class TestTransitions:
         d = r.json()
         assert d["validation_status"] == "rejected"
         assert d["validation_comments"][-1]["text"] == "score incohérent"
-        assert d["validation_comments"][-1]["role"] == "me_validator"
+        assert d["validation_comments"][-1]["role"] == "dircab"
 
     def test_request_correction_on_activity(self, tokens):
         act = next(a for a in _any_activity(tokens)

@@ -15,7 +15,7 @@ PWD = "Metfpa@2026Demo"
 
 ACCOUNTS = {
     "admin": "admin@metfpa.ci",
-    "validator": "validateur@metfpa.ci",
+    "validator": "dircab@metfpa.ci",
     "editor": "direction.daf@metfpa.ci",
     "dircab": "dircab@metfpa.ci",
 }
@@ -78,9 +78,9 @@ class TestAuditLog:
         r = requests.get(f"{API}/audit-log", headers=_h(tokens["admin"]), timeout=20)
         assert r.status_code == 200
 
-    def test_dircab_403(self, tokens):
+    def test_dircab_200(self, tokens):
         r = requests.get(f"{API}/audit-log", headers=_h(tokens["dircab"]), timeout=20)
-        assert r.status_code == 403
+        assert r.status_code == 200
 
     def test_editor_403(self, tokens):
         r = requests.get(f"{API}/audit-log", headers=_h(tokens["editor"]), timeout=20)
@@ -196,9 +196,9 @@ class TestImportRBAC:
         r = _upload("/tmp/imp/valid.xlsx")
         assert r.status_code == 401
 
-    def test_dircab_403(self, tokens):
+    def test_dircab_200(self, tokens):
         r = _upload("/tmp/imp/valid.xlsx", tokens["dircab"])
-        assert r.status_code == 403
+        assert r.status_code == 200
 
     def test_editor_403(self, tokens):
         r = _upload("/tmp/imp/valid.xlsx", tokens["editor"])
@@ -281,9 +281,9 @@ class TestImportJobs:
             assert r.status_code == 200
             assert isinstance(r.json(), list)
 
-    def test_list_dircab_403(self, tokens):
+    def test_list_dircab_200(self, tokens):
         r = requests.get(f"{API}/imports", headers=_h(tokens["dircab"]), timeout=20)
-        assert r.status_code == 403
+        assert r.status_code == 200
 
     def test_get_and_delete_job(self, tokens):
         # create a job
@@ -313,10 +313,10 @@ class TestValidationRBAC:
         r = requests.post(f"{API}/admin/validate", json={"framework": "ZZZ"}, timeout=20)
         assert r.status_code == 401
 
-    def test_dircab_403(self, tokens):
+    def test_dircab_passes_rbac(self, tokens):
         r = requests.post(f"{API}/admin/validate", json={"framework": "ZZZ"},
                           headers=_h(tokens["dircab"]), timeout=20)
-        assert r.status_code == 403
+        assert r.status_code in (400, 404, 422)
 
     def test_editor_403(self, tokens):
         r = requests.post(f"{API}/admin/validate", json={"framework": "ZZZ"},

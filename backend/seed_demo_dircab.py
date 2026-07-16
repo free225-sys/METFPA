@@ -24,7 +24,7 @@ def login(email):
 
 def main():
     admin = login("admin@metfpa.ci")
-    validator = login("validateur@metfpa.ci")
+    dircab = login("dircab@metfpa.ci")
 
     # ---- Activités : statuts variés (démo formation) ----
     acts = requests.get(f"{BASE}/api/metfpa/activities", headers=admin).json()
@@ -51,7 +51,7 @@ def main():
     print(f"activites re-typees: {ok}/{len(plan)}")
 
     # ---- Décisions (mix statuts + arbitrage + relances) ----
-    existing = {d["title"] for d in requests.get(f"{BASE}/api/metfpa/decisions", headers=admin).json()}
+    existing = {d["title"] for d in requests.get(f"{BASE}/api/metfpa/decisions", headers=dircab).json()}
     directions = sorted({a.get("direction") for a in acts if a.get("direction")})
     d1, d2 = (directions + ["DAF", "DGE"])[:2]
     DECISIONS = [
@@ -76,7 +76,7 @@ def main():
     for d in DECISIONS:
         if d["title"] in existing:
             continue
-        r = requests.post(f"{BASE}/api/metfpa/decisions", json=d, headers=admin)
+        r = requests.post(f"{BASE}/api/metfpa/decisions", json=d, headers=dircab)
         created += r.status_code == 200
     print(f"decisions creees: {created} (existantes conservees: {len(existing & {d['title'] for d in DECISIONS})})")
 
@@ -112,7 +112,7 @@ def main():
             continue
         r = requests.post(f"{BASE}/api/metfpa/validation/indicators/{k['id']}",
                           json={"action": "comment", "comment": "[DEMO] KPI critique : aucune donnée remontée, cible en danger."},
-                          headers=validator)
+                          headers=dircab)
         flagged += r.status_code == 200
     print(f"KPI marques critiques (commentaire): {flagged}")
     print("SEED DEMO DIRCAB: OK")

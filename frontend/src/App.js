@@ -75,23 +75,23 @@ function AppRoutes() {
         <Route path="/politique-eftp" element={<PolitiqueEFTP />} />
         <Route path="/strategie-digitale" element={<StrategieDigitale />} />
         <Route path="/plan-action" element={<PlanAction />} />
-        <Route path="/ma-direction" element={<RoleRoute roles={["direction_editor"]}><PlanAction /></RoleRoute>} />
+        <Route path="/ma-direction" element={<RoleRoute roles={["agency_director"]}><PlanAction /></RoleRoute>} />
         <Route path="/alignement" element={<Alignement />} />
         <Route path="/kpi-cascade" element={<KpiCascade />} />
-        <Route path="/pilotage-directeur" element={<RoleRoute roles={["dircab", "coordination", "admin"]}><CabinetView /></RoleRoute>} />
-        <Route path="/alertes-arbitrages" element={<RoleRoute roles={["dircab", "coordination", "me_validator", "admin"]}><AlertesArbitrages /></RoleRoute>} />
+        <Route path="/pilotage-directeur" element={<RoleRoute roles={["dircab", "admin"]}><CabinetView /></RoleRoute>} />
+        <Route path="/alertes-arbitrages" element={<RoleRoute roles={["dircab", "admin"]}><AlertesArbitrages /></RoleRoute>} />
         <Route path="/decisions" element={<DecisionRegister />} />
         <Route path="/risks" element={<RiskRegister />} />
         <Route path="/budget-consolide" element={<BudgetConsolide />} />
-        <Route path="/suivi-hebdo" element={<RoleRoute roles={["dircab", "coordination", "me_validator", "admin"]}><SuiviHebdo /></RoleRoute>} />
-        <Route path="/ordre-du-jour" element={<RoleRoute roles={["dircab", "coordination", "admin"]}><OrdreDuJour /></RoleRoute>} />
+        <Route path="/suivi-hebdo" element={<RoleRoute roles={["dircab", "admin"]}><SuiviHebdo /></RoleRoute>} />
+        <Route path="/ordre-du-jour" element={<RoleRoute roles={["dircab", "admin"]}><OrdreDuJour /></RoleRoute>} />
         <Route path="/declinaison" element={<DeclinaisonPeriodique />} />
-        <Route path="/vue-directions" element={<RoleRoute roles={["dircab", "coordination", "me_validator", "admin"]}><VueDirections /></RoleRoute>} />
-        <Route path="/reporting" element={<RoleRoute roles={["dircab", "coordination", "admin"]}><Reporting /></RoleRoute>} />
+        <Route path="/vue-directions" element={<RoleRoute roles={["dircab", "admin"]}><VueDirections /></RoleRoute>} />
+        <Route path="/reporting" element={<RoleRoute roles={["dircab", "admin"]}><Reporting /></RoleRoute>} />
         <Route path="/_internal/scenario-formation" element={<RoleRoute roles={["admin"]}><ScenarioFormation /></RoleRoute>} />
         <Route path="/admin-users" element={<RoleRoute roles={["admin"]}><AdminUsers /></RoleRoute>} />
-        <Route path="/audit-log" element={<RoleRoute roles={["me_validator", "admin"]}><AuditLog /></RoleRoute>} />
-        <Route path="/imports" element={<RoleRoute roles={["me_validator", "admin"]}><ImportsDryRun /></RoleRoute>} />
+        <Route path="/audit-log" element={<RoleRoute roles={["dircab", "admin"]}><AuditLog /></RoleRoute>} />
+        <Route path="/imports" element={<RoleRoute roles={["dircab", "admin"]}><ImportsDryRun /></RoleRoute>} />
         {/* Legacy PND routes removed: their API (lib/api.js, jeton "pnd_token")
             is never authenticated by the METFPA login flow and the backend
             routes are gated behind LEGACY_PND_ENABLED. Page files kept on disk. */}

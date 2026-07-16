@@ -21,7 +21,7 @@ const LEVEL_META = {
 export default function KpiCascade() {
   const { user } = useAuth();
   // The validation workspace applies to every role with validation rights
-  // (me_validator and admin), matching the server-side VALIDATE_ROLES guard.
+  // (dircab and admin), matching the server-side VALIDATE_ROLES guard.
   const isValidator = canValidate(user?.role);
   const [indics, setIndics] = useState(null);
   const [acts, setActs] = useState([]);

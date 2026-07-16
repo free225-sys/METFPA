@@ -35,7 +35,7 @@ export function MissionDrawer({ missionId, open, onOpenChange, role, onAction })
     try { await navigator.clipboard.writeText(text); toast.success("Texte de relance copié", { description: "Envoi manuel · non partagé dans l’application" }); }
     catch { toast.error("Copie impossible"); }
   };
-  const canPrepare = ["dircab", "coordination", "admin"].includes(role);
+  const canPrepare = ["dircab", "admin"].includes(role);
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

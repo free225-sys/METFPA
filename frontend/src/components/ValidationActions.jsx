@@ -34,7 +34,7 @@ const DIALOG_META = {
 
 /**
  * Validation action group for one item. Renders nothing unless the user has
- * validation rights (me_validator, admin); "Rouvrir" is admin-only.
+ * validation rights (dircab, admin); "Rouvrir" is admin-only.
  *
  * entityType: "indicators" | "activities" | "decisions" | "risks"
  * item:       document with { id, validation_status }
