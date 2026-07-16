@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { AlertTriangle, ArrowRight, Building2, CalendarDays, CheckCircle2, Download, Gavel, ListPlus, Loader2, RefreshCw } from "lucide-react";
+import { AlertTriangle, ArrowRight, Building2, CalendarDays, CheckCircle2, ChevronDown, Download, Gavel, ListPlus, Loader2, RefreshCw } from "lucide-react";
 import metfpaApi from "@/lib/metfpaApi";
 import { useAuth } from "@/context/AuthContext";
 import { apiError, dateTime, pct, shortDate } from "@/lib/operational";
@@ -110,12 +110,12 @@ export default function CabinetView() {
         {data.directions_to_follow_up.length ? <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">{data.directions_to_follow_up.slice(0, 6).map((d) => <div key={d.direction} className="rounded-[7px] border border-[#D97706]/30 bg-[#D97706]/5 p-4"><div className="flex items-start justify-between gap-2"><div><div className="font-semibold text-sm">{d.direction}</div><div className="text-xs text-[var(--ink-500)] mt-1">Dernière mise à jour : {dateTime(d.last_update)}</div></div><StatusBadge label="À relancer" color="#C93C37" /></div><div className="grid grid-cols-3 gap-2 mt-3 text-xs"><MiniMetric label="Retards" value={d.missions_overdue} /><MiniMetric label="Blocages" value={d.blockers} /><MiniMetric label="Décisions" value={d.decisions_required} /></div><div className="flex flex-wrap gap-2 mt-3"><Link to={`/plan-action?direction=${encodeURIComponent(d.direction)}`} className="small-action">Voir les missions</Link><button onClick={() => copyFollowUp(d)} className="small-action">Copier la relance</button></div></div>)}</div> : <EmptyState icon={CheckCircle2} title="Toutes les directions ont mis à jour leur périmètre" />}
       </Section>
 
-      <Section title="Ce qui avance" tone="positive">
+      <Section title="Ce qui avance" tone="positive" collapsible count={data.what_advances.length}>
         {data.what_advances.length ? <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">{data.what_advances.slice(0, 6).map((m) => <MissionCard key={m.id} mission={m} onOpen={() => setMissionId(m.id)} />)}</div> : <EmptyState title="Aucune progression enregistrée" description="Les avancements déclarés par les directions apparaîtront ici." />}
       </Section>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        <Section title="Prochaine réunion de suivi" action={<Link to="/ordre-du-jour" className="section-link">Préparer l’ordre du jour</Link>}>
+        <Section title="Prochaine réunion de suivi" collapsible action={<Link to="/ordre-du-jour" className="section-link">Préparer l’ordre du jour</Link>}>
           {data.next_meeting?.id ? <div className="rounded-[7px] bg-[var(--surface-soft)] p-4"><div className="font-semibold text-sm">{data.next_meeting.title}</div><div className="text-xs text-[var(--ink-500)] mt-1 flex items-center gap-1"><CalendarDays size={13} />{dateTime(data.next_meeting.meeting_date)}</div><div className="mt-3"><StatusBadge label={`${data.next_meeting.agenda?.length || 0} point(s) retenu(s)`} color="#7C3AED" /></div></div> : <EmptyState icon={CalendarDays} title="Aucune réunion planifiée" description={`Prochaine date suggérée : ${dateTime(data.next_meeting?.meeting_date)}`} action={<Link to="/ordre-du-jour" className="small-action">Planifier une réunion</Link>} />}
         </Section>
         <Section title="Points à inscrire à l’ordre du jour" tone="warning">
@@ -123,11 +123,11 @@ export default function CabinetView() {
         </Section>
       </div>
 
-      <Section title="Missions critiques" action={<Link to="/plan-action" className="section-link">Voir toutes les missions</Link>}>
+      <Section title="Missions critiques" collapsible count={data.top_priority_missions.length} action={<Link to="/plan-action" className="section-link">Voir toutes les missions</Link>}>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">{data.top_priority_missions.map((m) => <button key={m.id} onClick={() => setMissionId(m.id)} className="rounded-[7px] border border-[var(--border)] p-3 text-left hover:border-[#1F6FEB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6FEB]"><StatusBadge status={m.status} /><div className="font-medium text-sm mt-2 line-clamp-2">{m.code} · {m.action_title}</div><div className="text-xs text-[var(--ink-500)] mt-2">{m.direction || "Direction manquante"}</div></button>)}</div>
       </Section>
 
-      <Section title="Exécution par axe PND" action={<Link to="/alignement" className="section-link">Voir l’alignement</Link>}>
+      <Section title="Exécution par axe PND" collapsible count={data.execution_by_pnd_axis.length} action={<Link to="/alignement" className="section-link">Voir l’alignement</Link>}>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">{data.execution_by_pnd_axis.map((axis) => <div key={axis.pnd_axis} className="rounded-[7px] border border-[var(--border)] p-4"><div className="text-xs font-semibold text-[var(--ink-700)] line-clamp-2 min-h-8">{axis.pnd_axis}</div><ProgressBar value={axis.execution_rate} showLabel label={`Exécution ${axis.pnd_axis}`} /><div className="text-[11px] text-[var(--ink-500)] mt-2">{axis.missions_total} missions · {axis.missions_overdue} en retard</div></div>)}</div>
       </Section>
 
@@ -136,9 +136,27 @@ export default function CabinetView() {
   );
 }
 
-function Section({ title, action, children, tone = "neutral" }) {
+// `collapsible` sert la lecture en moins de 3 minutes : les blocs de décision
+// restent ouverts, le contexte est replié par défaut et reste à un clic.
+function Section({ title, action, children, tone = "neutral", collapsible, count }) {
   const colors = { critical: "#C93C37", warning: "#D97706", positive: "#16794A", neutral: "#E3E7ED" };
-  return <section className="bg-white rounded-[8px] border border-[var(--border)] overflow-hidden" style={{ borderTop: `3px solid ${colors[tone]}` }}><div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between gap-3"><h2 className="font-semibold text-sm">{title}</h2>{action}</div><div className="p-4">{children}</div></section>;
+  const border = { borderTop: `3px solid ${colors[tone]}` };
+  if (!collapsible) {
+    return <section className="bg-white rounded-[8px] border border-[var(--border)] overflow-hidden" style={border}><div className="px-5 py-3 border-b border-[var(--border)] flex items-center justify-between gap-3"><h2 className="font-semibold text-sm">{title}</h2>{action}</div><div className="p-4">{children}</div></section>;
+  }
+  return (
+    <details className="bg-white rounded-[8px] border border-[var(--border)] overflow-hidden group" style={border}>
+      <summary className="px-5 py-3 flex items-center justify-between gap-3 cursor-pointer list-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6FEB]">
+        <h2 className="font-semibold text-sm flex items-center gap-2">
+          <ChevronDown size={15} className="text-[var(--ink-500)] transition-transform group-open:rotate-180" aria-hidden="true" />
+          {title}
+          {count != null && <span className="text-[11px] font-normal text-[var(--ink-500)]">({count})</span>}
+        </h2>
+        {action}
+      </summary>
+      <div className="p-4 border-t border-[var(--border)]">{children}</div>
+    </details>
+  );
 }
 function MissionCard({ mission, onOpen, critical }) { return <button onClick={onOpen} className={`w-full rounded-[7px] border p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1F6FEB] ${critical ? "border-[#C93C37]/35 bg-[#C93C37]/5 hover:bg-[#C93C37]/10" : "border-[var(--border)] hover:border-[#16794A]"}`}><div className="flex items-start justify-between gap-3"><div><div className="font-semibold text-sm">{mission.code} · {mission.action_title}</div><div className="text-xs text-[var(--ink-500)] mt-1">{mission.direction || "Direction manquante"} · échéance {shortDate(mission.due_date)}</div></div><StatusBadge status={mission.status} /></div>{critical && <p className="text-xs text-[#A33A32] mt-3">{mission.blocker || "Mission en retard nécessitant une action."}</p>}<div className="mt-3"><ProgressBar value={mission.progress} status={mission.status} showLabel /></div><span className="text-[11px] font-semibold text-[#1F6FEB] mt-3 inline-flex items-center gap-1">Ouvrir le contexte <ArrowRight size={12} /></span></button>; }
 function DecisionList({ items, empty }) { return items.length ? <div className="space-y-2">{items.slice(0, 6).map((d) => <Link key={d.id} to="/decisions" className="block rounded-[7px] border border-[var(--border)] p-3 hover:border-[#C93C37]"><div className="flex items-start justify-between gap-3"><div><div className="text-sm font-medium">{d.title}</div><div className="text-xs text-[var(--ink-500)] mt-1">Échéance : {shortDate(d.due_date)} · {d.assigned_to || "Responsable à désigner"}</div></div><Gavel size={15} className="text-[#C93C37] shrink-0" /></div></Link>)}</div> : <EmptyState icon={Gavel} title={empty} />; }

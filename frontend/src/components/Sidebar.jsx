@@ -79,10 +79,13 @@ export function canAccessRoute(role, to) {
 }
 
 function navConfig(role) {
+  // L'administrateur est une équipe informatique : son métier (comptes, accès,
+  // qualité, audit) passe avant, et les pages de pilotage restent accessibles
+  // mais clairement identifiées comme de la consultation.
   if (role === "admin") return [
-    ...COMMON_GROUPS,
     { title: "Administration", items: NAV_ADMIN },
     { title: "Ressources internes", items: NAV_FORMATION },
+    ...COMMON_GROUPS.map((g, i) => (i === 0 ? { ...g, title: "Consultation du pilotage" } : g)),
   ];
 
   if (role === "agency_director") return [

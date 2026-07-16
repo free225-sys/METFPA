@@ -1,16 +1,17 @@
 import React from "react";
 import { STATUS_COLORS, SUBMISSION_COLORS, statusLabel, submissionLabel } from "@/lib/operational";
-import { AlertCircle, Ban, CheckCircle2, Circle, Clock, PauseCircle } from "lucide-react";
+import { AlertCircle, Ban, CheckCircle2, Circle, Clock, Gavel, PauseCircle } from "lucide-react";
 
 const ALIASES = {
   termine: { label: "Terminé", color: "#16794A", Icon: CheckCircle2 },
   bloque: { label: "Bloqué", color: "#C93C37", Icon: Ban },
 };
+// Une icône par concept : retard = alerte, blocage = interdit, arbitrage = marteau.
 const ICONS = {
   acheve: CheckCircle2,
   en_cours: Clock,
   en_retard: AlertCircle,
-  en_attente_arbitrage: Ban,
+  en_attente_arbitrage: Gavel,
   suspendu: PauseCircle,
   non_demarre: Circle,
   valide: CheckCircle2,

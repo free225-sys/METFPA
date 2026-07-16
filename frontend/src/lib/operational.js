@@ -7,13 +7,17 @@ export const STATUS_LABELS = {
   en_attente_arbitrage: "En attente d'arbitrage",
 };
 
+// Une couleur = un sens. Retard et blocage partagent le rouge (l'échéance est
+// dépassée / l'exécution est empêchée) ; l'arbitrage a sa propre couleur, le
+// violet déjà utilisé par le registre des décisions pour « À arbitrer », afin
+// que le Directeur distingue au premier coup d'œil retard, blocage et arbitrage.
 export const STATUS_COLORS = {
   non_demarre: "#667085",
   en_cours: "#1F6FEB",
   acheve: "#16794A",
   en_retard: "#C93C37",
   suspendu: "#667085",
-  en_attente_arbitrage: "#C93C37",
+  en_attente_arbitrage: "#7C3AED",
 };
 
 export const SUBMISSION_LABELS = {

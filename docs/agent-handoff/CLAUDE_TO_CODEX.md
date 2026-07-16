@@ -113,7 +113,7 @@ DIRECTION D'AGENCE (contributeur non expert)
 `[F7]` **Direction · Formulaire de 3,3 écrans / 14 champs** pour des utilisateurs non familiers des outils de gestion de projet. → **Divulgation progressive** : n'afficher d'emblée que *Statut · Avancement · Prochaine étape · Commentaire*. Replier « Blocage / arbitrage » (ouverture automatique si la case « Cette mission est bloquée » est cochée) et « Livrable ». · Backend : non · `PlanAction.jsx` (MissionDialog).
 
 ### P2 — amélioration
-`[F8]` Libellé de rôle collé à la direction : **« Direction d'agenceDAF »** (séparateur manquant). → `Direction d'agence · DAF`. · `Header.jsx` / `Sidebar.jsx`.
+`[F8]` ~~Libellé de rôle collé à la direction~~ — **CONSTAT RETIRÉ (faux positif)**. Le `Header` utilise `flex flex-col` : le rôle et la direction sont sur **deux lignes empilées** et correctement stylés. Le « Direction d'agenceDAF » observé était un artefact de lecture DOM (`textContent` concatène les deux `<span>`). **Aucune correction à faire.**
 `[F9]` Le `DemoBanner` occupe le haut de chaque page, au-dessus du verdict. → Le réduire à une ligne discrète ou le déplacer sous le premier bloc.
 `[F10]` `/alignement` reste un tableau à 10 colonnes. → Regrouper par **Axe PND** (accordéons) avec taux d'exécution agrégé.
 `[F11]` Sur le cockpit, les libellés de statut restent en minuscules techniques par endroits (`pending`, `draft`). → Utiliser les libellés FR partout.
@@ -187,19 +187,21 @@ Menu :  ADMINISTRATION  → Utilisateurs · Rôles et directions · Qualité des
 
 ## 8. Changements précis à transmettre à Codex
 
-| Réf | Fichier | Changement | Backend | Prio |
-|---|---|---|---|---|
-| F1 | `AdminUsers.jsx` + `metfpa/auth.py` | Bouton « + Nouvel utilisateur » + dialog (email, nom, rôle, périmètre, mot de passe initial) | **Oui — `POST /admin/users`** | **P0** |
-| F2 | `AdminUsers.jsx` | Remplacer l'input direction par un `<select>` des directions réelles + « non rattaché » | Non | P1 |
-| F3 | `Sidebar.jsx` | Rôle `admin` : groupe Administration en premier, métier replié sous « Consultation du pilotage » | Non | P1 |
-| F4 | `CabinetView.jsx` | Replier Ce qui avance / Réunion / Missions critiques / Axe PND (≤ 4 blocs au-dessus de la flottaison) | Non | P1 |
-| F5 | `lib/operational.js`, `StatusBadge.jsx` | `en_attente_arbitrage` → violet `#7C3AED` ; icône dédiée pour blocage | Non | P1 |
-| F6 | `PlanAction.jsx` | Phrase de périmètre sous le titre | Non | P1 |
-| F7 | `PlanAction.jsx` | Formulaire à divulgation progressive (4 champs visibles) | Non | P1 |
-| F8 | `Header.jsx`/`Sidebar.jsx` | `Direction d'agence · DAF` (séparateur) | Non | P2 |
-| F9 | `DemoBanner.jsx` | Bandeau réduit à une ligne | Non | P2 |
-| F10 | `Alignement.jsx` | Regroupement par axe PND | Non | P2 |
-| F11 | pages registres | Libellés FR au lieu des valeurs techniques | Non | P2 |
+**État au 16/07/2026 — F1 à F7 sont livrés et vérifiés sur instance réelle.** Il ne reste que des P2.
+
+| Réf | Fichier | Changement | Backend | Prio | État |
+|---|---|---|---|---|---|
+| F1 | `AdminUsers.jsx` + `metfpa/auth.py` | Dialog « + Nouvel utilisateur » + `POST /admin/users` (+ correctif 500 : `insert_one(dict(user))`) | Oui | P0 | ✅ **fait** |
+| F2 | `AdminUsers.jsx` | Périmètre via `<select>` alimenté par `GET /admin/directions` | Non | P1 | ✅ **fait** |
+| F3 | `Sidebar.jsx` | Admin : Administration en premier, métier sous « Consultation du pilotage » | Non | P1 | ✅ **fait** |
+| F4 | `CabinetView.jsx` | Blocs de contexte repliés → cockpit **14,7 → 7,3 écrans** | Non | P1 | ✅ **fait** |
+| F5 | `lib/operational.js`, `StatusBadge.jsx` | Arbitrage en violet `#7C3AED` + icône `Gavel` ; retard rouge + `AlertCircle` ; blocage rouge + `Ban` | Non | P1 | ✅ **fait** |
+| F6 | `PlanAction.jsx` | Phrase de périmètre pour l'agence | Non | P1 | ✅ **fait** |
+| F7 | `PlanAction.jsx` | Sections repliables (ouverture auto si déjà renseignées) ; commentaire requis maintenu visible | Non | P1 | ✅ **fait** |
+| F8 | — | Faux positif, retiré | — | — | ❌ sans objet |
+| F9 | `DemoBanner.jsx` | Bandeau réduit à une ligne | Non | P2 | à faire |
+| F10 | `Alignement.jsx` | Regroupement par axe PND | Non | P2 | à faire |
+| F11 | pages registres | Libellés FR au lieu des valeurs techniques | Non | P2 | à faire |
 
 ## 9. Besoin backend (unique)
 **`POST /api/metfpa/admin/users`** — email unique (409 sinon), rôle ∈ {admin, dircab, agency_director}, `direction` obligatoire si `agency_director`, mot de passe initial, audité. **C'est le seul verrou qui empêche le dashboard de fonctionner en conditions réelles** : sans lui, seule l'agence DAF existe.
