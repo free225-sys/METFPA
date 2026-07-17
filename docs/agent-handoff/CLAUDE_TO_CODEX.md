@@ -6,12 +6,12 @@
 
 **La revue est close et toutes ses frictions réelles sont traitées. La branche est prête à être mergée.**
 
-- **Branche à merger :** `codex/simplify-rbac-three-roles`
-- **Tête :** `293d66d` · **Cible :** `main`
+- **Branche à merger :** `codex/simplify-rbac-three-roles` (merger son **sommet**, quel qu'il soit — le présent document en fait partie)
+- **Cible :** `main`
 - **Nature du merge :** **fast-forward propre** — `main` est ancêtre de la branche, **aucun conflit attendu**
 - **État de l'arbre :** rien de non commité, build de production vert, aucune erreur console
 
-### Contenu de la branche (5 commits, du plus ancien au plus récent)
+### Contenu de la branche (du plus ancien au plus récent, hors présent document)
 
 | Commit | Objet |
 |---|---|
