@@ -1,5 +1,51 @@
 # Handoff Claude vers Codex — Revue UX/UI (structure à 3 rôles)
 
+---
+
+## ▶ ACTION DEMANDÉE À CODEX : MERGER LA BRANCHE
+
+**La revue est close et toutes ses frictions réelles sont traitées. La branche est prête à être mergée.**
+
+- **Branche à merger :** `codex/simplify-rbac-three-roles`
+- **Tête :** `293d66d` · **Cible :** `main`
+- **Nature du merge :** **fast-forward propre** — `main` est ancêtre de la branche, **aucun conflit attendu**
+- **État de l'arbre :** rien de non commité, build de production vert, aucune erreur console
+
+### Contenu de la branche (5 commits, du plus ancien au plus récent)
+
+| Commit | Objet |
+|---|---|
+| `316d0bc` | docs : revue UX/UI de la structure à 3 rôles |
+| `5d85f84` | feat(rbac) : consolidation des accès en 3 rôles |
+| `a1fab62` | feat(admin) : création d'utilisateur (F1) — endpoint, dialog **et correctif du 500** |
+| `52ce2b9` | fix(ux) : frictions P1 de la revue (F3 à F7) |
+| `293d66d` | fix(ux) : bandeau de fiabilité condensé, clôture de la revue (P2) |
+
+### Commande de merge
+
+```bash
+git checkout main
+git merge --ff-only codex/simplify-rbac-three-roles
+git push origin main
+```
+
+### Vérifications déjà effectuées (inutile de les refaire)
+
+- **F1 (création de compte)** : 19/19 contrôles sur instance réelle — création 201, gardes 409/422/400/403/401, le compte créé se connecte, ne voit que son agence, est refusé sur la Vue Directeur et l'admin, action auditée ; création vérifiée aussi via l'interface.
+- **Suites existantes** : 6 tests unitaires + 47 d'intégration, toutes vertes.
+- **Build production** : `Compiled successfully`.
+- **Parcours des 3 rôles** : vérifiés dans le navigateur, zéro erreur console.
+
+### ⚠ Point d'attention après le merge (déploiement)
+
+Le correctif CORS (regex des Netlify deploy previews, commit `0e09dc2`) est **présent dans cette branche**. Aujourd'hui, le backend Emergent tourne avec la liste d'origines fixée par variable d'environnement : **`deploy-preview-3` fonctionne, mais tout nouveau numéro de preview cassera le login**. Pour rendre le correctif définitif, **redéployer le backend Emergent depuis `main` une fois le merge fait**. Ce redéploiement servira aussi les corrections UX de cette branche.
+
+### Ce que ce merge ne contient pas
+
+Aucune modification des rôles, permissions ou règles métier au-delà de la consolidation à 3 rôles déjà décidée. Aucun nouvel endpoint hors `POST /admin/users` et `GET /admin/directions` (F1). Aucune refonte graphique.
+
+---
+
 ## Statut du document
 
 - Émetteur : Claude (UX/UI uniquement) · Destinataire : Codex
@@ -220,5 +266,10 @@ Menu :  ADMINISTRATION  → Utilisateurs · Rôles et directions · Qualité des
 
 ---
 
-### Note de coordination
-Aucun code React n'accompagne cette revue (hors le présent document) : les rôles, permissions et règles métier sont inchangés. Une grande partie de la spec P0 précédente est **déjà en place et validée en conditions réelles** — la présente revue ne demande donc pas de refaire l'existant, mais de traiter **11 frictions**, dont **une seule est bloquante (F1)** et **une seule requiert du backend (F1)**.
+### Note de coordination — revue close
+
+Ce document a évolué : livré d'abord comme revue (11 frictions), il consigne désormais leur **traitement complet**. Les 8 frictions réelles sont corrigées et vérifiées sur instance réelle ; les 3 restantes (F8, F10, F11) étaient **fausses ou obsolètes** et ont été retirées plutôt que « corrigées ».
+
+**Il ne reste aucune action UX ouverte.** La seule action attendue de Codex est le **merge de `codex/simplify-rbac-three-roles` vers `main`** (voir la section ▶ en tête de document), suivi d'un **redéploiement du backend Emergent** pour rendre le correctif CORS définitif.
+
+Pistes ultérieures possibles, **non engagées et hors périmètre de cette revue** : relance partagée persistée côté serveur, compte rendu de réunion structuré par point, réintroduction éventuelle d'un accès en lecture seule (le rôle `cabinet_reader` a été retiré ; aucun des 3 profils actuels n'est purement consultatif).
