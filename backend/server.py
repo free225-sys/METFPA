@@ -31,6 +31,7 @@ logger = logging.getLogger(__name__)
 JWT_ALGORITHM = "HS256"
 YEARS = [2026, 2027, 2028, 2029, 2030]
 TODAY = datetime(2026, 6, 15, tzinfo=timezone.utc)
+LEGACY_PND_ENABLED = os.environ.get("LEGACY_PND_ENABLED", "false").strip().lower() == "true"
 
 FIELD_LABELS = {
     "title": "Intitulé", "owner": "Ministère responsable", "progress": "Avancement",
@@ -267,6 +268,9 @@ async def seed_data():
 
 @app.on_event("startup")
 async def on_startup():
+    if not LEGACY_PND_ENABLED:
+        logger.info("Legacy PND API and seed disabled")
+        return
     await db.users.create_index("email", unique=True)
     await db.actions.create_index("code")
     await seed_admin()
@@ -614,8 +618,6 @@ async def root():
 # Legacy PND demo API: exposed without RBAC and unused by the METFPA frontend
 # (its token key "pnd_token" is never set by the login flow). Disabled by
 # default; set LEGACY_PND_ENABLED=true to restore the legacy routes.
-LEGACY_PND_ENABLED = os.environ.get("LEGACY_PND_ENABLED", "false").strip().lower() == "true"
-
 if LEGACY_PND_ENABLED:
     app.include_router(api_router)
 else:
